@@ -2,195 +2,94 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wykrywanie Ptaków</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/material-components-web/14.0.0/material-components-web.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <title>Bird Detection - Statystyki</title>
     <style>
-        :root {
-            --mdc-theme-primary: #2196f3;
-            --mdc-theme-secondary: #018786;
-        }
-
         body {
-            margin: 0;
-            padding: 16px;
-            font-family: Roboto, sans-serif;
-            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
         }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+        h2 {
+            color: #4CAF50;
         }
-
-        .card {
-            background: white;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 24px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .last-detection {
+        #last-detection-info {
             text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-
-        .bird-image-container {
-            position: relative;
-            margin: 16px 0;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .bird-image-container:hover {
-            transform: scale(1.02);
-        }
-
-        .bird-image {
-            max-width: 100%;
+        #last-detection-info img {
+            width: 120px;
             height: auto;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
         }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 8px 0;
-            padding: 8px;
-            background: #f8f9fa;
-            border-radius: 4px;
+        #bird-name, #bird-detection-time {
+            font-weight: bold;
         }
-
-        .info-label {
-            font-weight: 500;
-            color: #666;
-        }
-
-        .info-value {
+        #top-species-header {
+            font-size: 1.2em;
             color: #333;
+            margin-top: 20px;
         }
-
-        .species-table {
+        #top-species-table {
             width: 100%;
+            max-width: 600px;
             border-collapse: collapse;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-
-        .species-table th {
-            background: #f8f9fa;
+        #top-species-table th, #top-species-table td {
             padding: 12px;
             text-align: left;
-            font-weight: 500;
-            color: #666;
+            border-bottom: 1px solid #ddd;
         }
-
-        .species-table td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .species-table img {
-            width: 50px;
-            height: 50px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: transform 0.2s;
-            object-fit: cover;
-        }
-
-        .species-table img:hover {
-            transform: scale(1.1);
-        }
-
-        @media (max-width: 768px) {
-            .species-table {
-                font-size: 14px;
-            }
-
-            .species-table th,
-            .species-table td {
-                padding: 8px;
-            }
-
-            .info-row {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .info-value {
-                margin-top: 4px;
-            }
-        }
-
-        .refresh-button {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            background: var(--mdc-theme-primary);
+        #top-species-table th {
+            background-color: #4CAF50;
             color: white;
-            width: 56px;
-            height: 56px;
-            border-radius: 28px;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.2s;
         }
-
-        .refresh-button:hover {
-            transform: scale(1.05);
+        #top-species-table td {
+            background-color: #ffffff;
         }
-
-        .refresh-button:active {
-            transform: scale(0.95);
+        #top-species-table img {
+            width: 50px;
+            height: auto;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="card last-detection">
-            <h2>Ostatnio wykryty ptak</h2>
-            <div class="bird-image-container" id="last-detection-image">
-                <img src="" alt="Zdjęcie ptaka" id="bird-image" class="bird-image">
-            </div>
-            <div class="info-row" id="bird-name">
-                <span class="info-label">Nazwa:</span>
-                <span class="info-value"></span>
-            </div>
-            <div class="info-row" id="bird-detection-time">
-                <span class="info-label">Czas wykrycia:</span>
-                <span class="info-value"></span>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>Top 10 gatunków (ostatnie 24h)</h2>
-            <div class="table-container">
-                <table class="species-table">
-                    <thead>
-                        <tr>
-                            <th>Zdjęcie</th>
-                            <th>Nazwa</th>
-                            <th>Liczba wykryć</th>
-                            <th>Ostatnie wykrycie</th>
-                        </tr>
-                    </thead>
-                    <tbody id="species-table-body">
-                    </tbody>
-                </table>
-            </div>
-        </div>
+    <!-- Dodano nagłówek dla ostatnio wykrytego ptaka -->
+    <div id="last-detection-info">
+        <h2>Ostatni wykryty ptak</h2>
+        <img id="bird-image" src="" alt="Zdjęcie ptaka">
+        <p id="bird-name">Nazwa: <span></span></p>
+        <p id="bird-detection-time">Wykrycie: <span></span></p>
     </div>
+    
+    <h2 id="top-species-header">Top 10 gatunków wykrytych w ciągu ostatnich 24 godzin</h2>
+    <table id="top-species-table">
+        <thead>
+            <tr>
+                <th></th> <!-- Usunięto tekst "Zdjęcie" -->
+                <th>Nazwa Ptaka</th>
+                <th>Liczba Wykryć</th>
+                <th>Ostatnie Wykrycie</th>
+            </tr>
+        </thead>
+        <tbody id="species-table-body">
+            <!-- Wiersze z danymi zostaną dodane dynamicznie przez JavaScript -->
+        </tbody>
+    </table>
 
-    <button class="refresh-button" onclick="refreshData()">
-        <span class="material-icons">refresh</span>
-    </button>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/material-components-web/14.0.0/material-components-web.min.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>

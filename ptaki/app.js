@@ -6,13 +6,7 @@ const detectionsApiUrl = `https://app.birdweather.com/api/v1/stations/${token}/d
 // Funkcja do otwierania strony Wikipedii na podstawie nazwy ptaka
 function openWikipediaPage(birdName) {
     const wikiUrl = `https://pl.wikipedia.org/wiki/${encodeURIComponent(birdName)}`;
-    window.open(wikiUrl, '_blank');
-}
-
-// Funkcja do dodania efektu ripple do elementów
-function addRippleEffect(element) {
-    const ripple = mdc.ripple.MDCRipple.attachTo(element);
-    ripple.unbounded = true;
+    window.open(wikiUrl, '_blank'); // Otwiera link w nowej karcie
 }
 
 async function fetchLastDetection() {
@@ -31,16 +25,19 @@ async function fetchLastDetection() {
             const detectionTime = lastDetection.timestamp ? new Date(lastDetection.timestamp).toLocaleString('pl-PL') : "Data nieznana";
             const birdImageUrl = lastDetection.species && lastDetection.species.imageUrl ? lastDetection.species.imageUrl : "placeholder.jpg";
 
+            console.log("Nazwa ptaka:", birdName);
+            console.log("URL zdjęcia:", birdImageUrl);
+            console.log("Czas wykrycia:", detectionTime);
+
             // Aktualizacja danych na stronie
-            document.getElementById("bird-name").querySelector(".info-value").textContent = birdName;
-            document.getElementById("bird-detection-time").querySelector(".info-value").textContent = detectionTime;
+            document.getElementById("bird-name").querySelector("span").textContent = birdName;
+            document.getElementById("bird-detection-time").querySelector("span").textContent = detectionTime;
             const birdImage = document.getElementById("bird-image");
             birdImage.src = birdImageUrl;
             birdImage.alt = birdName;
 
-            // Dodanie obsługi kliknięcia na kontener zdjęcia
-            const imageContainer = document.getElementById("last-detection-image");
-            imageContainer.onclick = () => openWikipediaPage(birdName);
+            // Dodajemy onclick, aby otworzyć stronę Wikipedii
+            birdImage.onclick = () => openWikipediaPage(birdName);
         } else {
             console.error("Nie udało się pobrać danych o ostatnim wykryciu lub dane są niekompletne:", data);
         }
@@ -69,7 +66,7 @@ async function fetchTopSpecies() {
                 const img = document.createElement("img");
                 img.src = bird.thumbnailUrl || "placeholder.jpg";
                 img.alt = bird.commonName;
-                img.onclick = () => openWikipediaPage(bird.commonName);
+                img.style.width = "50px";
                 imgCell.appendChild(img);
                 row.appendChild(imgCell);
 
@@ -96,25 +93,9 @@ async function fetchTopSpecies() {
 }
 
 async function refreshData() {
-    const refreshButton = document.querySelector('.refresh-button');
-    refreshButton.style.transform = 'rotate(360deg)';
-    refreshButton.style.transition = 'transform 0.5s';
-    
     await fetchLastDetection();
     await fetchTopSpecies();
-    
-    setTimeout(() => {
-        refreshButton.style.transform = 'rotate(0deg)';
-        refreshButton.style.transition = 'none';
-    }, 500);
 }
-
-// Inicjalizacja Material Design Components
-document.addEventListener('DOMContentLoaded', () => {
-    // Dodaj efekt ripple do przycisków i interaktywnych elementów
-    const buttons = document.querySelectorAll('button');
-    buttons.forEach(addRippleEffect);
-});
 
 // Sprawdzaj nowe wykrycia co 10 sekund
 setInterval(refreshData, 10000);
