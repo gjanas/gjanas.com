@@ -5,7 +5,7 @@
     <title>Bird Detection - Statystyki</title>
     <style>
         body {
-            font-family: 'Roboto', sans-serif;
+            font-family: Arial, sans-serif;
             background-color: #f2f2f2;
             color: #333;
             display: flex;
@@ -32,6 +32,7 @@
             height: auto;
             border-radius: 8px;
             margin-bottom: 10px;
+            cursor: pointer;
         }
         #bird-name, #bird-detection-time {
             font-weight: bold;
@@ -63,7 +64,7 @@
             width: 50px;
             height: auto;
             border-radius: 4px;
-            cursor: pointer; /* Dodano kursor wskazujący możliwość kliknięcia */
+            cursor: pointer;
         }
     </style>
 </head>
@@ -71,7 +72,7 @@
     <!-- Dodano nagłówek dla ostatnio wykrytego ptaka -->
     <div id="last-detection-info">
         <h2>Ostatni wykryty ptak</h2>
-        <img id="bird-image" src="" alt="Zdjęcie ptaka">
+        <img id="bird-image" src="" alt="Zdjęcie ptaka" onclick="redirectToWiki(document.getElementById('bird-name').querySelector('span').textContent)">
         <p id="bird-name">Nazwa: <span></span></p>
         <p id="bird-detection-time">Wykrycie: <span></span></p>
     </div>
