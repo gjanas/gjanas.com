@@ -1,182 +1,98 @@
 const token = 'hLd2SmS16HxaZFzKjeghR75u';
 const locale = 'pl';
-const baseUrl = 'https://app.birdweather.com/api/v1';
-const speciesApiUrl = `${baseUrl}/stations/${token}/species`;
-const detectionsApiUrl = `${baseUrl}/stations/${token}/detections`;
+const speciesApiUrl = `https://app.birdweather.com/api/v1/stations/${token}/species?locale=${locale}&limit=10`;
+const detectionsApiUrl = `https://app.birdweather.com/api/v1/stations/${token}/detections?locale=${locale}&limit=1`;
 
-// Konfiguracja fetch dla Safari
-const fetchConfig = {
-    method: 'GET',
-    headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-    },
-    mode: 'cors',
-    credentials: 'same-origin'
-};
-
+// Funkcja do otwierania strony Wikipedii na podstawie nazwy ptaka
 function openWikipediaPage(birdName) {
     const wikiUrl = `https://pl.wikipedia.org/wiki/${encodeURIComponent(birdName)}`;
     window.open(wikiUrl, '_blank');
 }
 
+// Funkcja do dodania efektu ripple do elementów
 function addRippleEffect(element) {
     const ripple = mdc.ripple.MDCRipple.attachTo(element);
     ripple.unbounded = true;
 }
 
-async function fetchApi(url, params = {}) {
-    try {
-        // Dodaj parametry do URL
-        const queryString = new URLSearchParams({
-            locale,
-            ...params
-        }).toString();
-        const fullUrl = `${url}?${queryString}`;
-        
-        // Wykonaj zapytanie z pełną konfiguracją
-        const response = await fetch(fullUrl, fetchConfig);
-        
-        // Sprawdź status odpowiedzi
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        // Spróbuj sparsować JSON
-        const data = await response.json();
-        console.log('Odpowiedź API:', { url: fullUrl, data });
-        return data;
-        
-    } catch (error) {
-        console.error('Błąd podczas pobierania danych:', error);
-        throw error;
-    }
-}
-
 async function fetchLastDetection() {
     try {
-        const data = await fetchApi(detectionsApiUrl, { limit: 1 });
-        
-        if (data && Array.isArray(data.detections) && data.detections.length > 0) {
-            const detection = data.detections[0];
-            updateLastDetectionUI(detection);
+        const response = await fetch(detectionsApiUrl, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await response.json();
+
+        console.log("Pełna odpowiedź API dla ostatniego wykrycia:", data);
+
+        if (data.success && data.detections && data.detections.length > 0) {
+            const lastDetection = data.detections[0];
+            
+            const birdName = lastDetection.species ? lastDetection.species.commonName : "Nieznany ptak";
+            const detectionTime = lastDetection.timestamp ? new Date(lastDetection.timestamp).toLocaleString('pl-PL') : "Data nieznana";
+            const birdImageUrl = lastDetection.species && lastDetection.species.imageUrl ? lastDetection.species.imageUrl : "placeholder.jpg";
+
+            // Aktualizacja danych na stronie
+            document.getElementById("bird-name").querySelector(".info-value").textContent = birdName;
+            document.getElementById("bird-detection-time").querySelector(".info-value").textContent = detectionTime;
+            const birdImage = document.getElementById("bird-image");
+            birdImage.src = birdImageUrl;
+            birdImage.alt = birdName;
+
+            // Dodanie obsługi kliknięcia na kontener zdjęcia
+            const imageContainer = document.getElementById("last-detection-image");
+            imageContainer.onclick = () => openWikipediaPage(birdName);
         } else {
-            throw new Error('Brak danych o wykryciach');
+            console.error("Nie udało się pobrać danych o ostatnim wykryciu lub dane są niekompletne:", data);
         }
     } catch (error) {
-        console.error('Błąd podczas pobierania ostatniego wykrycia:', error);
-        handleError('Nie udało się pobrać danych o ostatnim wykryciu');
-        showPlaceholderDetection();
+        console.error("Błąd podczas wykonywania zapytania:", error);
     }
-}
-
-function updateLastDetectionUI(detection) {
-    const birdName = detection.speciesName || "Nieznany ptak";
-    const detectionTime = detection.detectedAt 
-        ? new Date(detection.detectedAt).toLocaleString('pl-PL') 
-        : "Data nieznana";
-    const birdImageUrl = detection.imageUrl || "placeholder.jpg";
-
-    document.getElementById("bird-name").querySelector(".info-value").textContent = birdName;
-    document.getElementById("bird-detection-time").querySelector(".info-value").textContent = detectionTime;
-    
-    const birdImage = document.getElementById("bird-image");
-    birdImage.src = birdImageUrl;
-    birdImage.alt = birdName;
-    
-    const imageContainer = document.getElementById("last-detection-image");
-    imageContainer.onclick = () => openWikipediaPage(birdName);
-}
-
-function showPlaceholderDetection() {
-    document.getElementById("bird-name").querySelector(".info-value").textContent = "Brak danych";
-    document.getElementById("bird-detection-time").querySelector(".info-value").textContent = "Brak danych";
-    document.getElementById("bird-image").src = "placeholder.jpg";
 }
 
 async function fetchTopSpecies() {
     try {
-        const data = await fetchApi(speciesApiUrl, { 
-            limit: 10,
-            hours: 24
+        const response = await fetch(speciesApiUrl, {
+            headers: { "Authorization": `Bearer ${token}` }
         });
-        
-        if (data && Array.isArray(data.species)) {
-            updateSpeciesTableUI(data.species);
+        const data = await response.json();
+
+        console.log("Odpowiedź API dla top gatunków:", data);
+
+        if (data.success) {
+            const speciesTableBody = document.getElementById("species-table-body");
+            speciesTableBody.innerHTML = '';
+
+            data.species.forEach(bird => {
+                const row = document.createElement("tr");
+
+                const imgCell = document.createElement("td");
+                const img = document.createElement("img");
+                img.src = bird.thumbnailUrl || "placeholder.jpg";
+                img.alt = bird.commonName;
+                img.onclick = () => openWikipediaPage(bird.commonName);
+                imgCell.appendChild(img);
+                row.appendChild(imgCell);
+
+                const nameCell = document.createElement("td");
+                nameCell.textContent = bird.commonName;
+                row.appendChild(nameCell);
+
+                const detectionsCell = document.createElement("td");
+                detectionsCell.textContent = bird.detections.total;
+                row.appendChild(detectionsCell);
+
+                const lastDetectionCell = document.createElement("td");
+                lastDetectionCell.textContent = new Date(bird.latestDetectionAt).toLocaleString('pl-PL');
+                row.appendChild(lastDetectionCell);
+
+                speciesTableBody.appendChild(row);
+            });
         } else {
-            throw new Error('Brak danych o gatunkach');
+            console.error("Brak danych o top gatunkach lub nieudane pobranie:", data);
         }
     } catch (error) {
-        console.error('Błąd podczas pobierania gatunków:', error);
-        handleError('Nie udało się pobrać danych o gatunkach');
-        showPlaceholderSpecies();
+        console.error("Błąd zapytania:", error);
     }
-}
-
-function updateSpeciesTableUI(species) {
-    const tableBody = document.getElementById("species-table-body");
-    tableBody.innerHTML = '';
-
-    species.forEach(bird => {
-        const row = document.createElement("tr");
-        
-        // Komórka ze zdjęciem
-        const imgCell = document.createElement("td");
-        const img = document.createElement("img");
-        img.src = bird.imageUrl || "placeholder.jpg";
-        img.alt = bird.name || "Nazwa ptaka niedostępna";
-        img.onclick = () => openWikipediaPage(bird.name);
-        imgCell.appendChild(img);
-        
-        // Pozostałe komórki
-        const nameCell = document.createElement("td");
-        nameCell.textContent = bird.name || "Nazwa niedostępna";
-        
-        const detectionsCell = document.createElement("td");
-        detectionsCell.textContent = bird.detectionsCount || 0;
-        
-        const lastDetectionCell = document.createElement("td");
-        lastDetectionCell.textContent = bird.lastDetectedAt 
-            ? new Date(bird.lastDetectedAt).toLocaleString('pl-PL')
-            : "Data nieznana";
-
-        row.append(imgCell, nameCell, detectionsCell, lastDetectionCell);
-        tableBody.appendChild(row);
-    });
-}
-
-function showPlaceholderSpecies() {
-    const tableBody = document.getElementById("species-table-body");
-    tableBody.innerHTML = `
-        <tr>
-            <td colspan="4" style="text-align: center; padding: 20px;">
-                Brak danych o gatunkach
-            </td>
-        </tr>
-    `;
-}
-
-function handleError(message) {
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'error-message';
-    errorDiv.textContent = message;
-    errorDiv.style.cssText = `
-        background-color: #ffebee;
-        color: #c62828;
-        padding: 12px;
-        margin: 8px 0;
-        border-radius: 4px;
-        text-align: center;
-    `;
-    
-    const oldErrors = document.getElementsByClassName('error-message');
-    Array.from(oldErrors).forEach(error => error.remove());
-    
-    const container = document.querySelector('.container');
-    container.insertBefore(errorDiv, container.firstChild);
-    
-    setTimeout(() => errorDiv.remove(), 5000);
 }
 
 async function refreshData() {
@@ -184,15 +100,8 @@ async function refreshData() {
     refreshButton.style.transform = 'rotate(360deg)';
     refreshButton.style.transition = 'transform 0.5s';
     
-    try {
-        await Promise.all([
-            fetchLastDetection(),
-            fetchTopSpecies()
-        ]);
-    } catch (error) {
-        console.error("Błąd podczas odświeżania danych:", error);
-        handleError("Wystąpił błąd podczas odświeżania danych");
-    }
+    await fetchLastDetection();
+    await fetchTopSpecies();
     
     setTimeout(() => {
         refreshButton.style.transform = 'rotate(0deg)';
@@ -200,10 +109,13 @@ async function refreshData() {
     }, 500);
 }
 
+// Inicjalizacja Material Design Components
 document.addEventListener('DOMContentLoaded', () => {
+    // Dodaj efekt ripple do przycisków i interaktywnych elementów
     const buttons = document.querySelectorAll('button');
     buttons.forEach(addRippleEffect);
-    refreshData();
 });
 
+// Sprawdzaj nowe wykrycia co 10 sekund
 setInterval(refreshData, 10000);
+refreshData();
