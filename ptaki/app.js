@@ -1,7 +1,8 @@
 const token = 'hLd2SmS16HxaZFzKjeghR75u';
 const locale = 'pl';
-const speciesApiUrl = `https://app.birdweather.com/api/v1/stations/${token}/species?locale=${locale}&limit=10`;
-const detectionsApiUrl = `https://app.birdweather.com/api/v1/stations/${token}/detections?locale=${locale}&limit=1`;
+const baseUrl = 'https://app.birdweather.com/api/v1';
+const speciesApiUrl = `${baseUrl}/stations/${token}/species`;
+const detectionsApiUrl = `${baseUrl}/stations/${token}/detections`;
 
 // Funkcja do otwierania strony Wikipedii na podstawie nazwy ptaka
 function openWikipediaPage(birdName) {
@@ -15,19 +16,41 @@ function addRippleEffect(element) {
     ripple.unbounded = true;
 }
 
+// Funkcja pomocnicza do wykonywania zapytań API
+async function fetchApi(url, params = {}) {
+    const queryParams = new URLSearchParams({
+        locale,
+        ...params
+    }).toString();
+    
+    const fullUrl = `${url}?${queryParams}`;
+    
+    try {
+        const response = await fetch(fullUrl);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error(`Błąd podczas pobierania danych z ${url}:`, error);
+        throw error;
+    }
+}
+
 async function fetchLastDetection() {
     try {
-        const response = await fetch(detectionsApiUrl, {
-            headers: { "Authorization": `Bearer ${token}` }
-        });
-        const data = await response.json();
+        const data = await fetchApi(detectionsApiUrl, { limit: 1 });
+        console.log("Dane z API (ostatnie wykrycie):", data);
 
-        if (data.success && data.detections && data.detections.length > 0) {
+        if (data && data.detections && data.detections.length > 0) {
             const lastDetection = data.detections[0];
             
-            const birdName = lastDetection.species ? lastDetection.species.commonName : "Nieznany ptak";
-            const detectionTime = lastDetection.timestamp ? new Date(lastDetection.timestamp).toLocaleString('pl-PL') : "Data nieznana";
-            const birdImageUrl = lastDetection.species && lastDetection.species.imageUrl ? lastDetection.species.imageUrl : "placeholder.jpg";
+            const birdName = lastDetection.speciesName || "Nieznany ptak";
+            const detectionTime = lastDetection.detectedAt 
+                ? new Date(lastDetection.detectedAt).toLocaleString('pl-PL') 
+                : "Data nieznana";
+            const birdImageUrl = lastDetection.imageUrl || "placeholder.jpg";
 
             // Aktualizacja danych na stronie
             document.getElementById("bird-name").querySelector(".info-value").textContent = birdName;
@@ -40,21 +63,25 @@ async function fetchLastDetection() {
             const imageContainer = document.getElementById("last-detection-image");
             imageContainer.onclick = () => openWikipediaPage(birdName);
         } else {
-            console.error("Nie udało się pobrać danych o ostatnim wykryciu lub dane są niekompletne:", data);
+            console.error("Brak danych o ostatnim wykryciu:", data);
+            document.getElementById("bird-name").querySelector(".info-value").textContent = "Brak danych";
+            document.getElementById("bird-detection-time").querySelector(".info-value").textContent = "Brak danych";
         }
     } catch (error) {
-        console.error("Błąd podczas wykonywania zapytania:", error);
+        console.error("Błąd podczas pobierania ostatniego wykrycia:", error);
+        handleError("Nie udało się pobrać danych o ostatnim wykryciu");
     }
 }
 
 async function fetchTopSpecies() {
     try {
-        const response = await fetch(speciesApiUrl, {
-            headers: { "Authorization": `Bearer ${token}` }
+        const data = await fetchApi(speciesApiUrl, { 
+            limit: 10,
+            hours: 24
         });
-        const data = await response.json();
+        console.log("Dane z API (top gatunki):", data);
 
-        if (data.success) {
+        if (data && data.species && data.species.length > 0) {
             const speciesTableBody = document.getElementById("species-table-body");
             speciesTableBody.innerHTML = '';
 
@@ -63,32 +90,64 @@ async function fetchTopSpecies() {
 
                 const imgCell = document.createElement("td");
                 const img = document.createElement("img");
-                img.src = bird.thumbnailUrl || "placeholder.jpg";
-                img.alt = bird.commonName;
-                img.onclick = () => openWikipediaPage(bird.commonName);
+                img.src = bird.imageUrl || "placeholder.jpg";
+                img.alt = bird.name || "Nazwa ptaka niedostępna";
+                img.onclick = () => openWikipediaPage(bird.name);
                 imgCell.appendChild(img);
                 row.appendChild(imgCell);
 
                 const nameCell = document.createElement("td");
-                nameCell.textContent = bird.commonName;
+                nameCell.textContent = bird.name || "Nazwa niedostępna";
                 row.appendChild(nameCell);
 
                 const detectionsCell = document.createElement("td");
-                detectionsCell.textContent = bird.detections.total;
+                detectionsCell.textContent = bird.detectionsCount || 0;
                 row.appendChild(detectionsCell);
 
                 const lastDetectionCell = document.createElement("td");
-                lastDetectionCell.textContent = new Date(bird.latestDetectionAt).toLocaleString('pl-PL');
+                const lastDetectionDate = bird.lastDetectedAt 
+                    ? new Date(bird.lastDetectedAt).toLocaleString('pl-PL')
+                    : "Data nieznana";
+                lastDetectionCell.textContent = lastDetectionDate;
                 row.appendChild(lastDetectionCell);
 
                 speciesTableBody.appendChild(row);
             });
         } else {
-            console.error("Brak danych o top gatunkach lub nieudane pobranie:", data);
+            console.error("Brak danych o gatunkach:", data);
+            const speciesTableBody = document.getElementById("species-table-body");
+            speciesTableBody.innerHTML = '<tr><td colspan="4" class="text-center">Brak danych o gatunkach</td></tr>';
         }
     } catch (error) {
-        console.error("Błąd zapytania:", error);
+        console.error("Błąd podczas pobierania top gatunków:", error);
+        handleError("Nie udało się pobrać danych o gatunkach");
     }
+}
+
+function handleError(message) {
+    // Dodaj komunikat o błędzie na stronie
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.textContent = message;
+    errorDiv.style.cssText = `
+        background-color: #ffebee;
+        color: #c62828;
+        padding: 12px;
+        margin: 8px 0;
+        border-radius: 4px;
+        text-align: center;
+    `;
+    
+    // Usuń poprzednie komunikaty o błędach
+    const oldErrors = document.getElementsByClassName('error-message');
+    Array.from(oldErrors).forEach(error => error.remove());
+    
+    // Dodaj nowy komunikat na górze strony
+    const container = document.querySelector('.container');
+    container.insertBefore(errorDiv, container.firstChild);
+    
+    // Automatycznie usuń komunikat po 5 sekundach
+    setTimeout(() => errorDiv.remove(), 5000);
 }
 
 async function refreshData() {
@@ -96,8 +155,15 @@ async function refreshData() {
     refreshButton.style.transform = 'rotate(360deg)';
     refreshButton.style.transition = 'transform 0.5s';
     
-    await fetchLastDetection();
-    await fetchTopSpecies();
+    try {
+        await Promise.all([
+            fetchLastDetection(),
+            fetchTopSpecies()
+        ]);
+    } catch (error) {
+        console.error("Błąd podczas odświeżania danych:", error);
+        handleError("Wystąpił błąd podczas odświeżania danych");
+    }
     
     setTimeout(() => {
         refreshButton.style.transform = 'rotate(0deg)';
@@ -110,8 +176,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Dodaj efekt ripple do przycisków i interaktywnych elementów
     const buttons = document.querySelectorAll('button');
     buttons.forEach(addRippleEffect);
+    
+    // Rozpocznij pobieranie danych
+    refreshData();
 });
 
 // Sprawdzaj nowe wykrycia co 10 sekund
 setInterval(refreshData, 10000);
-refreshData();
