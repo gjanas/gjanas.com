@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Bird Detection - Statystyki</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        h2 {
+            color: #4CAF50;
+        }
+        #last-detection-info {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        #last-detection-info img {
+            width: 120px;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        #bird-name, #bird-detection-time {
+            font-weight: bold;
+        }
+        #top-species-header {
+            font-size: 1.2em;
+            color: #333;
+            margin-top: 20px;
+        }
+        #top-species-table {
+            width: 100%;
+            max-width: 600px;
+            border-collapse: collapse;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        #top-species-table th, #top-species-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        #top-species-table th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #top-species-table td {
+            background-color: #ffffff;
+        }
+        #top-species-table img {
+            width: 50px;
+            height: auto;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Dodano nagłówek dla ostatnio wykrytego ptaka -->
+    <div id="last-detection-info">
+        <h2>Ostatni wykryty ptak</h2>
+        <img id="bird-image" src="" alt="Zdjęcie ptaka">
+        <p id="bird-name">Nazwa: <span></span></p>
+        <p id="bird-detection-time">Wykrycie: <span></span></p>
+    </div>
+    
+    <h2 id="top-species-header">Top 10 gatunków wykrytych w ciągu ostatnich 24 godzin</h2>
+    <table id="top-species-table">
+        <thead>
+            <tr>
+                <th></th> <!-- Usunięto tekst "Zdjęcie" -->
+                <th>Nazwa Ptaka</th>
+                <th>Liczba Wykryć</th>
+                <th>Ostatnie Wykrycie</th>
+            </tr>
+        </thead>
+        <tbody id="species-table-body">
+            <!-- Wiersze z danymi zostaną dodane dynamicznie przez JavaScript -->
+        </tbody>
+    </table>
+
+    <script src="app.js"></script>
+</body>
+</html>
