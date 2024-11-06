@@ -9,6 +9,17 @@ function openWikipediaPage(birdName) {
     window.open(wikiUrl, '_blank'); // Otwiera link w nowej karcie
 }
 
+// Funkcja do inicjalizacji zdarzenia kliknięcia na obraz ptaka w tabeli
+function addImageClickEvent() {
+    const images = document.querySelectorAll('#top-species-table img');
+    images.forEach(img => {
+        img.addEventListener('click', (event) => {
+            const birdName = event.target.alt;
+            openWikipediaPage(birdName);
+        });
+    });
+}
+
 async function fetchLastDetection() {
     try {
         const response = await fetch(detectionsApiUrl, {
@@ -82,11 +93,11 @@ async function fetchTopSpecies() {
                 lastDetectionCell.textContent = new Date(bird.latestDetectionAt).toLocaleString('pl-PL');
                 row.appendChild(lastDetectionCell);
 
-                // Dodajemy onclick na komórkę z obrazem ptaka, aby otworzyć stronę Wikipedii
-                img.addEventListener('click', () => openWikipediaPage(bird.commonName));
-
                 speciesTableBody.appendChild(row);
             });
+
+            // Dodanie zdarzenia kliknięcia po zaktualizowaniu tabeli
+            addImageClickEvent();
         } else {
             console.error("Brak danych o top gatunkach lub nieudane pobranie:", data);
         }
