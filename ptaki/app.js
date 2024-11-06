@@ -82,6 +82,9 @@ async function fetchTopSpecies() {
                 lastDetectionCell.textContent = new Date(bird.latestDetectionAt).toLocaleString('pl-PL');
                 row.appendChild(lastDetectionCell);
 
+                // Dodajemy onclick, aby otworzyć stronę Wikipedii
+                img.onclick = () => openWikipediaPage(bird.commonName);
+
                 speciesTableBody.appendChild(row);
             });
         } else {
