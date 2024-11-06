@@ -16,18 +16,12 @@ async function fetchLastDetection() {
         });
         const data = await response.json();
 
-        console.log("Pełna odpowiedź API dla ostatniego wykrycia:", data);
-
         if (data.success && data.detections && data.detections.length > 0) {
             const lastDetection = data.detections[0];
             
             const birdName = lastDetection.species ? lastDetection.species.commonName : "Nieznany ptak";
             const detectionTime = lastDetection.timestamp ? new Date(lastDetection.timestamp).toLocaleString('pl-PL') : "Data nieznana";
             const birdImageUrl = lastDetection.species && lastDetection.species.imageUrl ? lastDetection.species.imageUrl : "placeholder.jpg";
-
-            console.log("Nazwa ptaka:", birdName);
-            console.log("URL zdjęcia:", birdImageUrl);
-            console.log("Czas wykrycia:", detectionTime);
 
             // Aktualizacja danych na stronie
             document.getElementById("bird-name").querySelector("span").textContent = birdName;
@@ -53,8 +47,6 @@ async function fetchTopSpecies() {
         });
         const data = await response.json();
 
-        console.log("Odpowiedź API dla top gatunków:", data);
-
         if (data.success) {
             const speciesTableBody = document.getElementById("species-table-body");
             speciesTableBody.innerHTML = '';
@@ -66,8 +58,7 @@ async function fetchTopSpecies() {
                 const img = document.createElement("img");
                 img.src = bird.thumbnailUrl || "placeholder.jpg";
                 img.alt = bird.commonName;
-                img.style.width = "50px";
-                img.style.cursor = "pointer"; // Zmienia kursor na wskaźnik przy najechaniu
+                img.style.cursor = "pointer"; // Dodano kursor wskazujący
                 img.onclick = () => openWikipediaPage(bird.commonName); // Kliknięcie otwiera stronę Wikipedii
                 imgCell.appendChild(img);
                 row.appendChild(imgCell);
