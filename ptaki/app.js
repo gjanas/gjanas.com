@@ -6,6 +6,7 @@ const detectionsApiUrl = `https://app.birdweather.com/api/v1/stations/${token}/d
 // Funkcja do otwierania strony Wikipedii na podstawie nazwy ptaka
 function openWikipediaPage(birdName) {
     const wikiUrl = `https://pl.wikipedia.org/wiki/${encodeURIComponent(birdName)}`;
+    console.log(`Otwieranie strony: ${wikiUrl}`); // Logowanie do konsoli
     window.open(wikiUrl, '_blank'); // Otwiera link w nowej karcie
 }
 
@@ -15,6 +16,7 @@ function addImageClickEvent() {
     images.forEach(img => {
         img.addEventListener('click', (event) => {
             const birdName = event.target.alt;
+            console.log(`Kliknięto obraz: ${birdName}`); // Logowanie do konsoli
             openWikipediaPage(birdName);
         });
     });
