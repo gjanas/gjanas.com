@@ -1,95 +1,92 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <title>Bird Detection - Statystyki</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-        h2 {
-            color: #4CAF50;
-        }
-        #last-detection-info {
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: #e8f5e9;
-            border-radius: 5px;
-            width: 100%;
-            max-width: 600px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        #last-detection-info img {
-            width: 120px;
-            height: auto;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-        #bird-name, #bird-detection-time {
-            font-weight: bold;
-        }
-        #top-species-header {
-            font-size: 1.2em;
-            color: #333;
-            margin-top: 20px;
-        }
-        #top-species-table {
-            width: 100%;
-            max-width: 600px;
-            border-collapse: collapse;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        #top-species-table th, #top-species-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        #top-species-table th {
-            background-color: #4CAF50;
-            color: white;
-        }
-        #top-species-table td {
-            background-color: #ffffff;
-        }
-        #top-species-table img {
-            width: 50px;
-            height: auto;
-            border-radius: 4px;
-        }
-    </style>
-</head>
-<body>
-    <!-- Dodano nagłówek dla ostatnio wykrytego ptaka -->
-    <div id="last-detection-info">
-        <h2>Ostatni wykryty ptak</h2>
-        <img id="bird-image" src="" alt="Zdjęcie ptaka">
-        <p id="bird-name">Nazwa: <span></span></p>
-        <p id="bird-detection-time">Wykrycie: <span></span></p>
-    </div>
-    
-    <h2 id="top-species-header">Top 10 gatunków wykrytych w ciągu ostatnich 24 godzin</h2>
-    <table id="top-species-table">
-        <thead>
-            <tr>
-                <th></th> <!-- Usunięto tekst "Zdjęcie" -->
-                <th>Nazwa Ptaka</th>
-                <th>Liczba Wykryć</th>
-                <th>Ostatnie Wykrycie</th>
-            </tr>
-        </thead>
-        <tbody id="species-table-body">
-            <!-- Wiersze z danymi zostaną dodane dynamicznie przez JavaScript -->
-        </tbody>
-    </table>
+const token = 'hLd2SmS16HxaZFzKjeghR75u';
+const locale = 'pl';
+const speciesApiUrl = `https://app.birdweather.com/api/v1/stations/${token}/species?locale=${locale}&limit=10`;
+const detectionsApiUrl = `https://app.birdweather.com/api/v1/stations/${token}/detections?locale=${locale}&limit=1`;
 
-    <script src="app.js"></script>
-</body>
-</html>
+// Funkcja do otwierania strony Wikipedii na podstawie nazwy ptaka
+function openWikipediaPage(birdName) {
+    const wikiUrl = `https://pl.wikipedia.org/wiki/${encodeURIComponent(birdName)}`;
+    window.open(wikiUrl, '_blank'); // Otwiera link w nowej karcie
+}
+
+async function fetchLastDetection() {
+    try {
+        const response = await fetch(detectionsApiUrl, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await response.json();
+
+        console.log("Pełna odpowiedź API dla ostatniego wykrycia:", data);
+
+        if (data.success && data.detections && data.detections.length > 0) {
+            const lastDetection = data.detections[0];
+            
+            const birdName = lastDetection.species ? lastDetection.species.commonName : "Nieznany ptak";
+            const detectionTime = lastDetection.timestamp ? new Date(lastDetection.timestamp).toLocaleString('pl-PL') : "Data nieznana";
+            const birdImageUrl = lastDetection.species && lastDetection.species.imageUrl ? lastDetection.species.imageUrl : "placeholder.jpg";
+
+            document.getElementById("bird-name").querySelector("span").textContent = birdName;
+            document.getElementById("bird-detection-time").querySelector("span").textContent = detectionTime;
+            const birdImage = document.getElementById("bird-image");
+            birdImage.src = birdImageUrl;
+            birdImage.alt = birdName;
+
+            // Dodajemy onclick, aby otworzyć stronę Wikipedii
+            birdImage.onclick = () => openWikipediaPage(birdName);
+        } else {
+            console.error("Nie udało się pobrać danych o ostatnim wykryciu lub dane są niekompletne:", data);
+        }
+    } catch (error) {
+        console.error("Błąd podczas wykonywania zapytania:", error);
+    }
+}
+
+async function fetchTopSpecies() {
+    try {
+        const response = await fetch(speciesApiUrl, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await response.json();
+
+        console.log("Pełna odpowiedź API dla top gatunków:", data);
+
+        if (data.success && data.species && data.species.length > 0) {
+            const speciesTableBody = document.getElementById("species-table-body");
+            speciesTableBody.innerHTML = ''; // Czyści istniejące wiersze
+
+            data.species.forEach(bird => {
+                const row = document.createElement("tr");
+
+                // Tworzenie komórki z obrazem ptaka
+                const birdImageCell = document.createElement("td");
+                const birdImage = document.createElement("img");
+                birdImage.src = bird.imageUrl; // URL do zdjęcia ptaka
+                birdImage.alt = bird.commonName; // Nazwa ptaka
+
+                // Dodajemy onclick, aby otworzyć stronę Wikipedii
+                birdImage.onclick = () => openWikipediaPage(bird.commonName);
+
+                birdImageCell.appendChild(birdImage);
+                row.appendChild(birdImageCell);
+
+                const detectionsCell = document.createElement("td");
+                detectionsCell.textContent = bird.detections ? bird.detections.total : "0";
+                row.appendChild(detectionsCell);
+
+                const lastDetectionCell = document.createElement("td");
+                lastDetectionCell.textContent = bird.latestDetectionAt ? new Date(bird.latestDetectionAt).toLocaleString('pl-PL') : "Data nieznana";
+                row.appendChild(lastDetectionCell);
+
+                speciesTableBody.appendChild(row);
+            });
+        } else {
+            console.error("Brak danych o gatunkach:", data);
+        }
+    } catch (error) {
+        console.error("Błąd podczas wykonywania zapytania:", error);
+    }
+}
+
+// Wywołanie funkcji na starcie
+fetchLastDetection();
+fetchTopSpecies();
