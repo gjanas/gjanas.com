@@ -3,10 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Bird Detection - Statystyki</title>
+    
+    <!-- Czcionka Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
+        /* Główne stylowanie strony */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #f0f4f8, #e2ebf0); /* Nowoczesny gradient */
             color: #333;
             display: flex;
             justify-content: center;
@@ -14,59 +19,114 @@
             align-items: center;
             padding: 20px;
         }
+
         h2 {
-            color: #4CAF50;
+            background: linear-gradient(90deg, #4CAF50, #66BB6A);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            text-align: center;
         }
+
+        /* Stylowanie sekcji z ostatnim wykryciem ptaka */
         #last-detection-info {
             text-align: center;
             margin-bottom: 20px;
             padding: 15px;
             background-color: #e8f5e9;
-            border-radius: 5px;
+            border-radius: 10px;
             width: 100%;
             max-width: 600px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Cień */
+            animation: fadeIn 1s ease-in; /* Animacja */
         }
-        #last-detection-info img {
-            width: 150px; /* Zwiększono rozmiar */
+
+        #bird-image {
+            width: 150px;
             height: auto;
             border-radius: 8px;
             margin-bottom: 10px;
-            cursor: pointer; /* Dodano kursor wskazujący */
+            cursor: pointer;
+            transition: transform 0.3s;
         }
 
+        /* Efekt powiększenia przy najechaniu na zdjęcie */
+        #bird-image:hover {
+            transform: scale(1.05);
         }
+
         #bird-name, #bird-detection-time {
             font-weight: bold;
         }
+
+        /* Nagłówek dla tabeli */
         #top-species-header {
-            font-size: 1.2em;
+            font-size: 1.5em;
             color: #333;
             margin-top: 20px;
+            text-align: center;
+            animation: fadeIn 1s ease-in;
         }
+
+        /* Stylowanie tabeli z gatunkami */
         #top-species-table {
             width: 100%;
             max-width: 600px;
             border-collapse: collapse;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Cień */
+            border-radius: 10px;
+            overflow: hidden;
         }
+
         #top-species-table th, #top-species-table td {
-            padding: 12px;
+            padding: 15px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #e0e0e0; /* Cienka linia */
         }
+
         #top-species-table th {
             background-color: #4CAF50;
             color: white;
+            font-weight: bold;
         }
+
         #top-species-table td {
             background-color: #ffffff;
         }
+
+        /* Efekt hover na wierszach tabeli */
+        #top-species-table tr:hover {
+            background-color: #f1f8e9;
+        }
+
+        /* Efekt powiększenia na miniaturkach */
         #top-species-table img {
             width: 50px;
             height: auto;
             border-radius: 4px;
-            cursor: pointer; /* Dodano kursor wskazujący */
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        #top-species-table img:hover {
+            transform: scale(1.05);
+        }
+
+        /* Animacja fade-in dla nagłówków i tabeli */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsywność dla urządzeń mobilnych */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            #last-detection-info, #top-species-table {
+                width: 100%;
+            }
         }
     </style>
 </head>
