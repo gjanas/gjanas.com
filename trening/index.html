@@ -1,157 +1,169 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>Trening</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trening Tracker</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.83/dist/themes/light.css" />
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.83/dist/shoelace.js"></script>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #f8f8f8;
+      margin: 0;
+      padding: 1rem;
+      background: #f2f2f7;
+      color: #000;
+      max-width: 390px;
+      margin: auto;
     }
-    .ios-card {
+    h1 {
+      font-size: 1.5rem;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    #upload-section {
+      margin-bottom: 1.5rem;
+    }
+    .exercise {
       background: white;
       border-radius: 1rem;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-      padding: 1.5rem;
-      margin: 1rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
-    .disabled {
-      pointer-events: none;
-      opacity: 0.6;
+    .done {
+      color: green;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+    sl-button::part(base) {
+      width: 100%;
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-start p-4">
-  <h1 class="text-2xl font-bold mb-4">Mój Trening</h1>
+<body>
+  <h1>Trening - Dzień <span id="day-number"></span></h1>
+  <div id="upload-section">
+    <input type="file" id="csvFile" accept=".csv" />
+    <sl-button variant="primary" onclick="resetProgress()">Resetuj Progres</sl-button>
+  </div>
+  <div id="exercise-list"></div>
 
-  <input type="file" id="csvInput" accept=".csv" class="mb-4">
-  <button id="resetBtn" class="mb-4 px-4 py-2 bg-red-500 text-white rounded">Reset postępu</button>
+  <script type="module">
+    import initSqlJs from 'https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/sql-wasm.js';
 
-  <div id="todoContainer" class="w-full max-w-md"></div>
-
-  <script>
-    let db, plan = [], currentDayIndex = 0, completed = {};
+    let db, todayData = {}, dbLoaded = false;
 
     const initDB = async () => {
-      const SQL = await initSqlJs({ locateFile: filename => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${filename}` });
-      db = new SQL.Database();
-      db.run("CREATE TABLE IF NOT EXISTS progress (day INTEGER, task TEXT, done INTEGER)");
-    }
+      const SQL = await initSqlJs({ locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/${file}` });
+      const saved = localStorage.getItem('trening_db');
+      db = new SQL.Database(saved ? new Uint8Array(JSON.parse(saved)) : undefined);
+      if (!saved) db.run("CREATE TABLE progress(day INT, pushups INT, plank INT, bike INT);");
+      dbLoaded = true;
+    };
 
-    const saveProgress = () => {
-      db.run("DELETE FROM progress");
-      for (let key in completed) {
-        let [day, task] = key.split("|");
-        db.run("INSERT INTO progress (day, task, done) VALUES (?, ?, ?)", [day, task, completed[key] ? 1 : 0]);
+    const saveDB = () => {
+      const data = db.export();
+      localStorage.setItem('trening_db', JSON.stringify(Array.from(data)));
+    };
+
+    const resetProgress = () => {
+      if (confirm("Czy na pewno chcesz zresetować postęp?")) {
+        localStorage.removeItem('trening_db');
+        location.reload();
       }
-      localStorage.setItem("db", JSON.stringify(Array.from(db.export())));
-    }
+    };
 
-    const loadProgress = () => {
-      const saved = localStorage.getItem("db");
-      if (!saved) return;
-      const data = new Uint8Array(JSON.parse(saved));
-      db = new window.SQL.Database(data);
-      const rows = db.exec("SELECT * FROM progress")[0]?.values || [];
-      for (let row of rows) completed[`${row[0]}|${row[1]}`] = row[2] === 1;
-    }
-
-    const renderDay = () => {
-      const day = plan[currentDayIndex];
-      if (!day) {
-        document.getElementById("todoContainer").innerHTML = "<p class='text-center text-gray-500'>Plan ukończony 🎉</p>";
-        return;
-      }
-      const container = document.getElementById("todoContainer");
-      container.innerHTML = `
-        <div class="ios-card">
-          <h2 class="text-xl font-semibold mb-2">Dzień ${day["Dzień"]}</h2>
-          <ul class="space-y-4">
-            <li><label><input type="checkbox" ${getChecked(day, 'Pompki')} onchange="toggleCheck('Pompki')"> Pompki: ${day["Pompki"]}</label></li>
-            <li><label><input type="checkbox" ${getChecked(day, 'Rower')} onchange="toggleCheck('Rower')"> Rower: ${day["Rower (minuty)"]} min</label></li>
-            <li id="plankRow">
-              <button id="plankBtn" class="bg-blue-500 text-white px-3 py-1 rounded">START Plank (${day["Plank (sekundy)"]}s)</button>
-              <span id="plankTimer" class="ml-4"></span>
-            </li>
-          </ul>
-        </div>
-      `;
-      if (completed[`${currentDayIndex}|Plank`]) {
-        document.getElementById("plankRow").innerHTML = `<span class='text-green-600'>Plank: wykonane ✅</span>`;
-      } else {
-        document.getElementById("plankBtn").onclick = () => startPlankTimer(day["Plank (sekundy)"]);
-      }
-    }
-
-    const getChecked = (day, task) => {
-      return completed[`${currentDayIndex}|${task}`] ? "checked" : "";
-    }
-
-    const toggleCheck = (task) => {
-      completed[`${currentDayIndex}|${task}`] = !completed[`${currentDayIndex}|${task}`];
-      saveProgress();
-      checkAdvance();
-    }
-
-    const startPlankTimer = (seconds) => {
-      const btn = document.getElementById("plankBtn");
-      const timer = document.getElementById("plankTimer");
-      btn.disabled = true;
-      btn.classList.add("disabled");
-      let remaining = seconds;
-      const interval = setInterval(() => {
-        timer.textContent = `${remaining--}s`;
-        if (remaining < 0) {
-          clearInterval(interval);
-          completed[`${currentDayIndex}|Plank`] = true;
-          saveProgress();
-          renderDay();
-          checkAdvance();
-        }
-      }, 1000);
-    }
-
-    const checkAdvance = () => {
-      if (["Pompki", "Rower", "Plank"].every(task => completed[`${currentDayIndex}|${task}`])) {
-        currentDayIndex++;
-        renderDay();
-      }
-    }
-
-    document.getElementById("csvInput").addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      Papa.parse(file, {
-        header: true,
-        complete: (results) => {
-          plan = results.data.filter(d => d["Dzień"]);
-          currentDayIndex = 0;
-          completed = {};
-          db.run("DELETE FROM progress");
-          localStorage.removeItem("db");
-          renderDay();
-        }
+    const readCSV = async file => {
+      const text = await file.text();
+      const rows = text.trim().split("\n").slice(1);
+      return rows.map(r => {
+        const [day, pushups, plank, bike] = r.split(',');
+        return { day: +day, pushups: +pushups, plank: +plank, bike: +bike };
       });
-    });
+    };
 
-    document.getElementById("resetBtn").addEventListener("click", () => {
-      currentDayIndex = 0;
-      completed = {};
-      db.run("DELETE FROM progress");
-      localStorage.removeItem("db");
-      renderDay();
-    });
+    const markDone = (day, type) => {
+      const row = db.exec(`SELECT * FROM progress WHERE day = ${day}`);
+      if (row.length === 0) db.run(`INSERT INTO progress VALUES (${day}, 0, 0, 0);`);
+      db.run(`UPDATE progress SET ${type} = 1 WHERE day = ${day}`);
+      saveDB();
+      showToday(todayData);
+    };
 
-    window.addEventListener("DOMContentLoaded", async () => {
+    const isDone = (day, type) => {
+      const row = db.exec(`SELECT ${type} FROM progress WHERE day = ${day}`);
+      return row[0]?.values[0][0] === 1;
+    };
+
+    const showToday = (plan) => {
+      const day = plan.day;
+      document.getElementById("day-number").textContent = day;
+      const container = document.getElementById("exercise-list");
+      container.innerHTML = '';
+
+      const types = [
+        { label: "Pompki", type: "pushups", amount: plan.pushups },
+        { label: "Plank", type: "plank", amount: plan.plank },
+        { label: "Rower", type: "bike", amount: plan.bike },
+      ];
+
+      types.forEach(({ label, type, amount }) => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "exercise";
+
+        const title = document.createElement("div");
+        title.innerHTML = `<strong>${label}:</strong> ${amount} ${type === 'plank' ? 'sekund' : (type === 'bike' ? 'minut' : 'powtórzeń')}`;
+
+        const content = document.createElement("div");
+        if (isDone(day, type)) {
+          content.innerHTML = `<div class='done'>${label} wykonane</div>`;
+        } else if (type === 'plank') {
+          const btn = document.createElement("sl-button");
+          btn.textContent = "Start";
+          btn.variant = "success";
+          btn.addEventListener("click", () => {
+            btn.disabled = true;
+            let remaining = amount;
+            btn.textContent = `Pozostało ${remaining}s`;
+            const interval = setInterval(() => {
+              remaining--;
+              if (remaining <= 0) {
+                clearInterval(interval);
+                markDone(day, type);
+              } else {
+                btn.textContent = `Pozostało ${remaining}s`;
+              }
+            }, 1000);
+          });
+          content.appendChild(btn);
+        } else {
+          const btn = document.createElement("sl-button");
+          btn.textContent = `Rozpocznij ${label}`;
+          btn.variant = "primary";
+          btn.addEventListener("click", () => markDone(day, type));
+          content.appendChild(btn);
+        }
+
+        wrapper.appendChild(title);
+        wrapper.appendChild(content);
+        container.appendChild(wrapper);
+      });
+    };
+
+    document.getElementById("csvFile").addEventListener("change", async (e) => {
+      localStorage.removeItem('trening_db');
       await initDB();
-      loadProgress();
-      renderDay();
+      const file = e.target.files[0];
+      const plan = await readCSV(file);
+      todayData = plan.find(row => {
+        const rowDone = db.exec(`SELECT * FROM progress WHERE day = ${row.day}`);
+        return !rowDone[0] || rowDone[0].values[0].includes(0);
+      }) || plan[plan.length - 1];
+      showToday(todayData);
     });
+
+    await initDB();
   </script>
 </body>
 </html>
