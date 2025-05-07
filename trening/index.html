@@ -6,6 +6,7 @@
     <title>Trening Tracker</title>
     <style>
         :root {
+            /* Light Theme (Default) */
             --main-bg-color: #f2f2f7;
             --card-bg-color: #ffffff;
             --primary-color: #007aff;
@@ -14,7 +15,30 @@
             --secondary-text-color: #8e8e93;
             --border-color: #d1d1d6;
             --danger-color: #ff3b30;
+            --header-bg-color: var(--main-bg-color); /* For sticky header */
+            --day-indicator-bg: #e0e0e0;
+            --day-indicator-text: var(--text-color);
+            --btn-outline-hover-bg: rgba(0, 122, 255, 0.08);
+            --btn-outline-danger-hover-bg: rgba(255, 59, 48, 0.08);
         }
+
+        body.dark-theme {
+            /* Dark Theme Overrides */
+            --main-bg-color: #000000;
+            --card-bg-color: #1c1c1e;
+            --primary-color: #0a84ff; /* Slightly brighter blue for dark mode */
+            --success-color: #30d158; /* Slightly brighter green */
+            --text-color: #ffffff;
+            --secondary-text-color: #8d8d92; /* Lighter secondary text */
+            --border-color: #3a3a3c;   /* Darker border */
+            --danger-color: #ff453a;  /* Brighter red */
+            --header-bg-color: var(--main-bg-color);
+            --day-indicator-bg: #3a3a3c;
+            --day-indicator-text: var(--text-color);
+            --btn-outline-hover-bg: rgba(10, 132, 255, 0.15); /* Adjusted for dark */
+            --btn-outline-danger-hover-bg: rgba(255, 69, 58, 0.15); /* Adjusted for dark */
+        }
+
 
         * {
             margin: 0;
@@ -33,7 +57,8 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow-x: hidden; /* Prevent horizontal scroll if confetti strays */
+            overflow-x: hidden; 
+            transition: background-color 0.3s ease, color 0.3s ease; /* Smooth theme transition */
         }
 
         .container {
@@ -51,10 +76,35 @@
             border-bottom: 1px solid var(--border-color);
             position: sticky;
             top: 0;
-            background-color: var(--main-bg-color);
+            background-color: var(--header-bg-color);
             z-index: 100;
-            transition: box-shadow 0.3s ease-in-out;
+            transition: box-shadow 0.3s ease-in-out, background-color 0.3s ease, border-color 0.3s ease;
+            display: flex; /* For theme switcher */
+            justify-content: space-between; /* For theme switcher */
+            align-items: center; /* For theme switcher */
+            padding-left: 16px; /* Adjust padding for title centering with switcher */
+            padding-right: 16px;
         }
+        .header-title {
+            flex-grow: 1; /* Allows title to take available space and remain centered */
+            text-align: center;
+        }
+        .theme-switcher {
+            background: none;
+            border: 1px solid var(--secondary-text-color);
+            color: var(--secondary-text-color);
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: background-color 0.2s, color 0.2s, border-color 0.3s ease;
+        }
+        .theme-switcher:hover {
+            background-color: var(--secondary-text-color);
+            color: var(--card-bg-color);
+        }
+
 
         .header.scrolled {
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -66,6 +116,7 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             margin-bottom: 16px;
             overflow: hidden;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         .card-header {
@@ -75,6 +126,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: border-color 0.3s ease;
         }
 
         .card-content {
@@ -91,6 +143,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            transition: border-color 0.3s ease;
         }
 
         .exercise-item:last-child {
@@ -104,6 +157,7 @@
         .exercise-value {
             color: var(--secondary-text-color);
             font-size: 14px;
+            transition: color 0.3s ease;
         }
 
         .btn {
@@ -116,7 +170,7 @@
             font-weight: 500;
             cursor: pointer;
             font-size: 16px;
-            transition: background-color 0.2s, opacity 0.2s, transform 0.1s, filter 0.1s;
+            transition: background-color 0.2s, opacity 0.2s, transform 0.1s, filter 0.1s, color 0.3s ease;
         }
 
         .btn:disabled {
@@ -148,12 +202,12 @@
         }
 
         .btn-outline:not(:disabled):active {
-            background-color: rgba(0, 122, 255, 0.08); 
+            background-color: var(--btn-outline-hover-bg); 
             filter: none; 
             transform: translateY(1px);
         }
         .btn-outline.danger:not(:disabled):active {
-            background-color: rgba(255, 59, 48, 0.08);
+            background-color: var(--btn-outline-danger-hover-bg);
         }
         
         .btn-danger:not(:disabled):active,
@@ -198,6 +252,7 @@
             color: var(--secondary-text-color);
             text-align: center;
             min-height: 1.2em; 
+            transition: color 0.3s ease;
         }
 
         .days-progress {
@@ -214,7 +269,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #e0e0e0;
+            background-color: var(--day-indicator-bg);
+            color: var(--day-indicator-text);
             border-radius: 50%;
             font-weight: 600;
             font-size: 14px;
@@ -255,9 +311,13 @@
             opacity: 0;
             transition: opacity 0.3s ease-in-out;
             pointer-events: none;
-            z-index: 1000; /* Below confetti and modal */
+            z-index: 1000;
             text-align: center;
             max-width: 80%;
+        }
+        body.dark-theme .toast { /* Ensure toast contrast in dark mode if needed */
+            background-color: rgba(50,50,50,0.9); /* Slightly lighter dark for toast */
+            color: #f0f0f0;
         }
 
         .toast.show {
@@ -292,7 +352,7 @@
             max-width: 400px;
             text-align: center;
             transform: scale(0.95);
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, background-color 0.3s ease;
         }
         .modal-overlay.show .modal-content {
             transform: scale(1);
@@ -303,12 +363,14 @@
             font-size: 18px;
             font-weight: 600;
             color: var(--text-color);
+            transition: color 0.3s ease;
         }
         .modal-content p {
             margin-bottom: 24px;
             font-size: 16px;
             color: var(--secondary-text-color);
             line-height: 1.5;
+            transition: color 0.3s ease;
         }
         .modal-actions {
             display: flex;
@@ -320,50 +382,63 @@
             padding: 10px 20px;
         }
 
-        /* Confetti Styles */
         .confetti-particle {
             position: fixed;
             pointer-events: none;
             opacity: 0;
-            z-index: 1500; /* Above most content, below modals */
+            z-index: 1500;
             animation: fall linear forwards;
         }
 
         @keyframes fall {
-            0% {
-                transform: translateY(0) rotateZ(0deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(calc(100vh + 30px)) rotateZ(720deg); /* Fall past viewport bottom */
-                opacity: 0;
-            }
+            0% { transform: translateY(0) rotateZ(0deg); opacity: 1; }
+            100% { transform: translateY(calc(100vh + 30px)) rotateZ(720deg); opacity: 0; }
+        }
+
+        /* View Transition Animations */
+        .view {
+            /* display: block; by default if visible */
+            animation-duration: 0.3s;
+            animation-timing-function: ease-in-out;
+            animation-fill-mode: forwards; /* Keep final state of animation */
+        }
+        .fade-in {
+            animation-name: fadeInAnimation;
+            opacity: 0; /* Start transparent */
+        }
+        .fade-out {
+            animation-name: fadeOutAnimation;
+            opacity: 1; /* Start opaque */
+        }
+
+        @keyframes fadeInAnimation {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOutAnimation {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-10px); }
         }
 
 
         @media (max-width: 400px) {
-            .card {
-                border-radius: 10px;
-            }
-            .btn {
-                padding: 10px;
-            }
-            .modal-actions {
-                flex-direction: column-reverse;
-            }
-            .modal-actions .btn {
-                width: 100%;
-            }
+            .card { border-radius: 10px; }
+            .btn { padding: 10px; }
+            .modal-actions { flex-direction: column-reverse; }
+            .modal-actions .btn { width: 100%; }
+            .header { padding-left: 8px; padding-right: 8px; } /* Adjust header padding for smaller screens */
+            .theme-switcher { padding: 5px 8px; font-size: 11px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header" id="appHeader">
-            Trening Tracker
+            <span class="header-title">Trening Tracker</span>
+            <button id="themeSwitcher" class="theme-switcher" aria-label="Przełącz motyw">Switch</button>
         </div>
 
-        <div id="uploadSection" class="card">
+        <div id="uploadSection" class="card view"> <!-- Added .view -->
             <div class="card-header">Wczytaj plan treningowy</div>
             <div class="card-content">
                 <div class="upload-container">
@@ -377,18 +452,15 @@
             </div>
         </div>
 
-        <div id="mainContent" style="display: none;">
+        <div id="mainContent" class="view" style="display: none;"> <!-- Added .view -->
             <div class="days-progress" id="daysProgress"></div>
-
             <div class="card">
                 <div class="card-header">
                     <span>Dzień <span id="currentDay">1</span></span>
                     <span id="dayProgress">0/3</span>
                 </div>
                 <div class="card-content">
-                    <ul class="exercise-list" id="exerciseList">
-                        <!-- Exercises will be dynamically added here -->
-                    </ul>
+                    <ul class="exercise-list" id="exerciseList"></ul>
                     <div class="action-buttons">
                         <button class="btn btn-outline danger" id="resetButton">Reset</button>
                         <button class="btn btn-outline" id="uploadNewButton">Nowy plan CSV</button>
@@ -413,65 +485,73 @@
     </div>
 
     <script>
-        // Main state object
         const state = {
             workoutPlan: [],
             currentDay: 1,
             completedDays: [],
             completedExercises: {},
-            confettiShownForDays: [] // New: Track days where confetti was shown
+            confettiShownForDays: [],
+            currentTheme: 'light' // New: 'light' or 'dark'
         };
 
-        // DOM Elements
-        const appHeader = document.getElementById('appHeader'); 
-        const uploadSection = document.getElementById('uploadSection');
-        const mainContent = document.getElementById('mainContent');
-        const fileInput = document.getElementById('fileInput');
-        const fileName = document.getElementById('fileName');
-        const uploadButton = document.getElementById('uploadButton');
-        const currentDayElement = document.getElementById('currentDay');
-        const dayProgressElement = document.getElementById('dayProgress');
-        const exerciseList = document.getElementById('exerciseList');
-        const daysProgress = document.getElementById('daysProgress');
-        const nextDayButton = document.getElementById('nextDayButton');
-        const resetButton = document.getElementById('resetButton');
-        const toast = document.getElementById('toast');
-
-        const customModal = document.getElementById('customModal');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalMessage = document.getElementById('modalMessage');
-        const modalConfirmButton = document.getElementById('modalConfirmButton');
-        const modalCancelButton = document.getElementById('modalCancelButton');
+        const DOM = {
+            body: document.body,
+            appHeader: document.getElementById('appHeader'),
+            themeSwitcher: document.getElementById('themeSwitcher'),
+            uploadSection: document.getElementById('uploadSection'),
+            mainContent: document.getElementById('mainContent'),
+            fileInput: document.getElementById('fileInput'),
+            fileName: document.getElementById('fileName'),
+            uploadButton: document.getElementById('uploadButton'),
+            currentDayElement: document.getElementById('currentDay'),
+            dayProgressElement: document.getElementById('dayProgress'),
+            exerciseList: document.getElementById('exerciseList'),
+            daysProgress: document.getElementById('daysProgress'),
+            nextDayButton: document.getElementById('nextDayButton'),
+            resetButton: document.getElementById('resetButton'),
+            uploadNewButton: document.getElementById('uploadNewButton'),
+            toast: document.getElementById('toast'),
+            customModal: document.getElementById('customModal'),
+            modalTitle: document.getElementById('modalTitle'),
+            modalMessage: document.getElementById('modalMessage'),
+            modalConfirmButton: document.getElementById('modalConfirmButton'),
+            modalCancelButton: document.getElementById('modalCancelButton'),
+        };
         let currentModalConfirmCallback = null;
+        const ANIMATION_DURATION = 300; // ms, must match CSS
 
-        document.getElementById('fileInputButton').addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', handleFileSelection);
-        uploadButton.addEventListener('click', handleFileUpload);
-        resetButton.addEventListener('click', resetProgress);
-        nextDayButton.addEventListener('click', moveToNextDay);
-        document.getElementById('uploadNewButton').addEventListener('click', showUploadSection);
+        // Event Listeners
+        DOM.themeSwitcher.addEventListener('click', toggleTheme);
+        document.getElementById('fileInputButton').addEventListener('click', () => DOM.fileInput.click());
+        DOM.fileInput.addEventListener('change', handleFileSelection);
+        DOM.uploadButton.addEventListener('click', handleFileUpload);
+        DOM.resetButton.addEventListener('click', resetProgress);
+        DOM.nextDayButton.addEventListener('click', moveToNextDay);
+        DOM.uploadNewButton.addEventListener('click', () => showUploadSectionWithAnimation());
 
-        window.addEventListener('scroll', () => {
-            appHeader.classList.toggle('scrolled', window.scrollY > 0);
-        });
-
-        modalConfirmButton.addEventListener('click', () => {
+        window.addEventListener('scroll', () => DOM.appHeader.classList.toggle('scrolled', window.scrollY > 0));
+        DOM.modalConfirmButton.addEventListener('click', () => {
             if (currentModalConfirmCallback) currentModalConfirmCallback();
             hideCustomConfirm();
         });
-        modalCancelButton.addEventListener('click', hideCustomConfirm);
-        customModal.addEventListener('click', (e) => e.target === customModal && hideCustomConfirm());
-        window.addEventListener('keydown', (e) => e.key === 'Escape' && customModal.classList.contains('show') && hideCustomConfirm());
+        DOM.modalCancelButton.addEventListener('click', hideCustomConfirm);
+        DOM.customModal.addEventListener('click', (e) => e.target === DOM.customModal && hideCustomConfirm());
+        window.addEventListener('keydown', (e) => e.key === 'Escape' && DOM.customModal.classList.contains('show') && hideCustomConfirm());
 
         init();
 
         function init() {
             loadStateFromLocalStorage();
+            loadThemePreference(); // Load and apply theme
             if (state.workoutPlan.length > 0) {
-                showMainContent();
+                DOM.uploadSection.style.display = 'none'; // Hide without animation on init
+                DOM.mainContent.style.display = 'block';   // Show without animation on init
                 renderWorkoutPlan();
+            } else {
+                DOM.mainContent.style.display = 'none';
+                DOM.uploadSection.style.display = 'block';
             }
-            appHeader.classList.toggle('scrolled', window.scrollY > 0);
+            DOM.appHeader.classList.toggle('scrolled', window.scrollY > 0);
         }
 
         function loadStateFromLocalStorage() {
@@ -479,56 +559,113 @@
             if (savedState) {
                 try {
                     const parsedState = JSON.parse(savedState);
-                    // Ensure new state properties are initialized if not in saved state
-                    const defaultState = { confettiShownForDays: [] };
+                    const defaultState = { confettiShownForDays: [], currentTheme: 'light' };
                     Object.assign(state, defaultState, parsedState);
                 } catch (e) {
                     console.error('Failed to parse saved state:', e);
                     localStorage.removeItem('workoutTrackerState'); 
-                    state.confettiShownForDays = []; // Initialize on fresh start after error
+                    Object.assign(state, { confettiShownForDays: [], currentTheme: 'light' });
                 }
             } else {
-                 state.confettiShownForDays = []; // Initialize on first ever run
+                 Object.assign(state, { confettiShownForDays: [], currentTheme: 'light' });
             }
         }
-
         function saveStateToLocalStorage() {
             localStorage.setItem('workoutTrackerState', JSON.stringify(state));
         }
 
-        function showCustomConfirm(title, message, onConfirm) {
-            modalTitle.textContent = title;
-            modalMessage.textContent = message;
-            currentModalConfirmCallback = onConfirm;
-            customModal.classList.add('show');
-            modalConfirmButton.focus();
+        // Theme Functions
+        function loadThemePreference() {
+            const savedTheme = localStorage.getItem('themePreference');
+            if (savedTheme) {
+                state.currentTheme = savedTheme;
+            }
+            applyTheme();
+        }
+        function saveThemePreference() {
+            localStorage.setItem('themePreference', state.currentTheme);
+        }
+        function applyTheme() {
+            DOM.body.classList.toggle('dark-theme', state.currentTheme === 'dark');
+            DOM.themeSwitcher.textContent = state.currentTheme === 'dark' ? 'Jasny' : 'Ciemny';
+        }
+        function toggleTheme() {
+            state.currentTheme = state.currentTheme === 'light' ? 'dark' : 'light';
+            applyTheme();
+            saveThemePreference();
+            saveStateToLocalStorage(); // Save theme choice with other app state
         }
 
+        // View Transition Functions
+        function showMainContentWithAnimation() {
+            if (DOM.mainContent.style.display === 'block') return;
+
+            DOM.uploadSection.classList.remove('fade-in');
+            DOM.uploadSection.classList.add('fade-out');
+
+            setTimeout(() => {
+                DOM.uploadSection.style.display = 'none';
+                DOM.uploadSection.classList.remove('fade-out');
+                
+                DOM.mainContent.style.display = 'block';
+                DOM.mainContent.classList.add('fade-in');
+                requestAnimationFrame(() => { // Ensure fade-in class is applied before removing opacity
+                    // No need to remove class if animation-fill-mode: forwards is used
+                });
+            }, ANIMATION_DURATION);
+        }
+
+        function showUploadSectionWithAnimation() {
+            if (DOM.uploadSection.style.display === 'block') return;
+            
+            DOM.mainContent.classList.remove('fade-in');
+            DOM.mainContent.classList.add('fade-out');
+
+            setTimeout(() => {
+                DOM.mainContent.style.display = 'none';
+                DOM.mainContent.classList.remove('fade-out');
+
+                DOM.uploadSection.style.display = 'block';
+                DOM.uploadSection.classList.add('fade-in');
+                requestAnimationFrame(() => {
+                    // No need to remove class
+                });
+                DOM.fileName.textContent = '';
+                DOM.uploadButton.disabled = true;
+                DOM.fileInput.value = null;
+            }, ANIMATION_DURATION);
+        }
+
+
+        function showCustomConfirm(title, message, onConfirm) {
+            DOM.modalTitle.textContent = title;
+            DOM.modalMessage.textContent = message;
+            currentModalConfirmCallback = onConfirm;
+            DOM.customModal.classList.add('show');
+            DOM.modalConfirmButton.focus();
+        }
         function hideCustomConfirm() {
-            customModal.classList.remove('show');
+            DOM.customModal.classList.remove('show');
             currentModalConfirmCallback = null;
         }
 
         function handleFileSelection(event) {
             const file = event.target.files[0];
-            fileName.textContent = file ? file.name : '';
-            uploadButton.disabled = !file;
+            DOM.fileName.textContent = file ? file.name : '';
+            DOM.uploadButton.disabled = !file;
         }
 
         function handleFileUpload() {
-            const file = fileInput.files[0];
-            if (!file) {
-                showToast('Wybierz plik CSV');
-                return;
-            }
+            const file = DOM.fileInput.files[0];
+            if (!file) { showToast('Wybierz plik CSV'); return; }
             const reader = new FileReader();
             reader.onload = (e) => parseCSV(e.target.result);
             reader.onerror = () => showToast('Błąd podczas odczytu pliku.');
             reader.onloadend = () => {
-                fileInput.value = null; 
-                if (uploadSection.style.display !== 'none') {
-                    fileName.textContent = '';
-                    uploadButton.disabled = true;
+                DOM.fileInput.value = null; 
+                if (DOM.uploadSection.style.display !== 'none') {
+                    DOM.fileName.textContent = '';
+                    DOM.uploadButton.disabled = true;
                 }
             };
             reader.readAsText(file);
@@ -536,6 +673,7 @@
 
         function parseCSV(content) {
             try {
+                // ... (CSV parsing logic - unchanged, assuming it's fine)
                 const lines = content.split('\n').map(l => l.trim()).filter(Boolean);
                 if (lines.length < 2) throw new Error('Plik CSV jest pusty lub zawiera tylko nagłówki.');
                 
@@ -575,13 +713,15 @@
                 if (newWorkoutPlan.length === 0) throw new Error('Brak danych treningowych w pliku CSV.');
 
                 state.workoutPlan = newWorkoutPlan;
-                state.confettiShownForDays = []; // Reset confetti on new plan
+                state.confettiShownForDays = [];
                 resetProgressWithoutConfirmation(); 
                 state.currentDay = state.workoutPlan[0].day; 
-                showMainContent();
+                
+                showMainContentWithAnimation(); // Use animated transition
                 renderWorkoutPlan();
                 saveStateToLocalStorage();
                 showToast('Plan treningowy wczytany!');
+
             } catch (e) {
                 console.error('Error parsing CSV:', e);
                 showToast(e.message || 'Błąd podczas przetwarzania pliku CSV.');
@@ -593,19 +733,6 @@
             return required.every(h => headers.includes(h));
         }
 
-        function showMainContent() {
-            uploadSection.style.display = 'none';
-            mainContent.style.display = 'block';
-        }
-
-        function showUploadSection() {
-            uploadSection.style.display = 'block';
-            mainContent.style.display = 'none';
-            fileName.textContent = '';
-            uploadButton.disabled = true;
-            fileInput.value = null; 
-        }
-
         function renderWorkoutPlan() {
             renderDaysProgress();
             renderCurrentDayExercises();
@@ -613,7 +740,7 @@
         }
 
         function renderDaysProgress() {
-            daysProgress.innerHTML = '';
+            DOM.daysProgress.innerHTML = '';
             state.workoutPlan.forEach(dayPlan => { 
                 const dayNumber = dayPlan.day;
                 const dayEl = document.createElement('div');
@@ -628,13 +755,13 @@
                         saveStateToLocalStorage();
                     }
                 });
-                daysProgress.appendChild(dayEl);
+                DOM.daysProgress.appendChild(dayEl);
             });
         }
 
         function renderCurrentDayExercises() {
-            exerciseList.innerHTML = '';
-            currentDayElement.textContent = state.currentDay;
+            DOM.exerciseList.innerHTML = '';
+            DOM.currentDayElement.textContent = state.currentDay;
             const currentDayPlan = state.workoutPlan.find(d => d.day === state.currentDay);
 
             if (!currentDayPlan) {
@@ -642,7 +769,7 @@
                     state.currentDay = state.workoutPlan[0].day; 
                     saveStateToLocalStorage();
                     renderWorkoutPlan(); 
-                } else showUploadSection();
+                } else showUploadSectionWithAnimation(); // Use animated transition
                 return;
             }
             
@@ -666,7 +793,7 @@
                             </button>
                         `}
                     </div>`;
-                exerciseList.appendChild(li);
+                DOM.exerciseList.appendChild(li);
 
                 const button = li.querySelector(`#btn-${ex.id}`);
                 if (ex.type === 'timer' && !isDone) {
@@ -740,10 +867,7 @@
                 const timerEl = document.getElementById(`timer-${exerciseId}`);
                 if (timerEl) timerEl.textContent = formatTime(0);
             }
-            
             updateDayProgress();
-
-            // Confetti logic
             const currentDayPlan = state.workoutPlan.find(d => d.day === state.currentDay);
             if (currentDayPlan) {
                 const totalEx = currentDayPlan.exercises.length;
@@ -765,8 +889,8 @@
             if (!currentDayPlan) return;
             const totalEx = currentDayPlan.exercises.length;
             const completedCount = state.completedExercises[state.currentDay]?.length || 0;
-            dayProgressElement.textContent = `${completedCount}/${totalEx}`;
-            nextDayButton.disabled = totalEx === 0 || completedCount < totalEx;
+            DOM.dayProgressElement.textContent = `${completedCount}/${totalEx}`;
+            DOM.nextDayButton.disabled = totalEx === 0 || completedCount < totalEx;
         }
 
         function moveToNextDay() {
@@ -789,62 +913,48 @@
         }
 
         function resetProgress() {
-            showCustomConfirm(
-                'Reset Postępu',
-                'Czy na pewno chcesz zresetować postęp treningowy?',
-                () => {
-                    resetProgressWithoutConfirmation();
-                    showToast('Postęp zresetowany.');
-                }
-            );
+            showCustomConfirm('Reset Postępu', 'Czy na pewno chcesz zresetować postęp treningowy?', () => {
+                resetProgressWithoutConfirmation();
+                showToast('Postęp zresetowany.');
+            });
         }
 
         function resetProgressWithoutConfirmation() {
             state.completedDays = [];
             state.completedExercises = {};
-            state.confettiShownForDays = []; // Reset confetti state
+            state.confettiShownForDays = [];
             state.currentDay = state.workoutPlan.length > 0 ? state.workoutPlan[0].day : 1;
             document.querySelectorAll('button[data-timerid]').forEach(b => clearInterval(parseInt(b.dataset.timerId)));
-            if (state.workoutPlan.length > 0 && mainContent.style.display !== 'none') {
+            if (state.workoutPlan.length > 0 && DOM.mainContent.style.display !== 'none') {
                  renderWorkoutPlan();
             }
             saveStateToLocalStorage();
         }
 
         function showToast(message) {
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
+            DOM.toast.textContent = message;
+            DOM.toast.classList.add('show');
+            setTimeout(() => DOM.toast.classList.remove('show'), 3000);
         }
 
-        // Confetti Function
         function showConfetti() {
             const confettiCount = 60;
-            const colors = ['var(--primary-color)', 'var(--success-color)', '#ffcc00', '#ff3b30', '#5856d6', '#ff9500'];
-
+            const colors = ['var(--primary-color)', 'var(--success-color)', '#ffcc00', 'var(--danger-color)', '#5856d6', '#ff9500'];
             for (let i = 0; i < confettiCount; i++) {
                 const particle = document.createElement('div');
                 particle.classList.add('confetti-particle');
-                
-                const size = Math.random() * 8 + 4; // 4px to 12px
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
-                particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                particle.style.left = `${Math.random() * 100}vw`;
-                particle.style.top = `-${size + Math.random() * 20}px`; // Start above viewport
-                
-                // Vary animation duration and delay
-                particle.style.animationDuration = `${Math.random() * 2 + 2.5}s`; // 2.5-4.5 seconds
-                particle.style.animationDelay = `${Math.random() * 1}s`; // Stagger start up to 1s
-
-                document.body.appendChild(particle);
-
-                particle.addEventListener('animationend', () => {
-                    particle.remove();
+                const size = Math.random() * 8 + 4;
+                Object.assign(particle.style, {
+                    width: `${size}px`, height: `${size}px`,
+                    backgroundColor: colors[Math.floor(Math.random() * colors.length)],
+                    left: `${Math.random() * 100}vw`, top: `-${size + Math.random() * 20}px`,
+                    animationDuration: `${Math.random() * 2 + 2.5}s`,
+                    animationDelay: `${Math.random() * 1}s`
                 });
+                DOM.body.appendChild(particle);
+                particle.addEventListener('animationend', () => particle.remove());
             }
         }
-
     </script>
 </body>
 </html>
