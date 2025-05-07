@@ -28,11 +28,12 @@
             background-color: var(--main-bg-color);
             color: var(--text-color);
             font-size: 16px;
-            line-height: 1.6; /* Lepsza czytelność */
+            line-height: 1.6;
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow-x: hidden; /* Prevent horizontal scroll if confetti strays */
         }
 
         .container {
@@ -218,7 +219,7 @@
             font-weight: 600;
             font-size: 14px;
             transition: background-color 0.3s, color 0.3s, transform 0.1s, filter 0.1s;
-            cursor: pointer; /* Clickable by default now */
+            cursor: pointer;
         }
 
         .day-indicator.active {
@@ -254,7 +255,7 @@
             opacity: 0;
             transition: opacity 0.3s ease-in-out;
             pointer-events: none;
-            z-index: 1000;
+            z-index: 1000; /* Below confetti and modal */
             text-align: center;
             max-width: 80%;
         }
@@ -263,7 +264,6 @@
             opacity: 1;
         }
         
-        /* Custom Modal Styles */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -313,11 +313,31 @@
         .modal-actions {
             display: flex;
             gap: 12px;
-            justify-content: flex-end; /* Align buttons to the right */
+            justify-content: flex-end;
         }
         .modal-actions .btn {
-            width: auto; /* Override full width for modal buttons */
+            width: auto;
             padding: 10px 20px;
+        }
+
+        /* Confetti Styles */
+        .confetti-particle {
+            position: fixed;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 1500; /* Above most content, below modals */
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(0) rotateZ(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(calc(100vh + 30px)) rotateZ(720deg); /* Fall past viewport bottom */
+                opacity: 0;
+            }
         }
 
 
@@ -329,7 +349,7 @@
                 padding: 10px;
             }
             .modal-actions {
-                flex-direction: column-reverse; /* Stack buttons on small screens */
+                flex-direction: column-reverse;
             }
             .modal-actions .btn {
                 width: 100%;
@@ -387,7 +407,7 @@
             <p id="modalMessage">Czy na pewno chcesz to zrobić?</p>
             <div class="modal-actions">
                 <button id="modalCancelButton" class="btn btn-outline">Anuluj</button>
-                <button id="modalConfirmButton" class="btn btn-danger">Potwierdź</button> <!-- Changed to btn-danger for reset confirm -->
+                <button id="modalConfirmButton" class="btn btn-danger">Potwierdź</button>
             </div>
         </div>
     </div>
@@ -398,7 +418,8 @@
             workoutPlan: [],
             currentDay: 1,
             completedDays: [],
-            completedExercises: {}
+            completedExercises: {},
+            confettiShownForDays: [] // New: Track days where confetti was shown
         };
 
         // DOM Elements
@@ -416,7 +437,6 @@
         const resetButton = document.getElementById('resetButton');
         const toast = document.getElementById('toast');
 
-        // Custom Modal DOM Elements
         const customModal = document.getElementById('customModal');
         const modalTitle = document.getElementById('modalTitle');
         const modalMessage = document.getElementById('modalMessage');
@@ -424,48 +444,24 @@
         const modalCancelButton = document.getElementById('modalCancelButton');
         let currentModalConfirmCallback = null;
 
-
-        // Event Listeners
-        document.getElementById('fileInputButton').addEventListener('click', () => {
-            fileInput.click();
-        });
-
+        document.getElementById('fileInputButton').addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', handleFileSelection);
         uploadButton.addEventListener('click', handleFileUpload);
         resetButton.addEventListener('click', resetProgress);
         nextDayButton.addEventListener('click', moveToNextDay);
-        
-        document.getElementById('uploadNewButton').addEventListener('click', () => {
-            showUploadSection();
-        });
+        document.getElementById('uploadNewButton').addEventListener('click', showUploadSection);
 
         window.addEventListener('scroll', () => {
-            if (window.scrollY > 0) {
-                appHeader.classList.add('scrolled');
-            } else {
-                appHeader.classList.remove('scrolled');
-            }
+            appHeader.classList.toggle('scrolled', window.scrollY > 0);
         });
 
-        // Modal Listeners
         modalConfirmButton.addEventListener('click', () => {
-            if (currentModalConfirmCallback) {
-                currentModalConfirmCallback();
-            }
+            if (currentModalConfirmCallback) currentModalConfirmCallback();
             hideCustomConfirm();
         });
         modalCancelButton.addEventListener('click', hideCustomConfirm);
-        customModal.addEventListener('click', (event) => {
-            if (event.target === customModal) { // Click on overlay
-                hideCustomConfirm();
-            }
-        });
-        window.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape' && customModal.classList.contains('show')) {
-                hideCustomConfirm();
-            }
-        });
-
+        customModal.addEventListener('click', (e) => e.target === customModal && hideCustomConfirm());
+        window.addEventListener('keydown', (e) => e.key === 'Escape' && customModal.classList.contains('show') && hideCustomConfirm());
 
         init();
 
@@ -475,11 +471,7 @@
                 showMainContent();
                 renderWorkoutPlan();
             }
-            if (window.scrollY > 0) {
-                appHeader.classList.add('scrolled');
-            } else {
-                appHeader.classList.remove('scrolled');
-            }
+            appHeader.classList.toggle('scrolled', window.scrollY > 0);
         }
 
         function loadStateFromLocalStorage() {
@@ -487,11 +479,16 @@
             if (savedState) {
                 try {
                     const parsedState = JSON.parse(savedState);
-                    Object.assign(state, parsedState);
+                    // Ensure new state properties are initialized if not in saved state
+                    const defaultState = { confettiShownForDays: [] };
+                    Object.assign(state, defaultState, parsedState);
                 } catch (e) {
                     console.error('Failed to parse saved state:', e);
                     localStorage.removeItem('workoutTrackerState'); 
+                    state.confettiShownForDays = []; // Initialize on fresh start after error
                 }
+            } else {
+                 state.confettiShownForDays = []; // Initialize on first ever run
             }
         }
 
@@ -499,13 +496,12 @@
             localStorage.setItem('workoutTrackerState', JSON.stringify(state));
         }
 
-        // Custom Modal Functions
         function showCustomConfirm(title, message, onConfirm) {
             modalTitle.textContent = title;
             modalMessage.textContent = message;
             currentModalConfirmCallback = onConfirm;
             customModal.classList.add('show');
-            modalConfirmButton.focus(); // Focus on confirm button
+            modalConfirmButton.focus();
         }
 
         function hideCustomConfirm() {
@@ -513,16 +509,10 @@
             currentModalConfirmCallback = null;
         }
 
-
         function handleFileSelection(event) {
             const file = event.target.files[0];
-            if (file) {
-                fileName.textContent = file.name;
-                uploadButton.disabled = false;
-            } else {
-                fileName.textContent = '';
-                uploadButton.disabled = true;
-            }
+            fileName.textContent = file ? file.name : '';
+            uploadButton.disabled = !file;
         }
 
         function handleFileUpload() {
@@ -531,19 +521,12 @@
                 showToast('Wybierz plik CSV');
                 return;
             }
-
             const reader = new FileReader();
-            reader.onload = function(e) {
-                const content = e.target.result;
-                parseCSV(content);
-            };
-            reader.onerror = function() {
-                showToast('Błąd podczas odczytu pliku.');
-            };
-            reader.onloadend = function() {
+            reader.onload = (e) => parseCSV(e.target.result);
+            reader.onerror = () => showToast('Błąd podczas odczytu pliku.');
+            reader.onloadend = () => {
                 fileInput.value = null; 
-                const isUploadSectionVisible = uploadSection.style.display !== 'none';
-                if (isUploadSectionVisible) {
+                if (uploadSection.style.display !== 'none') {
                     fileName.textContent = '';
                     uploadButton.disabled = true;
                 }
@@ -553,83 +536,61 @@
 
         function parseCSV(content) {
             try {
-                const lines = content.split('\n').map(line => line.trim()).filter(line => line);
-                if (lines.length < 2) {
-                    showToast('Plik CSV jest pusty lub zawiera tylko nagłówki.');
-                    return;
-                }
-                const headers = lines[0].split(',').map(h => h.trim());
+                const lines = content.split('\n').map(l => l.trim()).filter(Boolean);
+                if (lines.length < 2) throw new Error('Plik CSV jest pusty lub zawiera tylko nagłówki.');
                 
-                if (!validateHeaders(headers)) {
-                    showToast('Nieprawidłowy format pliku CSV. Wymagane nagłówki: Dzień,Pompki,Plank (sekundy),Rower (minuty)');
-                    return;
-                }
+                const headers = lines[0].split(',').map(h => h.trim());
+                if (!validateHeaders(headers)) throw new Error('Nieprawidłowy format pliku CSV. Sprawdź nagłówki.');
 
                 const newWorkoutPlan = [];
                 for (let i = 1; i < lines.length; i++) {
                     const values = lines[i].split(',').map(v => v.trim());
-                    if (values.length !== headers.length) {
-                        showToast(`Błąd w linii ${i + 1}: Niewłaściwa liczba kolumn.`);
-                        return;
-                    }
+                    if (values.length !== headers.length) throw new Error(`Błąd w linii ${i + 1}: Niewłaściwa liczba kolumn.`);
+                    
+                    const dayData = {
+                        day: parseInt(values[0], 10),
+                        pushups: parseInt(values[1], 10),
+                        plank: parseInt(values[2], 10),
+                        bike: parseInt(values[3], 10)
+                    };
 
-                    const day = parseInt(values[0], 10);
-                    const pushups = parseInt(values[1], 10);
-                    const plankSeconds = parseInt(values[2], 10);
-                    const bikeMinutes = parseInt(values[3], 10);
-
-                    if (isNaN(day) || isNaN(pushups) || isNaN(plankSeconds) || isNaN(bikeMinutes)) {
-                        showToast(`Błąd w linii ${i + 1}: Wartości muszą być liczbami.`);
-                        return;
+                    if (Object.values(dayData).some(isNaN)) throw new Error(`Błąd w linii ${i + 1}: Wartości muszą być liczbami.`);
+                    if (dayData.day <= 0 || dayData.pushups < 0 || dayData.plank < 0 || dayData.bike < 0) {
+                        throw new Error(`Błąd w linii ${i + 1}: Wartości nie mogą być ujemne (dzień > 0).`);
                     }
-                    if (day <= 0 || pushups < 0 || plankSeconds < 0 || bikeMinutes < 0) {
-                        showToast(`Błąd w linii ${i + 1}: Wartości nie mogą być ujemne (dzień musi być > 0).`);
-                        return;
-                    }
-
                     newWorkoutPlan.push({
-                        day,
+                        day: dayData.day,
                         exercises: [
-                            { id: 'pushups', name: 'Pompki', value: pushups, unit: '', type: 'count' },
-                            { id: 'plank', name: 'Plank', value: plankSeconds, unit: 'sekund', type: 'timer' },
-                            { id: 'bike', name: 'Rower stacjonarny', value: bikeMinutes, unit: 'minut', type: 'count' }
+                            { id: 'pushups', name: 'Pompki', value: dayData.pushups, unit: '', type: 'count' },
+                            { id: 'plank', name: 'Plank', value: dayData.plank, unit: 'sekund', type: 'timer' },
+                            { id: 'bike', name: 'Rower stacjonarny', value: dayData.bike, unit: 'minut', type: 'count' }
                         ]
                     });
                 }
                 
                 newWorkoutPlan.sort((a, b) => a.day - b.day);
-                const dayNumbers = newWorkoutPlan.map(p => p.day);
-                if (new Set(dayNumbers).size !== dayNumbers.length) {
-                    showToast('Plik CSV zawiera zduplikowane numery dni.');
-                    return;
+                if (new Set(newWorkoutPlan.map(p => p.day)).size !== newWorkoutPlan.length) {
+                    throw new Error('Plik CSV zawiera zduplikowane numery dni.');
                 }
+                if (newWorkoutPlan.length === 0) throw new Error('Brak danych treningowych w pliku CSV.');
 
                 state.workoutPlan = newWorkoutPlan;
-
-                if (state.workoutPlan.length === 0) {
-                    showToast('Brak danych treningowych w pliku CSV po przetworzeniu.');
-                    return;
-                }
-
+                state.confettiShownForDays = []; // Reset confetti on new plan
                 resetProgressWithoutConfirmation(); 
                 state.currentDay = state.workoutPlan[0].day; 
                 showMainContent();
                 renderWorkoutPlan();
                 saveStateToLocalStorage();
                 showToast('Plan treningowy wczytany!');
-                fileName.textContent = ''; 
-                uploadButton.disabled = true;
-
             } catch (e) {
                 console.error('Error parsing CSV:', e);
-                showToast('Błąd podczas przetwarzania pliku CSV. Sprawdź konsolę po więcej informacji.');
+                showToast(e.message || 'Błąd podczas przetwarzania pliku CSV.');
             }
         }
 
         function validateHeaders(headers) {
-            const requiredHeaders = ['Dzień', 'Pompki', 'Plank (sekundy)', 'Rower (minuty)'];
-            const trimmedFileHeaders = headers.map(h => h.trim());
-            return requiredHeaders.every(header => trimmedFileHeaders.includes(header));
+            const required = ['Dzień', 'Pompki', 'Plank (sekundy)', 'Rower (minuty)'];
+            return required.every(h => headers.includes(h));
         }
 
         function showMainContent() {
@@ -655,157 +616,115 @@
             daysProgress.innerHTML = '';
             state.workoutPlan.forEach(dayPlan => { 
                 const dayNumber = dayPlan.day;
-                const dayElement = document.createElement('div');
-                dayElement.className = 'day-indicator';
-                
-                if (dayNumber === state.currentDay) {
-                    dayElement.classList.add('active');
-                }
-                if (state.completedDays.includes(dayNumber)) {
-                    dayElement.classList.add('completed');
-                }
-                dayElement.textContent = dayNumber;
-                dayElement.addEventListener('click', () => {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'day-indicator';
+                dayEl.classList.toggle('active', dayNumber === state.currentDay);
+                dayEl.classList.toggle('completed', state.completedDays.includes(dayNumber));
+                dayEl.textContent = dayNumber;
+                dayEl.addEventListener('click', () => {
                     if (state.currentDay !== dayNumber) {
                         state.currentDay = dayNumber;
-                        renderWorkoutPlan(); // Re-renders everything for the new current day
+                        renderWorkoutPlan(); 
                         saveStateToLocalStorage();
                     }
                 });
-                daysProgress.appendChild(dayElement);
+                daysProgress.appendChild(dayEl);
             });
         }
 
         function renderCurrentDayExercises() {
             exerciseList.innerHTML = '';
             currentDayElement.textContent = state.currentDay;
-            
-            const currentDayPlan = state.workoutPlan.find(day => day.day === state.currentDay);
+            const currentDayPlan = state.workoutPlan.find(d => d.day === state.currentDay);
+
             if (!currentDayPlan) {
-                console.error(`No plan found for day ${state.currentDay}`);
                 if (state.workoutPlan.length > 0) {
                     state.currentDay = state.workoutPlan[0].day; 
                     saveStateToLocalStorage();
                     renderWorkoutPlan(); 
-                } else {
-                    showUploadSection(); 
-                }
+                } else showUploadSection();
                 return;
             }
             
-            currentDayPlan.exercises.forEach(exercise => {
+            currentDayPlan.exercises.forEach(ex => {
                 const li = document.createElement('li');
                 li.className = 'exercise-item';
+                const isDone = isExerciseCompleted(state.currentDay, ex.id);
                 
-                const title = document.createElement('div');
-                title.className = 'exercise-title';
-                title.textContent = exercise.name;
-                
-                const value = document.createElement('div');
-                value.className = 'exercise-value';
-                value.textContent = `${exercise.value} ${exercise.unit}`;
-                
-                const actionContainer = document.createElement('div');
-                const isCompleted = isExerciseCompleted(state.currentDay, exercise.id);
-                
-                if (exercise.type === 'timer') {
-                    const timerElement = document.createElement('div');
-                    timerElement.className = 'timer';
-                    timerElement.id = `timer-${exercise.id}`;
-                    
-                    const button = document.createElement('button');
-                    button.className = 'btn';
-                    button.id = `btn-${exercise.id}`;
-                    
-                    if (isCompleted) {
-                        timerElement.textContent = formatTime(0); 
-                        button.textContent = `${exercise.name} wykonane`;
-                        button.classList.add('btn-success');
-                        button.disabled = true;
-                    } else {
-                        timerElement.textContent = formatTime(exercise.value);
-                        button.textContent = 'START';
-                        button.dataset.initialSeconds = exercise.value;
-                        button.addEventListener('click', () => handleTimerAction(exercise.id, exercise.name));
-                    }
-                    actionContainer.appendChild(timerElement);
-                    actionContainer.appendChild(button);
-                } else { 
-                    const button = document.createElement('button');
-                    button.className = 'btn';
-                    button.id = `btn-${exercise.id}`;
-                    
-                    if (isCompleted) {
-                        button.textContent = `${exercise.name} wykonane`;
-                        button.classList.add('btn-success');
-                        button.disabled = true;
-                    } else {
-                        button.textContent = 'Wykonaj';
-                        button.addEventListener('click', () => completeExercise(state.currentDay, exercise.id, exercise.name));
-                    }
-                    actionContainer.appendChild(button);
-                }
-                
-                li.appendChild(title);
-                li.appendChild(value);
-                li.appendChild(actionContainer);
+                li.innerHTML = `
+                    <div class="exercise-title">${ex.name}</div>
+                    <div class="exercise-value">${ex.value} ${ex.unit}</div>
+                    <div class="action-container">
+                        ${ex.type === 'timer' ? `
+                            <div class="timer" id="timer-${ex.id}">${isDone ? formatTime(0) : formatTime(ex.value)}</div>
+                            <button class="btn ${isDone ? 'btn-success' : ''}" id="btn-${ex.id}" ${isDone ? 'disabled' : ''} data-initial-seconds="${ex.value}">
+                                ${isDone ? `${ex.name} wykonane` : 'START'}
+                            </button>
+                        ` : `
+                            <button class="btn ${isDone ? 'btn-success' : ''}" id="btn-${ex.id}" ${isDone ? 'disabled' : ''}>
+                                ${isDone ? `${ex.name} wykonane` : 'Wykonaj'}
+                            </button>
+                        `}
+                    </div>`;
                 exerciseList.appendChild(li);
+
+                const button = li.querySelector(`#btn-${ex.id}`);
+                if (ex.type === 'timer' && !isDone) {
+                    button.addEventListener('click', () => handleTimerAction(ex.id, ex.name));
+                } else if (ex.type === 'count' && !isDone) {
+                    button.addEventListener('click', () => completeExercise(state.currentDay, ex.id, ex.name));
+                }
             });
         }
 
         function handleTimerAction(exerciseId, exerciseName) {
-            const timerElement = document.getElementById(`timer-${exerciseId}`);
             const button = document.getElementById(`btn-${exerciseId}`);
-            
-            const currentState = button.dataset.timerState || 'idle';
-            const initialSeconds = parseInt(button.dataset.initialSeconds);
+            const timerEl = document.getElementById(`timer-${exerciseId}`);
+            const timerState = button.dataset.timerState || 'idle';
+            const initialSecs = parseInt(button.dataset.initialSeconds);
 
-            if (currentState === 'idle') {
-                button.dataset.remainingSeconds = initialSeconds;
+            if (timerState === 'idle') {
+                button.dataset.remainingSeconds = initialSecs;
                 button.dataset.timerState = 'running';
                 button.textContent = 'PAUZA';
-                startTicking(exerciseId, exerciseName, button, timerElement);
-            } else if (currentState === 'running') {
+                startTicking(exerciseId, exerciseName, button, timerEl);
+            } else if (timerState === 'running') {
                 clearInterval(parseInt(button.dataset.timerId));
                 button.dataset.timerState = 'paused';
                 button.textContent = 'WZNOW';
-            } else if (currentState === 'paused') {
+            } else if (timerState === 'paused') {
                 button.dataset.timerState = 'running';
                 button.textContent = 'PAUZA';
-                startTicking(exerciseId, exerciseName, button, timerElement); 
+                startTicking(exerciseId, exerciseName, button, timerEl); 
             }
         }
 
-        function startTicking(exerciseId, exerciseName, button, timerElement) {
-            let remainingSeconds = parseInt(button.dataset.remainingSeconds);
-            timerElement.textContent = formatTime(remainingSeconds);
-
-            const timerInterval = setInterval(() => {
-                remainingSeconds--;
-                button.dataset.remainingSeconds = remainingSeconds;
-                timerElement.textContent = formatTime(remainingSeconds);
-                
-                if (remainingSeconds <= 0) { 
-                    clearInterval(timerInterval);
-                    timerElement.textContent = formatTime(0);
+        function startTicking(exerciseId, exerciseName, button, timerEl) {
+            let remaining = parseInt(button.dataset.remainingSeconds);
+            timerEl.textContent = formatTime(remaining);
+            const intervalId = setInterval(() => {
+                remaining--;
+                button.dataset.remainingSeconds = remaining;
+                timerEl.textContent = formatTime(remaining);
+                if (remaining <= 0) { 
+                    clearInterval(intervalId);
+                    timerEl.textContent = formatTime(0);
                     completeExercise(state.currentDay, exerciseId, exerciseName);
                     showToast(`${exerciseName} ukończone!`);
                 }
             }, 1000);
-            button.dataset.timerId = timerInterval;
+            button.dataset.timerId = intervalId;
         }
 
-        function formatTime(seconds) {
-            if (seconds < 0) seconds = 0; 
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        function formatTime(s) {
+            s = Math.max(0, s);
+            const mins = Math.floor(s / 60).toString().padStart(2, '0');
+            const secs = (s % 60).toString().padStart(2, '0');
+            return `${mins}:${secs}`;
         }
 
         function completeExercise(day, exerciseId, exerciseName) {
-            if (!state.completedExercises[day]) {
-                state.completedExercises[day] = [];
-            }
+            state.completedExercises[day] = state.completedExercises[day] || [];
             if (!state.completedExercises[day].includes(exerciseId)) {
                 state.completedExercises[day].push(exerciseId);
             }
@@ -816,49 +735,46 @@
                 button.classList.remove('btn-outline'); 
                 button.classList.add('btn-success');
                 button.disabled = true;
-                
-                if (button.dataset.timerId) { 
-                    clearInterval(parseInt(button.dataset.timerId));
-                    delete button.dataset.timerId;
-                }
-                delete button.dataset.timerState;
-                delete button.dataset.remainingSeconds;
-                delete button.dataset.initialSeconds; 
+                if (button.dataset.timerId) clearInterval(parseInt(button.dataset.timerId));
+                ['timerId', 'timerState', 'remainingSeconds', 'initialSeconds'].forEach(d => delete button.dataset[d]);
+                const timerEl = document.getElementById(`timer-${exerciseId}`);
+                if (timerEl) timerEl.textContent = formatTime(0);
+            }
+            
+            updateDayProgress();
 
-                const timerElement = document.getElementById(`timer-${exerciseId}`);
-                if (timerElement) {
-                    timerElement.textContent = formatTime(0);
+            // Confetti logic
+            const currentDayPlan = state.workoutPlan.find(d => d.day === state.currentDay);
+            if (currentDayPlan) {
+                const totalEx = currentDayPlan.exercises.length;
+                const completedExCount = state.completedExercises[state.currentDay]?.length || 0;
+                if (totalEx > 0 && completedExCount === totalEx && !state.confettiShownForDays.includes(state.currentDay)) {
+                    showConfetti();
+                    state.confettiShownForDays.push(state.currentDay);
                 }
             }
-            updateDayProgress();
             saveStateToLocalStorage();
         }
 
         function isExerciseCompleted(day, exerciseId) {
-            return state.completedExercises[day] && state.completedExercises[day].includes(exerciseId);
+            return state.completedExercises[day]?.includes(exerciseId) || false;
         }
 
         function updateDayProgress() {
-            const currentDayPlan = state.workoutPlan.find(day => day.day === state.currentDay);
+            const currentDayPlan = state.workoutPlan.find(d => d.day === state.currentDay);
             if (!currentDayPlan) return;
-            
-            const totalExercises = currentDayPlan.exercises.length;
-            const completedCount = state.completedExercises[state.currentDay] ? state.completedExercises[state.currentDay].length : 0;
-            
-            dayProgressElement.textContent = `${completedCount}/${totalExercises}`;
-            nextDayButton.disabled = completedCount < totalExercises;
+            const totalEx = currentDayPlan.exercises.length;
+            const completedCount = state.completedExercises[state.currentDay]?.length || 0;
+            dayProgressElement.textContent = `${completedCount}/${totalEx}`;
+            nextDayButton.disabled = totalEx === 0 || completedCount < totalEx;
         }
 
         function moveToNextDay() {
-            const currentDayData = state.workoutPlan.find(p => p.day === state.currentDay);
-            if (!currentDayData) return; // Should not happen if currentDay is valid
-
             if (!state.completedDays.includes(state.currentDay)) {
                 state.completedDays.push(state.currentDay);
             }
-            
             const currentIndex = state.workoutPlan.findIndex(p => p.day === state.currentDay);
-            const currentDayForToast = state.workoutPlan[currentIndex].day;
+            const currentDayNum = state.workoutPlan[currentIndex].day;
 
             if (currentIndex === -1 || currentIndex + 1 >= state.workoutPlan.length) {
                 showToast('Gratulacje! Ukończyłeś cały plan treningowy!');
@@ -866,17 +782,16 @@
                 saveStateToLocalStorage();
                 return;
             }
-
             state.currentDay = state.workoutPlan[currentIndex + 1].day;
             renderWorkoutPlan();
             saveStateToLocalStorage();
-            showToast(`Dzień ${currentDayForToast} ukończony! Przejście do dnia ${state.currentDay}`);
+            showToast(`Dzień ${currentDayNum} ukończony! Przejście do dnia ${state.currentDay}`);
         }
 
         function resetProgress() {
             showCustomConfirm(
                 'Reset Postępu',
-                'Czy na pewno chcesz zresetować postęp treningowy? Ta akcja usunie wszystkie ukończone ćwiczenia i dni.',
+                'Czy na pewno chcesz zresetować postęp treningowy?',
                 () => {
                     resetProgressWithoutConfirmation();
                     showToast('Postęp zresetowany.');
@@ -887,18 +802,9 @@
         function resetProgressWithoutConfirmation() {
             state.completedDays = [];
             state.completedExercises = {};
-
-            if (state.workoutPlan.length > 0) {
-                 state.currentDay = state.workoutPlan[0].day; 
-            } else {
-                state.currentDay = 1; 
-            }
-           
-            const activeTimers = document.querySelectorAll('button[data-timerid]');
-            activeTimers.forEach(timerButton => {
-                if(timerButton.dataset.timerId) clearInterval(parseInt(timerButton.dataset.timerId));
-            });
-
+            state.confettiShownForDays = []; // Reset confetti state
+            state.currentDay = state.workoutPlan.length > 0 ? state.workoutPlan[0].day : 1;
+            document.querySelectorAll('button[data-timerid]').forEach(b => clearInterval(parseInt(b.dataset.timerId)));
             if (state.workoutPlan.length > 0 && mainContent.style.display !== 'none') {
                  renderWorkoutPlan();
             }
@@ -908,10 +814,37 @@
         function showToast(message) {
             toast.textContent = message;
             toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+            setTimeout(() => toast.classList.remove('show'), 3000);
         }
+
+        // Confetti Function
+        function showConfetti() {
+            const confettiCount = 60;
+            const colors = ['var(--primary-color)', 'var(--success-color)', '#ffcc00', '#ff3b30', '#5856d6', '#ff9500'];
+
+            for (let i = 0; i < confettiCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('confetti-particle');
+                
+                const size = Math.random() * 8 + 4; // 4px to 12px
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.left = `${Math.random() * 100}vw`;
+                particle.style.top = `-${size + Math.random() * 20}px`; // Start above viewport
+                
+                // Vary animation duration and delay
+                particle.style.animationDuration = `${Math.random() * 2 + 2.5}s`; // 2.5-4.5 seconds
+                particle.style.animationDelay = `${Math.random() * 1}s`; // Stagger start up to 1s
+
+                document.body.appendChild(particle);
+
+                particle.addEventListener('animationend', () => {
+                    particle.remove();
+                });
+            }
+        }
+
     </script>
 </body>
 </html>
