@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Trening</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f8f8f8;
+    }
+    .ios-card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      padding: 1.5rem;
+      margin: 1rem;
+    }
+    .disabled {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start p-4">
+  <h1 class="text-2xl font-bold mb-4">Mój Trening</h1>
+
+  <input type="file" id="csvInput" accept=".csv" class="mb-4">
+  <button id="resetBtn" class="mb-4 px-4 py-2 bg-red-500 text-white rounded">Reset postępu</button>
+
+  <div id="todoContainer" class="w-full max-w-md"></div>
+
+  <script>
+    let db, plan = [], currentDayIndex = 0, completed = {};
+
+    const initDB = async () => {
+      const SQL = await initSqlJs({ locateFile: filename => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${filename}` });
+      db = new SQL.Database();
+      db.run("CREATE TABLE IF NOT EXISTS progress (day INTEGER, task TEXT, done INTEGER)");
+    }
+
+    const saveProgress = () => {
+      db.run("DELETE FROM progress");
+      for (let key in completed) {
+        let [day, task] = key.split("|");
+        db.run("INSERT INTO progress (day, task, done) VALUES (?, ?, ?)", [day, task, completed[key] ? 1 : 0]);
+      }
+      localStorage.setItem("db", JSON.stringify(Array.from(db.export())));
+    }
+
+    const loadProgress = () => {
+      const saved = localStorage.getItem("db");
+      if (!saved) return;
+      const data = new Uint8Array(JSON.parse(saved));
+      db = new window.SQL.Database(data);
+      const rows = db.exec("SELECT * FROM progress")[0]?.values || [];
+      for (let row of rows) completed[`${row[0]}|${row[1]}`] = row[2] === 1;
+    }
+
+    const renderDay = () => {
+      const day = plan[currentDayIndex];
+      if (!day) {
+        document.getElementById("todoContainer").innerHTML = "<p class='text-center text-gray-500'>Plan ukończony 🎉</p>";
+        return;
+      }
+      const container = document.getElementById("todoContainer");
+      container.innerHTML = `
+        <div class="ios-card">
+          <h2 class="text-xl font-semibold mb-2">Dzień ${day["Dzień"]}</h2>
+          <ul class="space-y-4">
+            <li><label><input type="checkbox" ${getChecked(day, 'Pompki')} onchange="toggleCheck('Pompki')"> Pompki: ${day["Pompki"]}</label></li>
+            <li><label><input type="checkbox" ${getChecked(day, 'Rower')} onchange="toggleCheck('Rower')"> Rower: ${day["Rower (minuty)"]} min</label></li>
+            <li id="plankRow">
+              <button id="plankBtn" class="bg-blue-500 text-white px-3 py-1 rounded">START Plank (${day["Plank (sekundy)"]}s)</button>
+              <span id="plankTimer" class="ml-4"></span>
+            </li>
+          </ul>
+        </div>
+      `;
+      if (completed[`${currentDayIndex}|Plank`]) {
+        document.getElementById("plankRow").innerHTML = `<span class='text-green-600'>Plank: wykonane ✅</span>`;
+      } else {
+        document.getElementById("plankBtn").onclick = () => startPlankTimer(day["Plank (sekundy)"]);
+      }
+    }
+
+    const getChecked = (day, task) => {
+      return completed[`${currentDayIndex}|${task}`] ? "checked" : "";
+    }
+
+    const toggleCheck = (task) => {
+      completed[`${currentDayIndex}|${task}`] = !completed[`${currentDayIndex}|${task}`];
+      saveProgress();
+      checkAdvance();
+    }
+
+    const startPlankTimer = (seconds) => {
+      const btn = document.getElementById("plankBtn");
+      const timer = document.getElementById("plankTimer");
+      btn.disabled = true;
+      btn.classList.add("disabled");
+      let remaining = seconds;
+      const interval = setInterval(() => {
+        timer.textContent = `${remaining--}s`;
+        if (remaining < 0) {
+          clearInterval(interval);
+          completed[`${currentDayIndex}|Plank`] = true;
+          saveProgress();
+          renderDay();
+          checkAdvance();
+        }
+      }, 1000);
+    }
+
+    const checkAdvance = () => {
+      if (["Pompki", "Rower", "Plank"].every(task => completed[`${currentDayIndex}|${task}`])) {
+        currentDayIndex++;
+        renderDay();
+      }
+    }
+
+    document.getElementById("csvInput").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      Papa.parse(file, {
+        header: true,
+        complete: (results) => {
+          plan = results.data.filter(d => d["Dzień"]);
+          currentDayIndex = 0;
+          completed = {};
+          db.run("DELETE FROM progress");
+          localStorage.removeItem("db");
+          renderDay();
+        }
+      });
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      currentDayIndex = 0;
+      completed = {};
+      db.run("DELETE FROM progress");
+      localStorage.removeItem("db");
+      renderDay();
+    });
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      await initDB();
+      loadProgress();
+      renderDay();
+    });
+  </script>
+</body>
+</html>
