@@ -50,6 +50,11 @@
             top: 0;
             background-color: var(--main-bg-color);
             z-index: 100;
+            transition: box-shadow 0.3s ease-in-out; /* For smooth shadow transition */
+        }
+
+        .header.scrolled { /* Style for scrolled header */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .card {
@@ -108,7 +113,7 @@
             font-weight: 500;
             cursor: pointer;
             font-size: 16px;
-            transition: background-color 0.2s;
+            transition: background-color 0.2s, opacity 0.2s, transform 0.1s, filter 0.1s; /* Added transform and filter for active state */
         }
 
         .btn:disabled {
@@ -128,6 +133,27 @@
 
         .btn-danger {
             background-color: #ff3b30;
+        }
+
+        /* Active states for buttons */
+        .btn:not(:disabled):active {
+            filter: brightness(0.9);
+            transform: translateY(1px);
+        }
+
+        .btn-outline:not(:disabled):active {
+            background-color: rgba(0, 122, 255, 0.08); 
+            filter: none; 
+            transform: translateY(1px);
+        }
+        
+        .btn-danger:not(:disabled):active {
+            filter: brightness(0.9);
+            transform: translateY(1px);
+        }
+        .btn-success:not(:disabled):active {
+            filter: brightness(0.9);
+            transform: translateY(1px);
         }
 
         .timer {
@@ -165,6 +191,7 @@
             font-size: 14px;
             color: var(--secondary-text-color);
             text-align: center;
+            min-height: 1.2em; /* Reserve space to prevent layout shift */
         }
 
         .days-progress {
@@ -185,7 +212,8 @@
             border-radius: 50%;
             font-weight: 600;
             font-size: 14px;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, color 0.3s, transform 0.1s, filter 0.1s; /* Added transform and filter */
+            cursor: default; 
         }
 
         .day-indicator.active {
@@ -197,6 +225,12 @@
             background-color: var(--success-color);
             color: white;
         }
+        
+        .day-indicator:active { 
+            transform: scale(0.95);
+            filter: brightness(0.92);
+        }
+
 
         .action-buttons {
             display: flex;
@@ -204,7 +238,6 @@
             margin-top: 16px;
         }
 
-        /* Toast Notification */
         .toast {
             position: fixed;
             bottom: 20px;
@@ -239,7 +272,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
+        <div class="header" id="appHeader"> <!-- Added ID for JS targeting -->
             Trening Tracker
         </div>
 
@@ -291,6 +324,7 @@
         };
 
         // DOM Elements
+        const appHeader = document.getElementById('appHeader'); 
         const uploadSection = document.getElementById('uploadSection');
         const mainContent = document.getElementById('mainContent');
         const fileInput = document.getElementById('fileInput');
@@ -314,12 +348,18 @@
         resetButton.addEventListener('click', resetProgress);
         nextDayButton.addEventListener('click', moveToNextDay);
         
-        // New event listener for upload new button
         document.getElementById('uploadNewButton').addEventListener('click', () => {
             showUploadSection();
         });
 
-        // Initialize the app
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 0) {
+                appHeader.classList.add('scrolled');
+            } else {
+                appHeader.classList.remove('scrolled');
+            }
+        });
+
         init();
 
         function init() {
@@ -327,6 +367,11 @@
             if (state.workoutPlan.length > 0) {
                 showMainContent();
                 renderWorkoutPlan();
+            }
+            if (window.scrollY > 0) {
+                appHeader.classList.add('scrolled');
+            } else {
+                appHeader.classList.remove('scrolled');
             }
         }
 
@@ -338,6 +383,7 @@
                     Object.assign(state, parsedState);
                 } catch (e) {
                     console.error('Failed to parse saved state:', e);
+                    localStorage.removeItem('workoutTrackerState'); 
                 }
             }
         }
@@ -369,62 +415,99 @@
                 const content = e.target.result;
                 parseCSV(content);
             };
+            reader.onerror = function() {
+                showToast('Błąd podczas odczytu pliku.');
+            };
+            reader.onloadend = function() {
+                fileInput.value = null; 
+                const isUploadSectionVisible = uploadSection.style.display !== 'none';
+                if (isUploadSectionVisible) {
+                    fileName.textContent = '';
+                    uploadButton.disabled = true;
+                }
+            };
             reader.readAsText(file);
         }
 
         function parseCSV(content) {
             try {
-                const lines = content.split('\n');
-                const headers = lines[0].split(',');
+                const lines = content.split('\n').map(line => line.trim()).filter(line => line);
+                if (lines.length < 2) {
+                    showToast('Plik CSV jest pusty lub zawiera tylko nagłówki.');
+                    return;
+                }
+                const headers = lines[0].split(',').map(h => h.trim());
                 
                 if (!validateHeaders(headers)) {
                     showToast('Nieprawidłowy format pliku CSV. Wymagane nagłówki: Dzień,Pompki,Plank (sekundy),Rower (minuty)');
                     return;
                 }
 
-                state.workoutPlan = [];
-                
+                const newWorkoutPlan = [];
                 for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (line) {
-                        const values = line.split(',');
-                        const day = parseInt(values[0], 10);
-                        const pushups = parseInt(values[1], 10);
-                        const plankSeconds = parseInt(values[2], 10);
-                        const bikeMinutes = parseInt(values[3], 10);
-
-                        state.workoutPlan.push({
-                            day,
-                            exercises: [
-                                { id: 'pushups', name: 'Pompki', value: pushups, unit: '', type: 'count' },
-                                { id: 'plank', name: 'Plank', value: plankSeconds, unit: 'sekund', type: 'timer' },
-                                { id: 'bike', name: 'Rower stacjonarny', value: bikeMinutes, unit: 'minut', type: 'count' }
-                            ]
-                        });
+                    const values = lines[i].split(',').map(v => v.trim());
+                    if (values.length !== headers.length) {
+                        showToast(`Błąd w linii ${i + 1}: Niewłaściwa liczba kolumn.`);
+                        return;
                     }
-                }
 
-                if (state.workoutPlan.length === 0) {
-                    showToast('Brak danych w pliku CSV');
+                    const day = parseInt(values[0], 10);
+                    const pushups = parseInt(values[1], 10);
+                    const plankSeconds = parseInt(values[2], 10);
+                    const bikeMinutes = parseInt(values[3], 10);
+
+                    if (isNaN(day) || isNaN(pushups) || isNaN(plankSeconds) || isNaN(bikeMinutes)) {
+                        showToast(`Błąd w linii ${i + 1}: Wartości muszą być liczbami.`);
+                        return;
+                    }
+                    if (day <= 0 || pushups < 0 || plankSeconds < 0 || bikeMinutes < 0) {
+                        showToast(`Błąd w linii ${i + 1}: Wartości nie mogą być ujemne (dzień musi być > 0).`);
+                        return;
+                    }
+
+                    newWorkoutPlan.push({
+                        day,
+                        exercises: [
+                            { id: 'pushups', name: 'Pompki', value: pushups, unit: '', type: 'count' },
+                            { id: 'plank', name: 'Plank', value: plankSeconds, unit: 'sekund', type: 'timer' },
+                            { id: 'bike', name: 'Rower stacjonarny', value: bikeMinutes, unit: 'minut', type: 'count' }
+                        ]
+                    });
+                }
+                
+                newWorkoutPlan.sort((a, b) => a.day - b.day);
+                const dayNumbers = newWorkoutPlan.map(p => p.day);
+                if (new Set(dayNumbers).size !== dayNumbers.length) {
+                    showToast('Plik CSV zawiera zduplikowane numery dni.');
                     return;
                 }
 
-                // Reset progress when uploading a new plan
-                resetProgressWithoutConfirmation();
-                state.currentDay = 1;
+                state.workoutPlan = newWorkoutPlan;
+
+                if (state.workoutPlan.length === 0) {
+                    showToast('Brak danych treningowych w pliku CSV po przetworzeniu.');
+                    return;
+                }
+
+                resetProgressWithoutConfirmation(); 
+                state.currentDay = state.workoutPlan[0].day; 
                 showMainContent();
                 renderWorkoutPlan();
                 saveStateToLocalStorage();
                 showToast('Plan treningowy wczytany!');
+                fileName.textContent = ''; 
+                uploadButton.disabled = true;
+
             } catch (e) {
                 console.error('Error parsing CSV:', e);
-                showToast('Błąd podczas przetwarzania pliku CSV');
+                showToast('Błąd podczas przetwarzania pliku CSV. Sprawdź konsolę po więcej informacji.');
             }
         }
 
         function validateHeaders(headers) {
             const requiredHeaders = ['Dzień', 'Pompki', 'Plank (sekundy)', 'Rower (minuty)'];
-            return requiredHeaders.every(header => headers.includes(header));
+            const trimmedFileHeaders = headers.map(h => h.trim());
+            return requiredHeaders.every(header => trimmedFileHeaders.includes(header));
         }
 
         function showMainContent() {
@@ -435,6 +518,9 @@
         function showUploadSection() {
             uploadSection.style.display = 'block';
             mainContent.style.display = 'none';
+            fileName.textContent = '';
+            uploadButton.disabled = true;
+            fileInput.value = null; 
         }
 
         function renderWorkoutPlan() {
@@ -445,20 +531,17 @@
 
         function renderDaysProgress() {
             daysProgress.innerHTML = '';
-            
-            state.workoutPlan.forEach((dayPlan, index) => {
-                const dayNumber = index + 1;
+            state.workoutPlan.forEach(dayPlan => { 
+                const dayNumber = dayPlan.day;
                 const dayElement = document.createElement('div');
                 dayElement.className = 'day-indicator';
                 
                 if (dayNumber === state.currentDay) {
                     dayElement.classList.add('active');
                 }
-                
                 if (state.completedDays.includes(dayNumber)) {
                     dayElement.classList.add('completed');
                 }
-                
                 dayElement.textContent = dayNumber;
                 daysProgress.appendChild(dayElement);
             });
@@ -469,7 +552,17 @@
             currentDayElement.textContent = state.currentDay;
             
             const currentDayPlan = state.workoutPlan.find(day => day.day === state.currentDay);
-            if (!currentDayPlan) return;
+            if (!currentDayPlan) {
+                console.error(`No plan found for day ${state.currentDay}`);
+                if (state.workoutPlan.length > 0) {
+                    state.currentDay = state.workoutPlan[0].day; 
+                    saveStateToLocalStorage();
+                    renderWorkoutPlan(); 
+                } else {
+                    showUploadSection(); 
+                }
+                return;
+            }
             
             currentDayPlan.exercises.forEach(exercise => {
                 const li = document.createElement('li');
@@ -484,31 +577,31 @@
                 value.textContent = `${exercise.value} ${exercise.unit}`;
                 
                 const actionContainer = document.createElement('div');
-                
                 const isCompleted = isExerciseCompleted(state.currentDay, exercise.id);
                 
                 if (exercise.type === 'timer') {
                     const timerElement = document.createElement('div');
                     timerElement.className = 'timer';
                     timerElement.id = `timer-${exercise.id}`;
-                    timerElement.textContent = formatTime(exercise.value);
                     
                     const button = document.createElement('button');
                     button.className = 'btn';
                     button.id = `btn-${exercise.id}`;
                     
                     if (isCompleted) {
+                        timerElement.textContent = formatTime(0); 
                         button.textContent = `${exercise.name} wykonane`;
                         button.classList.add('btn-success');
                         button.disabled = true;
                     } else {
+                        timerElement.textContent = formatTime(exercise.value);
                         button.textContent = 'START';
-                        button.addEventListener('click', () => startTimer(exercise.id, exercise.value, exercise.name));
+                        button.dataset.initialSeconds = exercise.value;
+                        button.addEventListener('click', () => handleTimerAction(exercise.id, exercise.name));
                     }
-                    
                     actionContainer.appendChild(timerElement);
                     actionContainer.appendChild(button);
-                } else {
+                } else { 
                     const button = document.createElement('button');
                     button.className = 'btn';
                     button.id = `btn-${exercise.id}`;
@@ -521,7 +614,6 @@
                         button.textContent = 'Wykonaj';
                         button.addEventListener('click', () => completeExercise(state.currentDay, exercise.id, exercise.name));
                     }
-                    
                     actionContainer.appendChild(button);
                 }
                 
@@ -532,30 +624,50 @@
             });
         }
 
-        function startTimer(exerciseId, seconds, exerciseName) {
+        function handleTimerAction(exerciseId, exerciseName) {
             const timerElement = document.getElementById(`timer-${exerciseId}`);
             const button = document.getElementById(`btn-${exerciseId}`);
             
-            let remainingSeconds = seconds;
-            button.disabled = true;
-            button.textContent = 'W TRAKCIE...';
-            
+            const currentState = button.dataset.timerState || 'idle';
+            const initialSeconds = parseInt(button.dataset.initialSeconds);
+
+            if (currentState === 'idle') {
+                button.dataset.remainingSeconds = initialSeconds;
+                button.dataset.timerState = 'running';
+                button.textContent = 'PAUZA';
+                startTicking(exerciseId, exerciseName, button, timerElement);
+            } else if (currentState === 'running') {
+                clearInterval(parseInt(button.dataset.timerId));
+                button.dataset.timerState = 'paused';
+                button.textContent = 'WZNOW';
+            } else if (currentState === 'paused') {
+                button.dataset.timerState = 'running';
+                button.textContent = 'PAUZA';
+                startTicking(exerciseId, exerciseName, button, timerElement); 
+            }
+        }
+
+        function startTicking(exerciseId, exerciseName, button, timerElement) {
+            let remainingSeconds = parseInt(button.dataset.remainingSeconds);
+            timerElement.textContent = formatTime(remainingSeconds);
+
             const timerInterval = setInterval(() => {
                 remainingSeconds--;
+                button.dataset.remainingSeconds = remainingSeconds;
                 timerElement.textContent = formatTime(remainingSeconds);
                 
-                if (remainingSeconds <= 0) {
+                if (remainingSeconds <= 0) { 
                     clearInterval(timerInterval);
+                    timerElement.textContent = formatTime(0); // Ensure 00:00 on complete
                     completeExercise(state.currentDay, exerciseId, exerciseName);
                     showToast(`${exerciseName} ukończone!`);
                 }
             }, 1000);
-            
-            // Store timer reference to clear it if needed
             button.dataset.timerId = timerInterval;
         }
 
         function formatTime(seconds) {
+            if (seconds < 0) seconds = 0; 
             const mins = Math.floor(seconds / 60);
             const secs = seconds % 60;
             return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
@@ -565,7 +677,6 @@
             if (!state.completedExercises[day]) {
                 state.completedExercises[day] = [];
             }
-            
             if (!state.completedExercises[day].includes(exerciseId)) {
                 state.completedExercises[day].push(exerciseId);
             }
@@ -573,15 +684,23 @@
             const button = document.getElementById(`btn-${exerciseId}`);
             if (button) {
                 button.textContent = `${exerciseName} wykonane`;
+                button.classList.remove('btn-outline'); 
                 button.classList.add('btn-success');
                 button.disabled = true;
                 
-                // Clear timer if exists
-                if (button.dataset.timerId) {
+                if (button.dataset.timerId) { 
                     clearInterval(parseInt(button.dataset.timerId));
+                    delete button.dataset.timerId;
+                }
+                delete button.dataset.timerState;
+                delete button.dataset.remainingSeconds;
+                delete button.dataset.initialSeconds; 
+
+                const timerElement = document.getElementById(`timer-${exerciseId}`);
+                if (timerElement) {
+                    timerElement.textContent = formatTime(0);
                 }
             }
-            
             updateDayProgress();
             saveStateToLocalStorage();
         }
@@ -595,12 +714,10 @@
             if (!currentDayPlan) return;
             
             const totalExercises = currentDayPlan.exercises.length;
-            const completedExercises = state.completedExercises[state.currentDay] ? state.completedExercises[state.currentDay].length : 0;
+            const completedCount = state.completedExercises[state.currentDay] ? state.completedExercises[state.currentDay].length : 0;
             
-            dayProgressElement.textContent = `${completedExercises}/${totalExercises}`;
-            
-            // Enable/disable next day button
-            nextDayButton.disabled = completedExercises < totalExercises;
+            dayProgressElement.textContent = `${completedCount}/${totalExercises}`;
+            nextDayButton.disabled = completedCount < totalExercises;
         }
 
         function moveToNextDay() {
@@ -608,35 +725,53 @@
                 state.completedDays.push(state.currentDay);
             }
             
-            const nextDay = state.currentDay + 1;
-            if (nextDay <= state.workoutPlan.length) {
-                state.currentDay = nextDay;
-                renderWorkoutPlan();
-                saveStateToLocalStorage();
-                showToast(`Dzień ${state.currentDay - 1} ukończony! Przejście do dnia ${state.currentDay}`);
-            } else {
+            const currentIndex = state.workoutPlan.findIndex(p => p.day === state.currentDay);
+            const currentDayForToast = state.workoutPlan[currentIndex].day; // Store before changing state.currentDay
+
+            if (currentIndex === -1 || currentIndex + 1 >= state.workoutPlan.length) {
                 showToast('Gratulacje! Ukończyłeś cały plan treningowy!');
+                renderDaysProgress(); 
+                saveStateToLocalStorage();
+                return;
             }
+
+            state.currentDay = state.workoutPlan[currentIndex + 1].day;
+            renderWorkoutPlan();
+            saveStateToLocalStorage();
+            showToast(`Dzień ${currentDayForToast} ukończony! Przejście do dnia ${state.currentDay}`);
         }
 
         function resetProgress() {
-            if (confirm('Czy na pewno chcesz zresetować postęp treningowy?')) {
+            if (confirm('Czy na pewno chcesz zresetować postęp treningowy? Ta akcja usunie wszystkie ukończone ćwiczenia i dni.')) {
                 resetProgressWithoutConfirmation();
+                showToast('Postęp zresetowany.');
             }
         }
 
         function resetProgressWithoutConfirmation() {
             state.completedDays = [];
             state.completedExercises = {};
-            state.currentDay = 1;
-            renderWorkoutPlan();
+
+            if (state.workoutPlan.length > 0) {
+                 state.currentDay = state.workoutPlan[0].day; 
+            } else {
+                state.currentDay = 1; 
+            }
+           
+            const activeTimers = document.querySelectorAll('button[data-timerid]');
+            activeTimers.forEach(timerButton => {
+                if(timerButton.dataset.timerId) clearInterval(parseInt(timerButton.dataset.timerId));
+            });
+
+            if (state.workoutPlan.length > 0 && mainContent.style.display !== 'none') {
+                 renderWorkoutPlan();
+            }
             saveStateToLocalStorage();
         }
 
         function showToast(message) {
             toast.textContent = message;
             toast.classList.add('show');
-            
             setTimeout(() => {
                 toast.classList.remove('show');
             }, 3000);
