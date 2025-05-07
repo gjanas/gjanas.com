@@ -13,6 +13,7 @@
             --text-color: #1c1c1e;
             --secondary-text-color: #8e8e93;
             --border-color: #d1d1d6;
+            --danger-color: #ff3b30;
         }
 
         * {
@@ -27,6 +28,7 @@
             background-color: var(--main-bg-color);
             color: var(--text-color);
             font-size: 16px;
+            line-height: 1.6; /* Lepsza czytelność */
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
             min-height: 100vh;
             display: flex;
@@ -50,10 +52,10 @@
             top: 0;
             background-color: var(--main-bg-color);
             z-index: 100;
-            transition: box-shadow 0.3s ease-in-out; /* For smooth shadow transition */
+            transition: box-shadow 0.3s ease-in-out;
         }
 
-        .header.scrolled { /* Style for scrolled header */
+        .header.scrolled {
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
@@ -113,7 +115,7 @@
             font-weight: 500;
             cursor: pointer;
             font-size: 16px;
-            transition: background-color 0.2s, opacity 0.2s, transform 0.1s, filter 0.1s; /* Added transform and filter for active state */
+            transition: background-color 0.2s, opacity 0.2s, transform 0.1s, filter 0.1s;
         }
 
         .btn:disabled {
@@ -130,12 +132,15 @@
             border: 1px solid var(--primary-color);
             color: var(--primary-color);
         }
-
-        .btn-danger {
-            background-color: #ff3b30;
+        .btn-outline.danger {
+            border-color: var(--danger-color);
+            color: var(--danger-color);
         }
 
-        /* Active states for buttons */
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+
         .btn:not(:disabled):active {
             filter: brightness(0.9);
             transform: translateY(1px);
@@ -146,11 +151,11 @@
             filter: none; 
             transform: translateY(1px);
         }
-        
-        .btn-danger:not(:disabled):active {
-            filter: brightness(0.9);
-            transform: translateY(1px);
+        .btn-outline.danger:not(:disabled):active {
+            background-color: rgba(255, 59, 48, 0.08);
         }
+        
+        .btn-danger:not(:disabled):active,
         .btn-success:not(:disabled):active {
             filter: brightness(0.9);
             transform: translateY(1px);
@@ -191,7 +196,7 @@
             font-size: 14px;
             color: var(--secondary-text-color);
             text-align: center;
-            min-height: 1.2em; /* Reserve space to prevent layout shift */
+            min-height: 1.2em; 
         }
 
         .days-progress {
@@ -212,8 +217,8 @@
             border-radius: 50%;
             font-weight: 600;
             font-size: 14px;
-            transition: background-color 0.3s, color 0.3s, transform 0.1s, filter 0.1s; /* Added transform and filter */
-            cursor: default; 
+            transition: background-color 0.3s, color 0.3s, transform 0.1s, filter 0.1s;
+            cursor: pointer; /* Clickable by default now */
         }
 
         .day-indicator.active {
@@ -231,7 +236,6 @@
             filter: brightness(0.92);
         }
 
-
         .action-buttons {
             display: flex;
             gap: 8px;
@@ -248,7 +252,7 @@
             padding: 12px 20px;
             border-radius: 10px;
             opacity: 0;
-            transition: opacity 0.3s;
+            transition: opacity 0.3s ease-in-out;
             pointer-events: none;
             z-index: 1000;
             text-align: center;
@@ -258,21 +262,84 @@
         .toast.show {
             opacity: 1;
         }
+        
+        /* Custom Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background-color: var(--card-bg-color);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.show .modal-content {
+            transform: scale(1);
+        }
+        .modal-content h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        .modal-content p {
+            margin-bottom: 24px;
+            font-size: 16px;
+            color: var(--secondary-text-color);
+            line-height: 1.5;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end; /* Align buttons to the right */
+        }
+        .modal-actions .btn {
+            width: auto; /* Override full width for modal buttons */
+            padding: 10px 20px;
+        }
+
 
         @media (max-width: 400px) {
             .card {
                 border-radius: 10px;
             }
-            
             .btn {
                 padding: 10px;
+            }
+            .modal-actions {
+                flex-direction: column-reverse; /* Stack buttons on small screens */
+            }
+            .modal-actions .btn {
+                width: 100%;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header" id="appHeader"> <!-- Added ID for JS targeting -->
+        <div class="header" id="appHeader">
             Trening Tracker
         </div>
 
@@ -303,7 +370,7 @@
                         <!-- Exercises will be dynamically added here -->
                     </ul>
                     <div class="action-buttons">
-                        <button class="btn btn-outline" id="resetButton">Reset</button>
+                        <button class="btn btn-outline danger" id="resetButton">Reset</button>
                         <button class="btn btn-outline" id="uploadNewButton">Nowy plan CSV</button>
                         <button class="btn" id="nextDayButton" disabled>Następny dzień</button>
                     </div>
@@ -312,7 +379,18 @@
         </div>
     </div>
 
-    <div class="toast" id="toast"></div>
+    <div class="toast" id="toast" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+    <div id="customModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modalTitle">Potwierdzenie</h3>
+            <p id="modalMessage">Czy na pewno chcesz to zrobić?</p>
+            <div class="modal-actions">
+                <button id="modalCancelButton" class="btn btn-outline">Anuluj</button>
+                <button id="modalConfirmButton" class="btn btn-danger">Potwierdź</button> <!-- Changed to btn-danger for reset confirm -->
+            </div>
+        </div>
+    </div>
 
     <script>
         // Main state object
@@ -338,6 +416,15 @@
         const resetButton = document.getElementById('resetButton');
         const toast = document.getElementById('toast');
 
+        // Custom Modal DOM Elements
+        const customModal = document.getElementById('customModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalConfirmButton = document.getElementById('modalConfirmButton');
+        const modalCancelButton = document.getElementById('modalCancelButton');
+        let currentModalConfirmCallback = null;
+
+
         // Event Listeners
         document.getElementById('fileInputButton').addEventListener('click', () => {
             fileInput.click();
@@ -359,6 +446,26 @@
                 appHeader.classList.remove('scrolled');
             }
         });
+
+        // Modal Listeners
+        modalConfirmButton.addEventListener('click', () => {
+            if (currentModalConfirmCallback) {
+                currentModalConfirmCallback();
+            }
+            hideCustomConfirm();
+        });
+        modalCancelButton.addEventListener('click', hideCustomConfirm);
+        customModal.addEventListener('click', (event) => {
+            if (event.target === customModal) { // Click on overlay
+                hideCustomConfirm();
+            }
+        });
+        window.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && customModal.classList.contains('show')) {
+                hideCustomConfirm();
+            }
+        });
+
 
         init();
 
@@ -391,6 +498,21 @@
         function saveStateToLocalStorage() {
             localStorage.setItem('workoutTrackerState', JSON.stringify(state));
         }
+
+        // Custom Modal Functions
+        function showCustomConfirm(title, message, onConfirm) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            currentModalConfirmCallback = onConfirm;
+            customModal.classList.add('show');
+            modalConfirmButton.focus(); // Focus on confirm button
+        }
+
+        function hideCustomConfirm() {
+            customModal.classList.remove('show');
+            currentModalConfirmCallback = null;
+        }
+
 
         function handleFileSelection(event) {
             const file = event.target.files[0];
@@ -543,6 +665,13 @@
                     dayElement.classList.add('completed');
                 }
                 dayElement.textContent = dayNumber;
+                dayElement.addEventListener('click', () => {
+                    if (state.currentDay !== dayNumber) {
+                        state.currentDay = dayNumber;
+                        renderWorkoutPlan(); // Re-renders everything for the new current day
+                        saveStateToLocalStorage();
+                    }
+                });
                 daysProgress.appendChild(dayElement);
             });
         }
@@ -658,7 +787,7 @@
                 
                 if (remainingSeconds <= 0) { 
                     clearInterval(timerInterval);
-                    timerElement.textContent = formatTime(0); // Ensure 00:00 on complete
+                    timerElement.textContent = formatTime(0);
                     completeExercise(state.currentDay, exerciseId, exerciseName);
                     showToast(`${exerciseName} ukończone!`);
                 }
@@ -721,12 +850,15 @@
         }
 
         function moveToNextDay() {
+            const currentDayData = state.workoutPlan.find(p => p.day === state.currentDay);
+            if (!currentDayData) return; // Should not happen if currentDay is valid
+
             if (!state.completedDays.includes(state.currentDay)) {
                 state.completedDays.push(state.currentDay);
             }
             
             const currentIndex = state.workoutPlan.findIndex(p => p.day === state.currentDay);
-            const currentDayForToast = state.workoutPlan[currentIndex].day; // Store before changing state.currentDay
+            const currentDayForToast = state.workoutPlan[currentIndex].day;
 
             if (currentIndex === -1 || currentIndex + 1 >= state.workoutPlan.length) {
                 showToast('Gratulacje! Ukończyłeś cały plan treningowy!');
@@ -742,10 +874,14 @@
         }
 
         function resetProgress() {
-            if (confirm('Czy na pewno chcesz zresetować postęp treningowy? Ta akcja usunie wszystkie ukończone ćwiczenia i dni.')) {
-                resetProgressWithoutConfirmation();
-                showToast('Postęp zresetowany.');
-            }
+            showCustomConfirm(
+                'Reset Postępu',
+                'Czy na pewno chcesz zresetować postęp treningowy? Ta akcja usunie wszystkie ukończone ćwiczenia i dni.',
+                () => {
+                    resetProgressWithoutConfirmation();
+                    showToast('Postęp zresetowany.');
+                }
+            );
         }
 
         function resetProgressWithoutConfirmation() {
