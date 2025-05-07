@@ -265,9 +265,6 @@
                     <span>Dzień <span id="currentDay">1</span></span>
                     <span id="dayProgress">0/3</span>
                 </div>
-                <button id="exportHealthBtn" class="btn btn-outline" style="margin: 10px; background-color: #e8e8ed; display: none;">
-                    Eksportuj do Apple Health
-                </button>
                 <div class="card-content">
                     <ul class="exercise-list" id="exerciseList">
                         <!-- Exercises will be dynamically added here -->
@@ -290,8 +287,7 @@
             workoutPlan: [],
             currentDay: 1,
             completedDays: [],
-            completedExercises: {},
-            lastCompletedExercise: null
+            completedExercises: {}
         };
 
         // DOM Elements
@@ -307,7 +303,6 @@
         const nextDayButton = document.getElementById('nextDayButton');
         const resetButton = document.getElementById('resetButton');
         const toast = document.getElementById('toast');
-        const exportHealthBtn = document.getElementById('exportHealthBtn');
 
         // Event Listeners
         document.getElementById('fileInputButton').addEventListener('click', () => {
@@ -332,19 +327,6 @@
             if (state.workoutPlan.length > 0) {
                 showMainContent();
                 renderWorkoutPlan();
-            }
-            
-            // Check if Apple Health API is available
-            checkAppleHealthAvailability();
-        }
-        
-        function checkAppleHealthAvailability() {
-            // Check if running on iOS and Health API might be available
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-            
-            if (isIOS) {
-                exportHealthBtn.style.display = 'block';
-                exportHealthBtn.addEventListener('click', exportToAppleHealth);
             }
         }
 
@@ -588,21 +570,6 @@
                 state.completedExercises[day].push(exerciseId);
             }
             
-            // Store last completed exercise for potential Health export
-            const currentDayPlan = state.workoutPlan.find(day => day.day === state.currentDay);
-            if (currentDayPlan) {
-                const exercise = currentDayPlan.exercises.find(ex => ex.id === exerciseId);
-                if (exercise) {
-                    state.lastCompletedExercise = {
-                        id: exerciseId,
-                        name: exerciseName,
-                        value: exercise.value,
-                        unit: exercise.unit,
-                        timestamp: new Date().toISOString()
-                    };
-                }
-            }
-            
             const button = document.getElementById(`btn-${exerciseId}`);
             if (button) {
                 button.textContent = `${exerciseName} wykonane`;
@@ -673,42 +640,6 @@
             setTimeout(() => {
                 toast.classList.remove('show');
             }, 3000);
-        }
-        
-        function exportToAppleHealth() {
-            // We cannot directly interact with Apple Health from a web app
-            // The best we can do is prepare a URL scheme to open the Health app
-            // or provide instructions
-            
-            // Get completed exercises summary
-            let summary = '';
-            Object.keys(state.completedExercises).forEach(day => {
-                const dayPlan = state.workoutPlan.find(d => d.day == day);
-                if (dayPlan) {
-                    state.completedExercises[day].forEach(exId => {
-                        const exercise = dayPlan.exercises.find(ex => ex.id === exId);
-                        if (exercise) {
-                            summary += `Dzień ${day}: ${exercise.name} - ${exercise.value} ${exercise.unit}\n`;
-                        }
-                    });
-                }
-            });
-            
-            // Create a share sheet with this data
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Podsumowanie treningów',
-                    text: summary
-                }).then(() => {
-                    showToast('Dane udostępnione do skopiowania');
-                }).catch(err => {
-                    showToast('Nie udało się udostępnić danych');
-                    console.error('Error sharing', err);
-                });
-            } else {
-                // Fallback if Web Share API is not available
-                alert("Aby dodać te dane do Apple Health, skopiuj poniższe podsumowanie i ręcznie dodaj ćwiczenia w aplikacji Zdrowie:\n\n" + summary);
-            }
         }
     </script>
 </body>
