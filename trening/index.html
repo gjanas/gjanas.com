@@ -1,198 +1,640 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Trening Tracker</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.83/dist/themes/light.css" />
-  <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.83/dist/shoelace.js"></script>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      margin: 0 auto;
-      padding: 1rem;
-      background: #f2f2f7;
-      color: #000;
-      max-width: 390px;
-    }
-    h1 {
-      font-size: 1.5rem;
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-    #upload-section {
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-    #day-progress {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-      justify-content: center;
-      margin-bottom: 1rem;
-    }
-    .day-box {
-      width: 20px;
-      height: 20px;
-      border-radius: 4px;
-      background-color: #ccc;
-    }
-    .day-box.done {
-      background-color: #4caf50;
-    }
-    .exercise {
-      background: white;
-      border-radius: 1rem;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .done {
-      color: green;
-      font-weight: bold;
-      font-size: 1.1rem;
-      text-align: center;
-    }
-    sl-button::part(base) {
-      width: 100%;
-    }
-  </style>
-</head>
-<body>
-  <h1>Trening - Dzień <span id="day-number"></span></h1>
-  <div id="upload-section">
-    <input type="file" id="csvFile" accept=".csv" />
-    <br /><br />
-    <sl-button variant="primary" onclick="resetProgress()">Resetuj Progres</sl-button>
-  </div>
-  <div id="day-progress"></div>
-  <div id="exercise-list"></div>
-
-  <script type="module">
-    import initSqlJs from 'https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/sql-wasm.js';
-
-    let db, plan = [], todayData = {}, dbLoaded = false;
-
-    const initDB = async () => {
-      const SQL = await initSqlJs({ locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/${file}` });
-      const saved = localStorage.getItem('trening_db');
-      db = new SQL.Database(saved ? new Uint8Array(JSON.parse(saved)) : undefined);
-      if (!saved) db.run("CREATE TABLE progress(day INT PRIMARY KEY, pushups INT, plank INT, bike INT);");
-      dbLoaded = true;
-    };
-
-    const saveDB = () => {
-      const data = db.export();
-      localStorage.setItem('trening_db', JSON.stringify(Array.from(data)));
-    };
-
-    const resetProgress = () => {
-      if (confirm("Czy na pewno chcesz zresetować postęp?")) {
-        localStorage.removeItem('trening_db');
-        location.reload();
-      }
-    };
-
-    const readCSV = async file => {
-      const text = await file.text();
-      const rows = text.trim().split("\n").slice(1);
-      return rows.map(r => {
-        const [day, pushups, plank, bike] = r.split(',');
-        return { day: +day, pushups: +pushups, plank: +plank, bike: +bike };
-      });
-    };
-
-    const markDone = (day, type) => {
-      const row = db.exec(`SELECT * FROM progress WHERE day = ${day}`);
-      if (row.length === 0) db.run(`INSERT INTO progress VALUES (${day}, 0, 0, 0);`);
-      db.run(`UPDATE progress SET ${type} = 1 WHERE day = ${day}`);
-      saveDB();
-      showToday(plan);
-    };
-
-    const isDone = (day, type) => {
-      const row = db.exec(`SELECT ${type} FROM progress WHERE day = ${day}`);
-      return row[0]?.values[0][0] === 1;
-    };
-
-    const isDayComplete = (day) => {
-      const row = db.exec(`SELECT * FROM progress WHERE day = ${day}`);
-      return row[0]?.values[0].slice(1).every(v => v === 1);
-    };
-
-    const showToday = (planData) => {
-      const container = document.getElementById("exercise-list");
-      container.innerHTML = '';
-
-      const dayProgress = document.getElementById("day-progress");
-      dayProgress.innerHTML = '';
-      planData.forEach(entry => {
-        const box = document.createElement("div");
-        box.className = "day-box" + (isDayComplete(entry.day) ? " done" : "");
-        dayProgress.appendChild(box);
-      });
-
-      const today = planData.find(row => !isDayComplete(row.day)) || planData[planData.length - 1];
-      document.getElementById("day-number").textContent = today.day;
-
-      const types = [
-        { label: "Pompki", type: "pushups", amount: today.pushups },
-        { label: "Plank", type: "plank", amount: today.plank },
-        { label: "Rower", type: "bike", amount: today.bike },
-      ];
-
-      types.forEach(({ label, type, amount }) => {
-        const wrapper = document.createElement("div");
-        wrapper.className = "exercise";
-
-        const title = document.createElement("div");
-        title.innerHTML = `<strong>${label}:</strong> ${amount} ${type === 'plank' ? 'sekund' : (type === 'bike' ? 'minut' : 'powtórzeń')}`;
-
-        const content = document.createElement("div");
-        if (isDone(today.day, type)) {
-          content.innerHTML = `<div class='done'>${label} wykonane</div>`;
-        } else if (type === 'plank') {
-          const btn = document.createElement("sl-button");
-          btn.textContent = "Start";
-          btn.variant = "success";
-          btn.addEventListener("click", () => {
-            btn.disabled = true;
-            let remaining = amount;
-            btn.textContent = `Pozostało ${remaining}s`;
-            const interval = setInterval(() => {
-              remaining--;
-              if (remaining <= 0) {
-                clearInterval(interval);
-                markDone(today.day, type);
-              } else {
-                btn.textContent = `Pozostało ${remaining}s`;
-              }
-            }, 1000);
-          });
-          content.appendChild(btn);
-        } else {
-          const btn = document.createElement("sl-button");
-          btn.textContent = `Rozpocznij ${label}`;
-          btn.variant = "primary";
-          btn.addEventListener("click", () => markDone(today.day, type));
-          content.appendChild(btn);
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Trening Tracker</title>
+    <style>
+        :root {
+            --main-bg-color: #f2f2f7;
+            --card-bg-color: #ffffff;
+            --primary-color: #007aff;
+            --success-color: #34c759;
+            --text-color: #1c1c1e;
+            --secondary-text-color: #8e8e93;
+            --border-color: #d1d1d6;
         }
 
-        wrapper.appendChild(title);
-        wrapper.appendChild(content);
-        container.appendChild(wrapper);
-      });
-    };
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-    document.getElementById("csvFile").addEventListener("change", async (e) => {
-      localStorage.removeItem('trening_db');
-      await initDB();
-      const file = e.target.files[0];
-      plan = await readCSV(file);
-      showToday(plan);
-    });
+        body {
+            background-color: var(--main-bg-color);
+            color: var(--text-color);
+            font-size: 16px;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-    await initDB();
-  </script>
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 16px;
+            width: 100%;
+        }
+
+        .header {
+            padding: 16px 0;
+            text-align: center;
+            font-weight: 600;
+            font-size: 18px;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            background-color: var(--main-bg-color);
+            z-index: 100;
+        }
+
+        .card {
+            background-color: var(--card-bg-color);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-content {
+            padding: 16px;
+        }
+
+        .exercise-list {
+            list-style: none;
+        }
+
+        .exercise-item {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .exercise-item:last-child {
+            border-bottom: none;
+        }
+
+        .exercise-title {
+            font-weight: 500;
+        }
+
+        .exercise-value {
+            color: var(--secondary-text-color);
+            font-size: 14px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-danger {
+            background-color: #ff3b30;
+        }
+
+        .timer {
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .upload-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-name {
+            margin-top: 8px;
+            font-size: 14px;
+            color: var(--secondary-text-color);
+            text-align: center;
+        }
+
+        .days-progress {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+            justify-content: center;
+        }
+
+        .day-indicator {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #e0e0e0;
+            border-radius: 50%;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .day-indicator.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .day-indicator.completed {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0,0,0,0.8);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 1000;
+            text-align: center;
+            max-width: 80%;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        @media (max-width: 400px) {
+            .card {
+                border-radius: 10px;
+            }
+            
+            .btn {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            Trening Tracker
+        </div>
+
+        <div id="uploadSection" class="card">
+            <div class="card-header">Wczytaj plan treningowy</div>
+            <div class="card-content">
+                <div class="upload-container">
+                    <div class="file-input-wrapper">
+                        <button class="btn btn-outline" id="fileInputButton">Wybierz plik CSV</button>
+                        <input type="file" id="fileInput" accept=".csv">
+                    </div>
+                    <div class="file-name" id="fileName"></div>
+                    <button class="btn" id="uploadButton" disabled>Wczytaj plan</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="mainContent" style="display: none;">
+            <div class="days-progress" id="daysProgress"></div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span>Dzień <span id="currentDay">1</span></span>
+                    <span id="dayProgress">0/3</span>
+                </div>
+                <div class="card-content">
+                    <ul class="exercise-list" id="exerciseList">
+                        <!-- Exercises will be dynamically added here -->
+                    </ul>
+                    <div class="action-buttons">
+                        <button class="btn btn-outline" id="resetButton">Reset</button>
+                        <button class="btn" id="nextDayButton" disabled>Następny dzień</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Main state object
+        const state = {
+            workoutPlan: [],
+            currentDay: 1,
+            completedDays: [],
+            completedExercises: {}
+        };
+
+        // DOM Elements
+        const uploadSection = document.getElementById('uploadSection');
+        const mainContent = document.getElementById('mainContent');
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const uploadButton = document.getElementById('uploadButton');
+        const currentDayElement = document.getElementById('currentDay');
+        const dayProgressElement = document.getElementById('dayProgress');
+        const exerciseList = document.getElementById('exerciseList');
+        const daysProgress = document.getElementById('daysProgress');
+        const nextDayButton = document.getElementById('nextDayButton');
+        const resetButton = document.getElementById('resetButton');
+        const toast = document.getElementById('toast');
+
+        // Event Listeners
+        document.getElementById('fileInputButton').addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', handleFileSelection);
+        uploadButton.addEventListener('click', handleFileUpload);
+        resetButton.addEventListener('click', resetProgress);
+        nextDayButton.addEventListener('click', moveToNextDay);
+
+        // Initialize the app
+        init();
+
+        function init() {
+            loadStateFromLocalStorage();
+            if (state.workoutPlan.length > 0) {
+                showMainContent();
+                renderWorkoutPlan();
+            }
+        }
+
+        function loadStateFromLocalStorage() {
+            const savedState = localStorage.getItem('workoutTrackerState');
+            if (savedState) {
+                try {
+                    const parsedState = JSON.parse(savedState);
+                    Object.assign(state, parsedState);
+                } catch (e) {
+                    console.error('Failed to parse saved state:', e);
+                }
+            }
+        }
+
+        function saveStateToLocalStorage() {
+            localStorage.setItem('workoutTrackerState', JSON.stringify(state));
+        }
+
+        function handleFileSelection(event) {
+            const file = event.target.files[0];
+            if (file) {
+                fileName.textContent = file.name;
+                uploadButton.disabled = false;
+            } else {
+                fileName.textContent = '';
+                uploadButton.disabled = true;
+            }
+        }
+
+        function handleFileUpload() {
+            const file = fileInput.files[0];
+            if (!file) {
+                showToast('Wybierz plik CSV');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                parseCSV(content);
+            };
+            reader.readAsText(file);
+        }
+
+        function parseCSV(content) {
+            try {
+                const lines = content.split('\n');
+                const headers = lines[0].split(',');
+                
+                if (!validateHeaders(headers)) {
+                    showToast('Nieprawidłowy format pliku CSV. Wymagane nagłówki: Dzień,Pompki,Plank (sekundy),Rower (minuty)');
+                    return;
+                }
+
+                state.workoutPlan = [];
+                
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (line) {
+                        const values = line.split(',');
+                        const day = parseInt(values[0], 10);
+                        const pushups = parseInt(values[1], 10);
+                        const plankSeconds = parseInt(values[2], 10);
+                        const bikeMinutes = parseInt(values[3], 10);
+
+                        state.workoutPlan.push({
+                            day,
+                            exercises: [
+                                { id: 'pushups', name: 'Pompki', value: pushups, unit: '', type: 'count' },
+                                { id: 'plank', name: 'Plank', value: plankSeconds, unit: 'sekund', type: 'timer' },
+                                { id: 'bike', name: 'Rower stacjonarny', value: bikeMinutes, unit: 'minut', type: 'count' }
+                            ]
+                        });
+                    }
+                }
+
+                if (state.workoutPlan.length === 0) {
+                    showToast('Brak danych w pliku CSV');
+                    return;
+                }
+
+                // Reset progress when uploading a new plan
+                resetProgressWithoutConfirmation();
+                state.currentDay = 1;
+                showMainContent();
+                renderWorkoutPlan();
+                saveStateToLocalStorage();
+                showToast('Plan treningowy wczytany!');
+            } catch (e) {
+                console.error('Error parsing CSV:', e);
+                showToast('Błąd podczas przetwarzania pliku CSV');
+            }
+        }
+
+        function validateHeaders(headers) {
+            const requiredHeaders = ['Dzień', 'Pompki', 'Plank (sekundy)', 'Rower (minuty)'];
+            return requiredHeaders.every(header => headers.includes(header));
+        }
+
+        function showMainContent() {
+            uploadSection.style.display = 'none';
+            mainContent.style.display = 'block';
+        }
+
+        function showUploadSection() {
+            uploadSection.style.display = 'block';
+            mainContent.style.display = 'none';
+        }
+
+        function renderWorkoutPlan() {
+            renderDaysProgress();
+            renderCurrentDayExercises();
+            updateDayProgress();
+        }
+
+        function renderDaysProgress() {
+            daysProgress.innerHTML = '';
+            
+            state.workoutPlan.forEach((dayPlan, index) => {
+                const dayNumber = index + 1;
+                const dayElement = document.createElement('div');
+                dayElement.className = 'day-indicator';
+                
+                if (dayNumber === state.currentDay) {
+                    dayElement.classList.add('active');
+                }
+                
+                if (state.completedDays.includes(dayNumber)) {
+                    dayElement.classList.add('completed');
+                }
+                
+                dayElement.textContent = dayNumber;
+                daysProgress.appendChild(dayElement);
+            });
+        }
+
+        function renderCurrentDayExercises() {
+            exerciseList.innerHTML = '';
+            currentDayElement.textContent = state.currentDay;
+            
+            const currentDayPlan = state.workoutPlan.find(day => day.day === state.currentDay);
+            if (!currentDayPlan) return;
+            
+            currentDayPlan.exercises.forEach(exercise => {
+                const li = document.createElement('li');
+                li.className = 'exercise-item';
+                
+                const title = document.createElement('div');
+                title.className = 'exercise-title';
+                title.textContent = exercise.name;
+                
+                const value = document.createElement('div');
+                value.className = 'exercise-value';
+                value.textContent = `${exercise.value} ${exercise.unit}`;
+                
+                const actionContainer = document.createElement('div');
+                
+                const isCompleted = isExerciseCompleted(state.currentDay, exercise.id);
+                
+                if (exercise.type === 'timer') {
+                    const timerElement = document.createElement('div');
+                    timerElement.className = 'timer';
+                    timerElement.id = `timer-${exercise.id}`;
+                    timerElement.textContent = formatTime(exercise.value);
+                    
+                    const button = document.createElement('button');
+                    button.className = 'btn';
+                    button.id = `btn-${exercise.id}`;
+                    
+                    if (isCompleted) {
+                        button.textContent = `${exercise.name} wykonane`;
+                        button.classList.add('btn-success');
+                        button.disabled = true;
+                    } else {
+                        button.textContent = 'START';
+                        button.addEventListener('click', () => startTimer(exercise.id, exercise.value, exercise.name));
+                    }
+                    
+                    actionContainer.appendChild(timerElement);
+                    actionContainer.appendChild(button);
+                } else {
+                    const button = document.createElement('button');
+                    button.className = 'btn';
+                    button.id = `btn-${exercise.id}`;
+                    
+                    if (isCompleted) {
+                        button.textContent = `${exercise.name} wykonane`;
+                        button.classList.add('btn-success');
+                        button.disabled = true;
+                    } else {
+                        button.textContent = 'Wykonaj';
+                        button.addEventListener('click', () => completeExercise(state.currentDay, exercise.id, exercise.name));
+                    }
+                    
+                    actionContainer.appendChild(button);
+                }
+                
+                li.appendChild(title);
+                li.appendChild(value);
+                li.appendChild(actionContainer);
+                exerciseList.appendChild(li);
+            });
+        }
+
+        function startTimer(exerciseId, seconds, exerciseName) {
+            const timerElement = document.getElementById(`timer-${exerciseId}`);
+            const button = document.getElementById(`btn-${exerciseId}`);
+            
+            let remainingSeconds = seconds;
+            button.disabled = true;
+            button.textContent = 'W TRAKCIE...';
+            
+            const timerInterval = setInterval(() => {
+                remainingSeconds--;
+                timerElement.textContent = formatTime(remainingSeconds);
+                
+                if (remainingSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    completeExercise(state.currentDay, exerciseId, exerciseName);
+                    showToast(`${exerciseName} ukończone!`);
+                }
+            }, 1000);
+            
+            // Store timer reference to clear it if needed
+            button.dataset.timerId = timerInterval;
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function completeExercise(day, exerciseId, exerciseName) {
+            if (!state.completedExercises[day]) {
+                state.completedExercises[day] = [];
+            }
+            
+            if (!state.completedExercises[day].includes(exerciseId)) {
+                state.completedExercises[day].push(exerciseId);
+            }
+            
+            const button = document.getElementById(`btn-${exerciseId}`);
+            if (button) {
+                button.textContent = `${exerciseName} wykonane`;
+                button.classList.add('btn-success');
+                button.disabled = true;
+                
+                // Clear timer if exists
+                if (button.dataset.timerId) {
+                    clearInterval(parseInt(button.dataset.timerId));
+                }
+            }
+            
+            updateDayProgress();
+            saveStateToLocalStorage();
+        }
+
+        function isExerciseCompleted(day, exerciseId) {
+            return state.completedExercises[day] && state.completedExercises[day].includes(exerciseId);
+        }
+
+        function updateDayProgress() {
+            const currentDayPlan = state.workoutPlan.find(day => day.day === state.currentDay);
+            if (!currentDayPlan) return;
+            
+            const totalExercises = currentDayPlan.exercises.length;
+            const completedExercises = state.completedExercises[state.currentDay] ? state.completedExercises[state.currentDay].length : 0;
+            
+            dayProgressElement.textContent = `${completedExercises}/${totalExercises}`;
+            
+            // Enable/disable next day button
+            nextDayButton.disabled = completedExercises < totalExercises;
+        }
+
+        function moveToNextDay() {
+            if (!state.completedDays.includes(state.currentDay)) {
+                state.completedDays.push(state.currentDay);
+            }
+            
+            const nextDay = state.currentDay + 1;
+            if (nextDay <= state.workoutPlan.length) {
+                state.currentDay = nextDay;
+                renderWorkoutPlan();
+                saveStateToLocalStorage();
+                showToast(`Dzień ${state.currentDay - 1} ukończony! Przejście do dnia ${state.currentDay}`);
+            } else {
+                showToast('Gratulacje! Ukończyłeś cały plan treningowy!');
+            }
+        }
+
+        function resetProgress() {
+            if (confirm('Czy na pewno chcesz zresetować postęp treningowy?')) {
+                resetProgressWithoutConfirmation();
+            }
+        }
+
+        function resetProgressWithoutConfirmation() {
+            state.completedDays = [];
+            state.completedExercises = {};
+            state.currentDay = 1;
+            renderWorkoutPlan();
+            saveStateToLocalStorage();
+        }
+
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
