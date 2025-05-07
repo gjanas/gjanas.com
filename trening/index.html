@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Trening Tracker</title>
+    <!-- Link to manifest will be added later -->
     <style>
         :root {
             --main-bg-color: #f2f2f7;
@@ -70,7 +71,7 @@
         }
 
         .header {
-            padding: 10px 16px; /* Adjusted padding */
+            padding: 10px 16px;
             text-align: center;
             font-weight: 600;
             font-size: 18px;
@@ -87,70 +88,35 @@
         .header-title {
             flex-grow: 1;
             text-align: center;
-            margin-left: 38px; /* Approx width of settings button + padding */
+            margin-left: 38px; 
         }
         .settings-button {
-            background: none;
-            border: none;
-            color: var(--settings-icon-fill); /* Use variable for SVG fill */
-            cursor: pointer;
-            padding: 6px; /* Adjust padding around SVG */
-            line-height: 1;
-            border-radius: 50%; /* Make it circular for better tap target / focus */
-            display: flex; /* For aligning SVG inside */
-            align-items: center;
-            justify-content: center;
-            width: 38px; /* Explicit width */
-            height: 38px; /* Explicit height */
+            background: none; border: none; color: var(--settings-icon-fill); cursor: pointer;
+            padding: 6px; line-height: 1; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; width: 38px; height: 38px;
             transition: background-color 0.2s;
         }
-        .settings-button svg {
-            width: 24px; /* Control SVG size */
-            height: 24px;
-            fill: currentColor; /* SVG inherits color from button's text color */
-        }
-        .settings-button:hover {
-            background-color: rgba(0,0,0,0.05);
-        }
-        body.dark-theme .settings-button:hover {
-            background-color: rgba(255,255,255,0.1);
-        }
-        .settings-button:focus-visible {
-            outline: 2px solid transparent;
-            box-shadow: 0 0 0 3px var(--focus-ring-color);
-        }
+        .settings-button svg { width: 24px; height: 24px; fill: currentColor; }
+        .settings-button:hover { background-color: rgba(0,0,0,0.05); }
+        body.dark-theme .settings-button:hover { background-color: rgba(255,255,255,0.1); }
+        .settings-button:focus-visible { outline: 2px solid transparent; box-shadow: 0 0 0 3px var(--focus-ring-color); }
 
-
-        .header.scrolled {
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
+        .header.scrolled { box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); }
         .card {
-            background-color: var(--card-bg-color);
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            margin-bottom: 16px;
-            overflow: hidden;
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            background-color: var(--card-bg-color); border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); margin-bottom: 16px;
+            overflow: hidden; transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
-
         .card-header {
-            padding: 16px;
-            border-bottom: 1px solid var(--border-color);
-            font-weight: 600;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 16px; border-bottom: 1px solid var(--border-color); font-weight: 600;
+            display: flex; justify-content: space-between; align-items: center;
             transition: border-color 0.3s ease;
         }
-
         .card-content { padding: 16px; }
         .exercise-list { list-style: none; }
         .exercise-item {
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border-color);
-            display: flex; flex-direction: column; gap: 8px;
-            transition: border-color 0.3s ease;
+            padding: 12px 0; border-bottom: 1px solid var(--border-color);
+            display: flex; flex-direction: column; gap: 8px; transition: border-color 0.3s ease;
         }
         .exercise-item:last-child { border-bottom: none; }
         .exercise-title { font-weight: 500; }
@@ -166,15 +132,11 @@
         .btn-outline { background-color: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); }
         .btn-outline.danger { border-color: var(--danger-color); color: var(--danger-color); }
         .btn-danger { background-color: var(--danger-color); }
-
         .btn:not(:disabled):active { filter: brightness(0.9); transform: translateY(1px); }
         .btn-outline:not(:disabled):active { background-color: var(--btn-outline-hover-bg); filter: none; transform: translateY(1px); }
         .btn-outline.danger:not(:disabled):active { background-color: var(--btn-outline-danger-hover-bg); }
         .btn-danger:not(:disabled):active, .btn-success:not(:disabled):active { filter: brightness(0.9); transform: translateY(1px); }
-        
-        .btn:focus-visible, .btn-outline:focus-visible {
-            outline: 2px solid transparent; box-shadow: 0 0 0 3px var(--focus-ring-color);
-        }
+        .btn:focus-visible, .btn-outline:focus-visible { outline: 2px solid transparent; box-shadow: 0 0 0 3px var(--focus-ring-color); }
 
         .timer { font-size: 24px; font-weight: 600; text-align: center; margin: 10px 0; }
         .upload-container { display: flex; flex-direction: column; gap: 8px; }
@@ -225,7 +187,6 @@
             font-weight: 600; color: var(--text-color); transition: color 0.3s ease;
         }
         .modal-content p { margin-bottom: 24px; font-size: 16px; color: var(--secondary-text-color); line-height: 1.5; transition: color 0.3s ease; }
-        
         .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px;}
         .modal-actions .btn { width: auto; padding: 10px 20px; }
 
@@ -237,26 +198,13 @@
         .stats-modal-content p { text-align: left; margin-bottom: 8px; font-size: 15px; }
         .stats-modal-content p strong { font-weight: 500; color: var(--text-color); }
 
-        /* Confetti Optimization */
         .confetti-particle {
-            position: fixed;
-            pointer-events: none;
-            opacity: 0;
-            z-index: 1500;
-            /* Apply will-change to hint browser about upcoming transformations */
-            will-change: transform, opacity; 
-            animation: fall linear forwards;
+            position: fixed; pointer-events: none; opacity: 0; z-index: 1500;
+            will-change: transform, opacity; animation: fall linear forwards;
         }
-
         @keyframes fall {
-            0% {
-                transform: translate3d(0, 0, 0) rotateZ(0deg); /* Use translate3d */
-                opacity: 1;
-            }
-            100% {
-                transform: translate3d(0, calc(100vh + 30px), 0) rotateZ(360deg); /* Simpler rotation, adjust if needed */
-                opacity: 0;
-            }
+            0% { transform: translate3d(0, -10px, 0) rotateZ(0deg); opacity: 1; } /* Start slightly above origin point */
+            100% { transform: translate3d(0, 150px, 0) rotateZ(180deg); opacity: 0; } /* Shorter fall, less rotation */
         }
 
         .view { animation-duration: 0.3s; animation-timing-function: ease-in-out; animation-fill-mode: forwards; }
@@ -270,7 +218,7 @@
             .btn { padding: 10px; }
             .modal-actions { flex-direction: column-reverse; }
             .modal-actions .btn { width: 100%; }
-            .header-title { margin-left: 28px; font-size: 17px; } /* Adjust for SVG icon */
+            .header-title { margin-left: 28px; font-size: 17px; }
             .settings-button { width: 34px; height: 34px; padding: 5px; }
             .settings-button svg { width: 22px; height: 22px; }
             .settings-modal-content .btn, .stats-modal-content .btn { padding: 12px 16px; }
@@ -337,6 +285,7 @@
             <h3>Ustawienia</h3>
             <button id="themeSwitcherButton" class="btn btn-outline">Motyw: Jasny</button>
             <button id="statsButton" class="btn btn-outline">Statystyki</button>
+            <button id="exportDataButton" class="btn btn-outline">Eksportuj Dane</button> <!-- New Button -->
             <button id="uploadNewPlanButtonModal" class="btn btn-outline">Nowy Plan CSV</button>
             <button id="resetProgressButtonModal" class="btn btn-outline danger">Resetuj Postęp</button>
             <button id="closeSettingsModalButton" class="btn btn-close-modal">Zamknij</button>
@@ -356,14 +305,13 @@
         </div>
     </div>
 
-
     <script>
         const state = {
             workoutPlan: [], currentDay: 1, completedDays: [],
             completedExercises: {}, confettiShownForDays: [], currentTheme: 'light'
         };
 
-        const DOM = { // ... (DOM object largely unchanged, ensure all IDs are correct)
+        const DOM = {
             body: document.body, appHeader: document.getElementById('appHeader'),
             settingsButton: document.getElementById('settingsButton'),
             uploadSection: document.getElementById('uploadSection'), mainContent: document.getElementById('mainContent'),
@@ -379,6 +327,7 @@
             settingsModal: document.getElementById('settingsModal'),
             themeSwitcherButton: document.getElementById('themeSwitcherButton'),
             statsButton: document.getElementById('statsButton'),
+            exportDataButton: document.getElementById('exportDataButton'), // New DOM element
             uploadNewPlanButtonModal: document.getElementById('uploadNewPlanButtonModal'),
             resetProgressButtonModal: document.getElementById('resetProgressButtonModal'),
             closeSettingsModalButton: document.getElementById('closeSettingsModalButton'),
@@ -391,7 +340,7 @@
         };
         let currentModalConfirmCallback = null;
         const ANIMATION_DURATION = 300;
-        const CONFETTI_COUNT = 40; // Reduced confetti count for performance
+        const CONFETTI_COUNT = 20; // Reduced further for "burst" effect
 
         // Event Listeners
         DOM.settingsButton.addEventListener('click', openSettingsModal);
@@ -402,6 +351,7 @@
         
         DOM.themeSwitcherButton.addEventListener('click', toggleTheme);
         DOM.statsButton.addEventListener('click', openStatsModal);
+        DOM.exportDataButton.addEventListener('click', exportData); // New listener
         DOM.uploadNewPlanButtonModal.addEventListener('click', () => {
             closeSettingsModal(); showUploadSectionWithAnimation();
         });
@@ -431,8 +381,12 @@
         });
 
         init();
+        // --- (Rest of the JS code from previous version, starting from function init() down to calculateAndRenderStats()) ---
+        // --- It's important to include all functions from init() downwards here ---
+        // --- The only new function added below is exportData() ---
+        // --- And the confetti animation / particle creation is updated in showConfetti() ---
 
-        function init() { /* ... (unchanged) ... */ 
+        function init() {
             loadStateFromLocalStorage();
             loadThemePreference();
             if (state.workoutPlan.length > 0) {
@@ -445,7 +399,8 @@
             }
             DOM.appHeader.classList.toggle('scrolled', window.scrollY > 0);
         }
-        function loadStateFromLocalStorage() { /* ... (unchanged) ... */ 
+
+        function loadStateFromLocalStorage() {
             const savedState = localStorage.getItem('workoutTrackerState');
             if (savedState) {
                 try {
@@ -455,41 +410,35 @@
                 } catch (e) { console.error('Failed to parse saved state:', e); localStorage.removeItem('workoutTrackerState'); Object.assign(state, { confettiShownForDays: [], currentTheme: 'light' }); }
             } else { Object.assign(state, { confettiShownForDays: [], currentTheme: 'light' }); }
         }
-        function saveStateToLocalStorage() { /* ... (unchanged) ... */ 
-             localStorage.setItem('workoutTrackerState', JSON.stringify(state));
-        }
-        function loadThemePreference() { /* ... (unchanged) ... */ 
+        function saveStateToLocalStorage() { localStorage.setItem('workoutTrackerState', JSON.stringify(state)); }
+
+        function loadThemePreference() {
             const savedTheme = localStorage.getItem('themePreference');
             if (savedTheme) state.currentTheme = savedTheme;
             applyTheme();
         }
-        function saveThemePreference() { /* ... (unchanged) ... */ 
-            localStorage.setItem('themePreference', state.currentTheme);
-        }
-        function applyTheme() { /* ... (unchanged) ... */ 
+        function saveThemePreference() { localStorage.setItem('themePreference', state.currentTheme); }
+        function applyTheme() {
             DOM.body.classList.toggle('dark-theme', state.currentTheme === 'dark');
             DOM.themeSwitcherButton.textContent = `Motyw: ${state.currentTheme === 'dark' ? 'Jasny' : 'Ciemny'}`;
         }
-        function toggleTheme() { /* ... (unchanged) ... */ 
+        function toggleTheme() {
             state.currentTheme = state.currentTheme === 'light' ? 'dark' : 'light';
             applyTheme(); saveThemePreference();
         }
-        function openSettingsModal() { /* ... (unchanged) ... */ 
-            DOM.settingsModal.classList.add('show'); DOM.themeSwitcherButton.focus();
-        }
-        function closeSettingsModal() { /* ... (unchanged) ... */ 
-            DOM.settingsModal.classList.remove('show');
-        }
-        function openStatsModal() { /* ... (unchanged) ... */ 
+
+        function openSettingsModal() { DOM.settingsModal.classList.add('show'); DOM.themeSwitcherButton.focus(); }
+        function closeSettingsModal() { DOM.settingsModal.classList.remove('show'); }
+
+        function openStatsModal() {
             closeSettingsModal(); 
             calculateAndRenderStats();
             DOM.statsModal.classList.add('show');
             DOM.closeStatsModalButton.focus();
         }
-        function closeStatsModal() { /* ... (unchanged) ... */ 
-            DOM.statsModal.classList.remove('show');
-        }
-        function showMainContentWithAnimation() { /* ... (unchanged) ... */ 
+        function closeStatsModal() { DOM.statsModal.classList.remove('show'); }
+
+        function showMainContentWithAnimation() {
             if (DOM.mainContent.style.display === 'block' && !DOM.mainContent.classList.contains('fade-out')) return;
             DOM.uploadSection.classList.remove('fade-in'); DOM.uploadSection.classList.add('fade-out');
             setTimeout(() => {
@@ -498,7 +447,7 @@
                 DOM.mainContent.classList.add('fade-in');
             }, ANIMATION_DURATION);
         }
-        function showUploadSectionWithAnimation() { /* ... (unchanged) ... */ 
+        function showUploadSectionWithAnimation() {
             if (DOM.uploadSection.style.display === 'block' && !DOM.uploadSection.classList.contains('fade-out')) return;
             DOM.mainContent.classList.remove('fade-in'); DOM.mainContent.classList.add('fade-out');
             setTimeout(() => {
@@ -508,19 +457,19 @@
                 DOM.fileName.textContent = ''; DOM.uploadButton.disabled = true; DOM.fileInput.value = null;
             }, ANIMATION_DURATION);
         }
-        function showCustomConfirm(title, message, onConfirm) { /* ... (unchanged) ... */ 
+
+        function showCustomConfirm(title, message, onConfirm) {
             DOM.modalTitle.textContent = title; DOM.modalMessage.textContent = message;
             currentModalConfirmCallback = onConfirm;
             DOM.customModal.classList.add('show'); DOM.modalConfirmButton.focus();
         }
-        function hideCustomConfirm() { /* ... (unchanged) ... */ 
-            DOM.customModal.classList.remove('show'); currentModalConfirmCallback = null;
-        }
-        function handleFileSelection(event) { /* ... (unchanged) ... */ 
+        function hideCustomConfirm() { DOM.customModal.classList.remove('show'); currentModalConfirmCallback = null; }
+
+        function handleFileSelection(event) {
             const file = event.target.files[0];
             DOM.fileName.textContent = file ? file.name : ''; DOM.uploadButton.disabled = !file;
         }
-        function handleFileUpload() { /* ... (unchanged) ... */ 
+        function handleFileUpload() {
             const file = DOM.fileInput.files[0];
             if (!file) { showToast('Wybierz plik CSV'); return; }
             const reader = new FileReader();
@@ -532,7 +481,8 @@
             };
             reader.readAsText(file);
         }
-        function parseCSV(content) { /* ... (unchanged) ... */ 
+
+        function parseCSV(content) {
             try {
                 const lines = content.split('\n').map(l => l.trim()).filter(Boolean);
                 if (lines.length < 2) throw new Error('Plik CSV jest pusty lub zawiera tylko nagłówki.');
@@ -560,14 +510,13 @@
                 saveStateToLocalStorage(); showToast('Plan treningowy wczytany!');
             } catch (e) { console.error('Error parsing CSV:', e); showToast(e.message || 'Błąd podczas przetwarzania pliku CSV.'); }
         }
-        function validateHeaders(headers) { /* ... (unchanged) ... */ 
+
+        function validateHeaders(headers) {
             const required = ['Dzień', 'Pompki', 'Plank (sekundy)', 'Rower (minuty)'];
             return required.every(h => headers.includes(h));
         }
-        function renderWorkoutPlan() { /* ... (unchanged) ... */ 
-            renderDaysProgress(); renderCurrentDayExercises(); updateDayProgress();
-        }
-        function renderDaysProgress() { /* ... (unchanged, includes ARIA for day indicators) ... */ 
+        function renderWorkoutPlan() { renderDaysProgress(); renderCurrentDayExercises(); updateDayProgress(); }
+        function renderDaysProgress() {
             DOM.daysProgress.innerHTML = '';
             state.workoutPlan.forEach(dayPlan => { 
                 const dayNumber = dayPlan.day; const dayEl = document.createElement('div');
@@ -581,7 +530,7 @@
                 DOM.daysProgress.appendChild(dayEl);
             });
         }
-        function renderCurrentDayExercises() { /* ... (unchanged) ... */ 
+        function renderCurrentDayExercises() {
             DOM.exerciseList.innerHTML = ''; DOM.currentDayElement.textContent = state.currentDay;
             const currentDayPlan = state.workoutPlan.find(d => d.day === state.currentDay);
             if (!currentDayPlan) {
@@ -603,14 +552,14 @@
                 else if (ex.type === 'count' && !isDone) button.addEventListener('click', () => completeExercise(state.currentDay, ex.id, ex.name));
             });
         }
-        function handleTimerAction(exerciseId, exerciseName) { /* ... (unchanged) ... */ 
+        function handleTimerAction(exerciseId, exerciseName) {
             const button = document.getElementById(`btn-${exerciseId}`); const timerEl = document.getElementById(`timer-${exerciseId}`);
             const timerState = button.dataset.timerState || 'idle'; const initialSecs = parseInt(button.dataset.initialSeconds);
             if (timerState === 'idle') { button.dataset.remainingSeconds = initialSecs; button.dataset.timerState = 'running'; button.textContent = 'PAUZA'; startTicking(exerciseId, exerciseName, button, timerEl); }
             else if (timerState === 'running') { clearInterval(parseInt(button.dataset.timerId)); button.dataset.timerState = 'paused'; button.textContent = 'WZNOW'; }
             else if (timerState === 'paused') { button.dataset.timerState = 'running'; button.textContent = 'PAUZA'; startTicking(exerciseId, exerciseName, button, timerEl); }
         }
-        function startTicking(exerciseId, exerciseName, button, timerEl) { /* ... (unchanged) ... */ 
+        function startTicking(exerciseId, exerciseName, button, timerEl) {
             let remaining = parseInt(button.dataset.remainingSeconds); timerEl.textContent = formatTime(remaining);
             const intervalId = setInterval(() => {
                 remaining--; button.dataset.remainingSeconds = remaining; timerEl.textContent = formatTime(remaining);
@@ -618,10 +567,8 @@
             }, 1000);
             button.dataset.timerId = intervalId;
         }
-        function formatTime(s) { /* ... (unchanged) ... */ 
-            s = Math.max(0, s); const mins = Math.floor(s / 60).toString().padStart(2, '0'); const secs = (s % 60).toString().padStart(2, '0'); return `${mins}:${secs}`;
-        }
-        function completeExercise(day, exerciseId, exerciseName) { /* ... (unchanged, confetti logic included) ... */ 
+        function formatTime(s) { s = Math.max(0, s); const mins = Math.floor(s / 60).toString().padStart(2, '0'); const secs = (s % 60).toString().padStart(2, '0'); return `${mins}:${secs}`; }
+        function completeExercise(day, exerciseId, exerciseName) {
             state.completedExercises[day] = state.completedExercises[day] || [];
             if (!state.completedExercises[day].includes(exerciseId)) { state.completedExercises[day].push(exerciseId); }
             const button = document.getElementById(`btn-${exerciseId}`);
@@ -639,16 +586,14 @@
             }
             saveStateToLocalStorage();
         }
-        function isExerciseCompleted(day, exerciseId) { /* ... (unchanged) ... */ 
-            return state.completedExercises[day]?.includes(exerciseId) || false;
-        }
-        function updateDayProgress() { /* ... (unchanged) ... */ 
+        function isExerciseCompleted(day, exerciseId) { return state.completedExercises[day]?.includes(exerciseId) || false; }
+        function updateDayProgress() {
             const currentDayPlan = state.workoutPlan.find(d => d.day === state.currentDay); if (!currentDayPlan) return;
             const totalEx = currentDayPlan.exercises.length; const completedCount = state.completedExercises[state.currentDay]?.length || 0;
             DOM.dayProgressElement.textContent = `${completedCount}/${totalEx}`;
             DOM.nextDayButton.disabled = totalEx === 0 || completedCount < totalEx;
         }
-        function moveToNextDay() { /* ... (unchanged) ... */ 
+        function moveToNextDay() {
             if (!state.completedDays.includes(state.currentDay)) { state.completedDays.push(state.currentDay); }
             const currentIndex = state.workoutPlan.findIndex(p => p.day === state.currentDay);
             const currentDayNum = state.workoutPlan[currentIndex].day;
@@ -657,61 +602,45 @@
             renderWorkoutPlan(); saveStateToLocalStorage();
             showToast(`Dzień ${currentDayNum} ukończony! Przejście do dnia ${state.currentDay}`);
         }
-        function resetProgress() { /* ... (unchanged) ... */ 
-            showCustomConfirm('Reset Postępu', 'Czy na pewno chcesz zresetować postęp treningowy?', () => { resetProgressWithoutConfirmation(); showToast('Postęp zresetowany.'); });
-        }
-        function resetProgressWithoutConfirmation() { /* ... (unchanged) ... */ 
+        function resetProgress() { showCustomConfirm('Reset Postępu', 'Czy na pewno chcesz zresetować postęp treningowy?', () => { resetProgressWithoutConfirmation(); showToast('Postęp zresetowany.'); }); }
+        function resetProgressWithoutConfirmation() {
             state.completedDays = []; state.completedExercises = {}; state.confettiShownForDays = [];
             state.currentDay = state.workoutPlan.length > 0 ? state.workoutPlan[0].day : 1;
             document.querySelectorAll('button[data-timerid]').forEach(b => clearInterval(parseInt(b.dataset.timerId)));
             if (state.workoutPlan.length > 0 && DOM.mainContent.style.display !== 'none') { renderWorkoutPlan(); }
             saveStateToLocalStorage();
         }
-        function showToast(message) { /* ... (unchanged) ... */ 
-            DOM.toast.textContent = message; DOM.toast.classList.add('show'); setTimeout(() => DOM.toast.classList.remove('show'), 3000);
-        }
+        function showToast(message) { DOM.toast.textContent = message; DOM.toast.classList.add('show'); setTimeout(() => DOM.toast.classList.remove('show'), 3000); }
         
         function showConfetti() {
-            const colors = ['var(--primary-color)', 'var(--success-color)', '#ffcc00', 'var(--danger-color)', '#5856d6', '#ff9500'];
-            for (let i = 0; i < CONFETTI_COUNT; i++) { // Use constant for count
+            const colors = ['var(--primary-color)', 'var(--success-color)', '#ffcc00', 'var(--danger-color)'];
+            // Determine origin point for confetti (e.g., center top of viewport)
+            const originX = 50; // vw
+            const originY = 0;  // vh (top)
+
+            for (let i = 0; i < CONFETTI_COUNT; i++) {
                 const particle = document.createElement('div');
                 particle.classList.add('confetti-particle');
-                const size = Math.random() * 6 + 3; // Smaller particles: 3px to 9px
-                const xPosition = Math.random() * 100; // vw
-                // Random horizontal movement factor for translate3d
-                const horizontalMovement = (Math.random() - 0.5) * 50; // +/- 25px horizontal drift
+                const size = Math.random() * 5 + 2; // Smaller: 2px to 7px
+                // Spread particles a bit horizontally from origin
+                const initialXOffset = (Math.random() - 0.5) * 30; // +/- 15vw from originX
 
                 Object.assign(particle.style, {
                     width: `${size}px`, height: `${size}px`,
                     backgroundColor: colors[Math.floor(Math.random() * colors.length)],
-                    left: `${xPosition}vw`,
-                    top: `-${size + Math.random() * 20}px`, // Start above viewport
-                    animationDuration: `${Math.random() * 1.5 + 2.0}s`, // 2.0-3.5 seconds
-                    animationDelay: `${Math.random() * 0.5}s` // Stagger start up to 0.5s
+                    left: `calc(${originX}vw + ${initialXOffset}px)`, // Start near center top
+                    top: `${originY}vh`, // Start at the very top
+                    animationDuration: `${Math.random() * 1 + 1.0}s`, // 1.0-2.0 seconds for shorter burst
+                    animationDelay: `${Math.random() * 0.2}s` // Stagger start up to 0.2s
                 });
-                // Store the horizontal movement on the particle for use in the animation keyframes if needed,
-                // or directly manipulate transform during animation if using JS animation.
-                // For CSS animation, we can vary the end X position slightly if we make multiple @keyframes rules
-                // or accept that horizontal drift is harder with pure CSS without more complex setup.
-                // The translate3d(0, ...) in keyframes will primarily handle vertical fall.
-                // For now, the keyframes apply the same vertical fall to all.
-                
-                // We can add a random horizontal offset to the translate3d X value in JS if we were
-                // dynamically setting the animation for each, but for a shared CSS keyframe:
-                // particle.style.setProperty('--confetti-x-drift', `${horizontalMovement}px`);
-                // And then in @keyframes: transform: translate3d(var(--confetti-x-drift), ...)
-                // However, this requires setting custom property per particle which can be complex.
-                // A simpler approach is to just let `left` position them initially and they fall mostly straight.
-
                 DOM.body.appendChild(particle);
                 particle.addEventListener('animationend', () => particle.remove());
             }
         }
 
-        function calculateAndRenderStats() { /* ... (unchanged) ... */ 
+        function calculateAndRenderStats() {
             let completedDaysCount = state.completedDays.length;
             let totalPushups = 0; let totalPlankSeconds = 0; let totalBikeMinutes = 0;
-
             state.completedDays.forEach(dayNumber => {
                 const dayPlan = state.workoutPlan.find(dp => dp.day === dayNumber);
                 if (dayPlan && state.completedExercises[dayNumber] && state.completedExercises[dayNumber].length === dayPlan.exercises.length) {
@@ -727,6 +656,38 @@
             DOM.statsTotalPlank.textContent = totalPlankSeconds;
             DOM.statsTotalBike.textContent = totalBikeMinutes;
         }
+
+        function exportData() {
+            try {
+                const dataToExport = {
+                    version: "1.0.0", // Optional: version your backup format
+                    timestamp: new Date().toISOString(),
+                    workoutPlan: state.workoutPlan,
+                    currentDay: state.currentDay,
+                    completedDays: state.completedDays,
+                    completedExercises: state.completedExercises,
+                    confettiShownForDays: state.confettiShownForDays,
+                    currentTheme: state.currentTheme
+                };
+                const jsonData = JSON.stringify(dataToExport, null, 2); // Pretty print JSON
+                const blob = new Blob([jsonData], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const dateStr = new Date().toISOString().slice(0,10); // YYYY-MM-DD
+                a.download = `trening-tracker-backup-${dateStr}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast('Dane wyeksportowane pomyślnie!');
+                closeSettingsModal();
+            } catch (error) {
+                console.error("Błąd podczas eksportu danych:", error);
+                showToast("Wystąpił błąd podczas eksportu danych.");
+            }
+        }
+
     </script>
 </body>
 </html>
