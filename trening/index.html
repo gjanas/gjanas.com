@@ -6,7 +6,6 @@
     <title>Trening Tracker</title>
     <style>
         :root {
-            /* Light Theme (Default) */
             --main-bg-color: #f2f2f7;
             --card-bg-color: #ffffff;
             --primary-color: #007aff;
@@ -15,30 +14,30 @@
             --secondary-text-color: #8e8e93;
             --border-color: #d1d1d6;
             --danger-color: #ff3b30;
-            --header-bg-color: var(--main-bg-color); /* For sticky header */
+            --header-bg-color: var(--main-bg-color);
             --day-indicator-bg: #e0e0e0;
             --day-indicator-text: var(--text-color);
             --btn-outline-hover-bg: rgba(0, 122, 255, 0.08);
             --btn-outline-danger-hover-bg: rgba(255, 59, 48, 0.08);
+            --focus-ring-color: rgba(0, 122, 255, 0.5);
         }
 
         body.dark-theme {
-            /* Dark Theme Overrides */
             --main-bg-color: #000000;
             --card-bg-color: #1c1c1e;
-            --primary-color: #0a84ff; /* Slightly brighter blue for dark mode */
-            --success-color: #30d158; /* Slightly brighter green */
+            --primary-color: #0a84ff;
+            --success-color: #30d158;
             --text-color: #ffffff;
-            --secondary-text-color: #8d8d92; /* Lighter secondary text */
-            --border-color: #3a3a3c;   /* Darker border */
-            --danger-color: #ff453a;  /* Brighter red */
+            --secondary-text-color: #8d8d92;
+            --border-color: #3a3a3c;
+            --danger-color: #ff453a;
             --header-bg-color: var(--main-bg-color);
             --day-indicator-bg: #3a3a3c;
             --day-indicator-text: var(--text-color);
-            --btn-outline-hover-bg: rgba(10, 132, 255, 0.15); /* Adjusted for dark */
-            --btn-outline-danger-hover-bg: rgba(255, 69, 58, 0.15); /* Adjusted for dark */
+            --btn-outline-hover-bg: rgba(10, 132, 255, 0.15);
+            --btn-outline-danger-hover-bg: rgba(255, 69, 58, 0.15);
+            --focus-ring-color: rgba(10, 132, 255, 0.6);
         }
-
 
         * {
             margin: 0;
@@ -58,7 +57,7 @@
             display: flex;
             flex-direction: column;
             overflow-x: hidden; 
-            transition: background-color 0.3s ease, color 0.3s ease; /* Smooth theme transition */
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .container {
@@ -69,7 +68,7 @@
         }
 
         .header {
-            padding: 16px 0;
+            padding: 12px 16px;
             text-align: center;
             font-weight: 600;
             font-size: 18px;
@@ -79,30 +78,28 @@
             background-color: var(--header-bg-color);
             z-index: 100;
             transition: box-shadow 0.3s ease-in-out, background-color 0.3s ease, border-color 0.3s ease;
-            display: flex; /* For theme switcher */
-            justify-content: space-between; /* For theme switcher */
-            align-items: center; /* For theme switcher */
-            padding-left: 16px; /* Adjust padding for title centering with switcher */
-            padding-right: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .header-title {
-            flex-grow: 1; /* Allows title to take available space and remain centered */
+            flex-grow: 1;
             text-align: center;
+            margin-left: 30px; 
         }
-        .theme-switcher {
+        .settings-button {
             background: none;
-            border: 1px solid var(--secondary-text-color);
-            color: var(--secondary-text-color);
-            padding: 6px 10px;
-            border-radius: 8px;
+            border: none;
+            color: var(--primary-color);
+            font-size: 24px;
             cursor: pointer;
-            font-size: 12px;
-            font-weight: 500;
-            transition: background-color 0.2s, color 0.2s, border-color 0.3s ease;
+            padding: 5px;
+            line-height: 1;
+            border-radius: 8px;
         }
-        .theme-switcher:hover {
-            background-color: var(--secondary-text-color);
-            color: var(--card-bg-color);
+        .settings-button:focus-visible {
+            outline: 2px solid transparent;
+            box-shadow: 0 0 0 3px var(--focus-ring-color);
         }
 
 
@@ -129,305 +126,120 @@
             transition: border-color 0.3s ease;
         }
 
-        .card-content {
-            padding: 16px;
-        }
-
-        .exercise-list {
-            list-style: none;
-        }
-
+        .card-content { padding: 16px; }
+        .exercise-list { list-style: none; }
         .exercise-item {
             padding: 12px 0;
             border-bottom: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            display: flex; flex-direction: column; gap: 8px;
             transition: border-color 0.3s ease;
         }
-
-        .exercise-item:last-child {
-            border-bottom: none;
-        }
-
-        .exercise-title {
-            font-weight: 500;
-        }
-
-        .exercise-value {
-            color: var(--secondary-text-color);
-            font-size: 14px;
-            transition: color 0.3s ease;
-        }
+        .exercise-item:last-child { border-bottom: none; }
+        .exercise-title { font-weight: 500; }
+        .exercise-value { color: var(--secondary-text-color); font-size: 14px; transition: color 0.3s ease; }
 
         .btn {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 500;
-            cursor: pointer;
-            font-size: 16px;
+            width: 100%; padding: 12px; background-color: var(--primary-color); color: white;
+            border: none; border-radius: 10px; font-weight: 500; cursor: pointer; font-size: 16px;
             transition: background-color 0.2s, opacity 0.2s, transform 0.1s, filter 0.1s, color 0.3s ease;
         }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-success { background-color: var(--success-color); }
+        .btn-outline { background-color: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); }
+        .btn-outline.danger { border-color: var(--danger-color); color: var(--danger-color); }
+        .btn-danger { background-color: var(--danger-color); }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .btn-success {
-            background-color: var(--success-color);
-        }
-
-        .btn-outline {
-            background-color: transparent;
-            border: 1px solid var(--primary-color);
-            color: var(--primary-color);
-        }
-        .btn-outline.danger {
-            border-color: var(--danger-color);
-            color: var(--danger-color);
-        }
-
-        .btn-danger {
-            background-color: var(--danger-color);
-        }
-
-        .btn:not(:disabled):active {
-            filter: brightness(0.9);
-            transform: translateY(1px);
-        }
-
-        .btn-outline:not(:disabled):active {
-            background-color: var(--btn-outline-hover-bg); 
-            filter: none; 
-            transform: translateY(1px);
-        }
-        .btn-outline.danger:not(:disabled):active {
-            background-color: var(--btn-outline-danger-hover-bg);
-        }
+        .btn:not(:disabled):active { filter: brightness(0.9); transform: translateY(1px); }
+        .btn-outline:not(:disabled):active { background-color: var(--btn-outline-hover-bg); filter: none; transform: translateY(1px); }
+        .btn-outline.danger:not(:disabled):active { background-color: var(--btn-outline-danger-hover-bg); }
+        .btn-danger:not(:disabled):active, .btn-success:not(:disabled):active { filter: brightness(0.9); transform: translateY(1px); }
         
-        .btn-danger:not(:disabled):active,
-        .btn-success:not(:disabled):active {
-            filter: brightness(0.9);
-            transform: translateY(1px);
+        .btn:focus-visible, .btn-outline:focus-visible {
+            outline: 2px solid transparent; box-shadow: 0 0 0 3px var(--focus-ring-color);
         }
 
-        .timer {
-            font-size: 24px;
-            font-weight: 600;
-            text-align: center;
-            margin: 10px 0;
-        }
+        .timer { font-size: 24px; font-weight: 600; text-align: center; margin: 10px 0; }
+        .upload-container { display: flex; flex-direction: column; gap: 8px; }
+        .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
+        .file-input-wrapper input[type=file] { position: absolute; left: 0; top: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+        .file-name { margin-top: 8px; font-size: 14px; color: var(--secondary-text-color); text-align: center; min-height: 1.2em; transition: color 0.3s ease; }
 
-        .upload-container {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-            width: 100%;
-        }
-
-        .file-input-wrapper input[type=file] {
-            position: absolute;
-            left: 0;
-            top: 0;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-        }
-
-        .file-name {
-            margin-top: 8px;
-            font-size: 14px;
-            color: var(--secondary-text-color);
-            text-align: center;
-            min-height: 1.2em; 
-            transition: color 0.3s ease;
-        }
-
-        .days-progress {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 16px;
-            justify-content: center;
-        }
-
+        .days-progress { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; justify-content: center; }
         .day-indicator {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: var(--day-indicator-bg);
-            color: var(--day-indicator-text);
-            border-radius: 50%;
-            font-weight: 600;
-            font-size: 14px;
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            background-color: var(--day-indicator-bg); color: var(--day-indicator-text);
+            border-radius: 50%; font-weight: 600; font-size: 14px;
             transition: background-color 0.3s, color 0.3s, transform 0.1s, filter 0.1s;
             cursor: pointer;
         }
+        .day-indicator.active { background-color: var(--primary-color); color: white; }
+        .day-indicator.completed { background-color: var(--success-color); color: white; }
+        .day-indicator:active { transform: scale(0.95); filter: brightness(0.92); }
+        .day-indicator:focus-visible { outline: 2px solid transparent; box-shadow: 0 0 0 3px var(--focus-ring-color); }
 
-        .day-indicator.active {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .day-indicator.completed {
-            background-color: var(--success-color);
-            color: white;
-        }
-        
-        .day-indicator:active { 
-            transform: scale(0.95);
-            filter: brightness(0.92);
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-            margin-top: 16px;
-        }
+        .action-buttons { display: flex; gap: 8px; margin-top: 16px; }
 
         .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(0,0,0,0.8);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 10px;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-            pointer-events: none;
-            z-index: 1000;
-            text-align: center;
-            max-width: 80%;
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background-color: rgba(20,20,20,0.9); /* Darker for better contrast on light/dark */
+            color: white; padding: 12px 20px; border-radius: 10px;
+            opacity: 0; transition: opacity 0.3s ease-in-out; pointer-events: none;
+            z-index: 3000; text-align: center; max-width: 80%;
         }
-        body.dark-theme .toast { /* Ensure toast contrast in dark mode if needed */
-            background-color: rgba(50,50,50,0.9); /* Slightly lighter dark for toast */
-            color: #f0f0f0;
-        }
-
-        .toast.show {
-            opacity: 1;
-        }
+        /* body.dark-theme .toast - already good with dark background */
+        .toast.show { opacity: 1; }
         
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6); /* Slightly darker overlay */
+            display: flex; align-items: center; justify-content: center; z-index: 2000;
+            opacity: 0; transition: opacity 0.3s ease; pointer-events: none;
         }
-        .modal-overlay.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        .modal-overlay.show { opacity: 1; pointer-events: auto; }
         .modal-content {
-            background-color: var(--card-bg-color);
-            padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            transform: scale(0.95);
-            transition: transform 0.3s ease, background-color 0.3s ease;
+            background-color: var(--card-bg-color); padding: 24px; border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); /* Stronger shadow for modals */
+            width: 90%; max-width: 400px;
+            text-align: center; transform: scale(0.95) translateY(10px); /* Start slightly down */
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s ease, background-color 0.3s ease;
+            opacity: 0; /* Start transparent for modal animation */
         }
-        .modal-overlay.show .modal-content {
-            transform: scale(1);
-        }
+        .modal-overlay.show .modal-content { transform: scale(1) translateY(0); opacity: 1; }
         .modal-content h3 {
-            margin-top: 0;
-            margin-bottom: 12px;
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--text-color);
-            transition: color 0.3s ease;
+            margin-top: 0; margin-bottom: 16px; font-size: 20px;
+            font-weight: 600; color: var(--text-color); transition: color 0.3s ease;
         }
-        .modal-content p {
-            margin-bottom: 24px;
-            font-size: 16px;
-            color: var(--secondary-text-color);
-            line-height: 1.5;
-            transition: color 0.3s ease;
-        }
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-        }
-        .modal-actions .btn {
-            width: auto;
-            padding: 10px 20px;
-        }
+        .modal-content p { margin-bottom: 24px; font-size: 16px; color: var(--secondary-text-color); line-height: 1.5; transition: color 0.3s ease; }
+        
+        .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px;}
+        .modal-actions .btn { width: auto; padding: 10px 20px; }
 
-        .confetti-particle {
-            position: fixed;
-            pointer-events: none;
-            opacity: 0;
-            z-index: 1500;
-            animation: fall linear forwards;
+        .settings-modal-content .btn, .stats-modal-content .btn {
+            margin-bottom: 12px; text-align: left; padding-left: 16px;
+            display: block; width: 100%; /* Make buttons full width in these modals */
         }
+        .settings-modal-content .btn:last-child, .stats-modal-content .btn:last-child { margin-bottom: 0; }
+        .stats-modal-content p { text-align: left; margin-bottom: 8px; font-size: 15px; }
+        .stats-modal-content p strong { font-weight: 500; color: var(--text-color); }
 
-        @keyframes fall {
-            0% { transform: translateY(0) rotateZ(0deg); opacity: 1; }
-            100% { transform: translateY(calc(100vh + 30px)) rotateZ(720deg); opacity: 0; }
-        }
 
-        /* View Transition Animations */
-        .view {
-            /* display: block; by default if visible */
-            animation-duration: 0.3s;
-            animation-timing-function: ease-in-out;
-            animation-fill-mode: forwards; /* Keep final state of animation */
-        }
-        .fade-in {
-            animation-name: fadeInAnimation;
-            opacity: 0; /* Start transparent */
-        }
-        .fade-out {
-            animation-name: fadeOutAnimation;
-            opacity: 1; /* Start opaque */
-        }
+        .confetti-particle { position: fixed; pointer-events: none; opacity: 0; z-index: 1500; animation: fall linear forwards; }
+        @keyframes fall { 0% { transform: translateY(0) rotateZ(0deg); opacity: 1; } 100% { transform: translateY(calc(100vh + 30px)) rotateZ(720deg); opacity: 0; } }
 
-        @keyframes fadeInAnimation {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeOutAnimation {
-            from { opacity: 1; transform: translateY(0); }
-            to { opacity: 0; transform: translateY(-10px); }
-        }
-
+        .view { animation-duration: 0.3s; animation-timing-function: ease-in-out; animation-fill-mode: forwards; }
+        .fade-in { animation-name: fadeInAnimation; opacity: 0; }
+        .fade-out { animation-name: fadeOutAnimation; opacity: 1; }
+        @keyframes fadeInAnimation { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOutAnimation { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-10px); } }
 
         @media (max-width: 400px) {
             .card { border-radius: 10px; }
             .btn { padding: 10px; }
             .modal-actions { flex-direction: column-reverse; }
             .modal-actions .btn { width: 100%; }
-            .header { padding-left: 8px; padding-right: 8px; } /* Adjust header padding for smaller screens */
-            .theme-switcher { padding: 5px 8px; font-size: 11px; }
+            .header-title { margin-left: 20px; font-size: 17px; }
+            .settings-button { font-size: 22px; }
+            .settings-modal-content .btn, .stats-modal-content .btn { padding: 12px 16px; } /* Ensure consistent padding on mobile */
         }
     </style>
 </head>
@@ -435,10 +247,10 @@
     <div class="container">
         <div class="header" id="appHeader">
             <span class="header-title">Trening Tracker</span>
-            <button id="themeSwitcher" class="theme-switcher" aria-label="Przełącz motyw">Switch</button>
+            <button id="settingsButton" class="settings-button" aria-label="Otwórz ustawienia">⚙️</button>
         </div>
 
-        <div id="uploadSection" class="card view"> <!-- Added .view -->
+        <div id="uploadSection" class="card view">
             <div class="card-header">Wczytaj plan treningowy</div>
             <div class="card-content">
                 <div class="upload-container">
@@ -452,7 +264,7 @@
             </div>
         </div>
 
-        <div id="mainContent" class="view" style="display: none;"> <!-- Added .view -->
+        <div id="mainContent" class="view" style="display: none;">
             <div class="days-progress" id="daysProgress"></div>
             <div class="card">
                 <div class="card-header">
@@ -462,8 +274,6 @@
                 <div class="card-content">
                     <ul class="exercise-list" id="exerciseList"></ul>
                     <div class="action-buttons">
-                        <button class="btn btn-outline danger" id="resetButton">Reset</button>
-                        <button class="btn btn-outline" id="uploadNewButton">Nowy plan CSV</button>
                         <button class="btn" id="nextDayButton" disabled>Następny dzień</button>
                     </div>
                 </div>
@@ -484,50 +294,86 @@
         </div>
     </div>
 
+    <div id="settingsModal" class="modal-overlay">
+        <div class="modal-content settings-modal-content">
+            <h3>Ustawienia</h3>
+            <button id="themeSwitcherButton" class="btn btn-outline">Motyw: Jasny</button>
+            <button id="statsButton" class="btn btn-outline">Statystyki</button>
+            <button id="uploadNewPlanButtonModal" class="btn btn-outline">Nowy Plan CSV</button>
+            <button id="resetProgressButtonModal" class="btn btn-outline danger">Resetuj Postęp</button>
+            <button id="closeSettingsModalButton" class="btn btn-close-modal">Zamknij</button>
+        </div>
+    </div>
+
+    <div id="statsModal" class="modal-overlay">
+        <div class="modal-content stats-modal-content">
+            <h3>Statystyki Treningowe</h3>
+            <div id="statsContent">
+                <p>Ukończone dni: <strong id="statsCompletedDays">0</strong></p>
+                <p>Suma pompek: <strong id="statsTotalPushups">0</strong></p>
+                <p>Suma czasu plank: <strong id="statsTotalPlank">0</strong> s</p> <!-- Added unit -->
+                <p>Suma czasu na rowerze: <strong id="statsTotalBike">0</strong> min</p> <!-- Added unit -->
+            </div>
+            <button id="closeStatsModalButton" class="btn">Zamknij</button>
+        </div>
+    </div>
+
+
     <script>
         const state = {
-            workoutPlan: [],
-            currentDay: 1,
-            completedDays: [],
-            completedExercises: {},
-            confettiShownForDays: [],
-            currentTheme: 'light' // New: 'light' or 'dark'
+            workoutPlan: [], currentDay: 1, completedDays: [],
+            completedExercises: {}, confettiShownForDays: [], currentTheme: 'light'
         };
 
         const DOM = {
-            body: document.body,
-            appHeader: document.getElementById('appHeader'),
-            themeSwitcher: document.getElementById('themeSwitcher'),
-            uploadSection: document.getElementById('uploadSection'),
-            mainContent: document.getElementById('mainContent'),
-            fileInput: document.getElementById('fileInput'),
-            fileName: document.getElementById('fileName'),
-            uploadButton: document.getElementById('uploadButton'),
-            currentDayElement: document.getElementById('currentDay'),
-            dayProgressElement: document.getElementById('dayProgress'),
-            exerciseList: document.getElementById('exerciseList'),
-            daysProgress: document.getElementById('daysProgress'),
-            nextDayButton: document.getElementById('nextDayButton'),
-            resetButton: document.getElementById('resetButton'),
-            uploadNewButton: document.getElementById('uploadNewButton'),
+            body: document.body, appHeader: document.getElementById('appHeader'),
+            settingsButton: document.getElementById('settingsButton'),
+            uploadSection: document.getElementById('uploadSection'), mainContent: document.getElementById('mainContent'),
+            fileInput: document.getElementById('fileInput'), fileInputButton: document.getElementById('fileInputButton'),
+            fileName: document.getElementById('fileName'), uploadButton: document.getElementById('uploadButton'),
+            currentDayElement: document.getElementById('currentDay'), dayProgressElement: document.getElementById('dayProgress'),
+            exerciseList: document.getElementById('exerciseList'), daysProgress: document.getElementById('daysProgress'),
+            nextDayButton: document.getElementById('nextDayButton'), 
             toast: document.getElementById('toast'),
-            customModal: document.getElementById('customModal'),
-            modalTitle: document.getElementById('modalTitle'),
-            modalMessage: document.getElementById('modalMessage'),
-            modalConfirmButton: document.getElementById('modalConfirmButton'),
+            customModal: document.getElementById('customModal'), modalTitle: document.getElementById('modalTitle'),
+            modalMessage: document.getElementById('modalMessage'), modalConfirmButton: document.getElementById('modalConfirmButton'),
             modalCancelButton: document.getElementById('modalCancelButton'),
+            settingsModal: document.getElementById('settingsModal'),
+            themeSwitcherButton: document.getElementById('themeSwitcherButton'),
+            statsButton: document.getElementById('statsButton'),
+            uploadNewPlanButtonModal: document.getElementById('uploadNewPlanButtonModal'),
+            resetProgressButtonModal: document.getElementById('resetProgressButtonModal'),
+            closeSettingsModalButton: document.getElementById('closeSettingsModalButton'),
+            statsModal: document.getElementById('statsModal'),
+            statsCompletedDays: document.getElementById('statsCompletedDays'),
+            statsTotalPushups: document.getElementById('statsTotalPushups'),
+            statsTotalPlank: document.getElementById('statsTotalPlank'),
+            statsTotalBike: document.getElementById('statsTotalBike'),
+            closeStatsModalButton: document.getElementById('closeStatsModalButton'),
         };
         let currentModalConfirmCallback = null;
-        const ANIMATION_DURATION = 300; // ms, must match CSS
+        const ANIMATION_DURATION = 300;
 
         // Event Listeners
-        DOM.themeSwitcher.addEventListener('click', toggleTheme);
-        document.getElementById('fileInputButton').addEventListener('click', () => DOM.fileInput.click());
+        DOM.settingsButton.addEventListener('click', openSettingsModal);
+        DOM.fileInputButton.addEventListener('click', () => DOM.fileInput.click());
         DOM.fileInput.addEventListener('change', handleFileSelection);
         DOM.uploadButton.addEventListener('click', handleFileUpload);
-        DOM.resetButton.addEventListener('click', resetProgress);
         DOM.nextDayButton.addEventListener('click', moveToNextDay);
-        DOM.uploadNewButton.addEventListener('click', () => showUploadSectionWithAnimation());
+        
+        DOM.themeSwitcherButton.addEventListener('click', toggleTheme);
+        DOM.statsButton.addEventListener('click', openStatsModal);
+        DOM.uploadNewPlanButtonModal.addEventListener('click', () => {
+            closeSettingsModal(); showUploadSectionWithAnimation();
+        });
+        DOM.resetProgressButtonModal.addEventListener('click', () => {
+            closeSettingsModal(); resetProgress(); 
+        });
+        DOM.closeSettingsModalButton.addEventListener('click', closeSettingsModal);
+        DOM.settingsModal.addEventListener('click', (e) => e.target === DOM.settingsModal && closeSettingsModal());
+
+        DOM.closeStatsModalButton.addEventListener('click', closeStatsModal);
+        DOM.statsModal.addEventListener('click', (e) => e.target === DOM.statsModal && closeStatsModal());
 
         window.addEventListener('scroll', () => DOM.appHeader.classList.toggle('scrolled', window.scrollY > 0));
         DOM.modalConfirmButton.addEventListener('click', () => {
@@ -536,16 +382,23 @@
         });
         DOM.modalCancelButton.addEventListener('click', hideCustomConfirm);
         DOM.customModal.addEventListener('click', (e) => e.target === DOM.customModal && hideCustomConfirm());
-        window.addEventListener('keydown', (e) => e.key === 'Escape' && DOM.customModal.classList.contains('show') && hideCustomConfirm());
+        
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (DOM.customModal.classList.contains('show')) hideCustomConfirm();
+                else if (DOM.settingsModal.classList.contains('show')) closeSettingsModal();
+                else if (DOM.statsModal.classList.contains('show')) closeStatsModal();
+            }
+        });
 
         init();
 
         function init() {
             loadStateFromLocalStorage();
-            loadThemePreference(); // Load and apply theme
+            loadThemePreference();
             if (state.workoutPlan.length > 0) {
-                DOM.uploadSection.style.display = 'none'; // Hide without animation on init
-                DOM.mainContent.style.display = 'block';   // Show without animation on init
+                DOM.uploadSection.style.display = 'none';
+                DOM.mainContent.style.display = 'block';
                 renderWorkoutPlan();
             } else {
                 DOM.mainContent.style.display = 'none';
@@ -561,100 +414,70 @@
                     const parsedState = JSON.parse(savedState);
                     const defaultState = { confettiShownForDays: [], currentTheme: 'light' };
                     Object.assign(state, defaultState, parsedState);
-                } catch (e) {
-                    console.error('Failed to parse saved state:', e);
-                    localStorage.removeItem('workoutTrackerState'); 
-                    Object.assign(state, { confettiShownForDays: [], currentTheme: 'light' });
-                }
-            } else {
-                 Object.assign(state, { confettiShownForDays: [], currentTheme: 'light' });
-            }
+                } catch (e) { console.error('Failed to parse saved state:', e); localStorage.removeItem('workoutTrackerState'); Object.assign(state, { confettiShownForDays: [], currentTheme: 'light' }); }
+            } else { Object.assign(state, { confettiShownForDays: [], currentTheme: 'light' }); }
         }
-        function saveStateToLocalStorage() {
-            localStorage.setItem('workoutTrackerState', JSON.stringify(state));
-        }
+        function saveStateToLocalStorage() { localStorage.setItem('workoutTrackerState', JSON.stringify(state)); }
 
-        // Theme Functions
         function loadThemePreference() {
             const savedTheme = localStorage.getItem('themePreference');
-            if (savedTheme) {
-                state.currentTheme = savedTheme;
-            }
+            if (savedTheme) state.currentTheme = savedTheme;
             applyTheme();
         }
-        function saveThemePreference() {
-            localStorage.setItem('themePreference', state.currentTheme);
-        }
+        function saveThemePreference() { localStorage.setItem('themePreference', state.currentTheme); }
         function applyTheme() {
             DOM.body.classList.toggle('dark-theme', state.currentTheme === 'dark');
-            DOM.themeSwitcher.textContent = state.currentTheme === 'dark' ? 'Jasny' : 'Ciemny';
+            DOM.themeSwitcherButton.textContent = `Motyw: ${state.currentTheme === 'dark' ? 'Jasny' : 'Ciemny'}`;
         }
         function toggleTheme() {
             state.currentTheme = state.currentTheme === 'light' ? 'dark' : 'light';
-            applyTheme();
-            saveThemePreference();
-            saveStateToLocalStorage(); // Save theme choice with other app state
+            applyTheme(); saveThemePreference();
         }
 
-        // View Transition Functions
+        function openSettingsModal() {
+            DOM.settingsModal.classList.add('show'); DOM.themeSwitcherButton.focus();
+        }
+        function closeSettingsModal() { DOM.settingsModal.classList.remove('show'); }
+
+        function openStatsModal() {
+            closeSettingsModal(); 
+            calculateAndRenderStats();
+            DOM.statsModal.classList.add('show');
+            DOM.closeStatsModalButton.focus();
+        }
+        function closeStatsModal() { DOM.statsModal.classList.remove('show'); }
+
         function showMainContentWithAnimation() {
-            if (DOM.mainContent.style.display === 'block') return;
-
-            DOM.uploadSection.classList.remove('fade-in');
-            DOM.uploadSection.classList.add('fade-out');
-
+            if (DOM.mainContent.style.display === 'block' && !DOM.mainContent.classList.contains('fade-out')) return;
+            DOM.uploadSection.classList.remove('fade-in'); DOM.uploadSection.classList.add('fade-out');
             setTimeout(() => {
-                DOM.uploadSection.style.display = 'none';
-                DOM.uploadSection.classList.remove('fade-out');
-                
-                DOM.mainContent.style.display = 'block';
+                DOM.uploadSection.style.display = 'none'; DOM.uploadSection.classList.remove('fade-out');
+                DOM.mainContent.style.display = 'block'; DOM.mainContent.classList.remove('fade-out');
                 DOM.mainContent.classList.add('fade-in');
-                requestAnimationFrame(() => { // Ensure fade-in class is applied before removing opacity
-                    // No need to remove class if animation-fill-mode: forwards is used
-                });
             }, ANIMATION_DURATION);
         }
-
         function showUploadSectionWithAnimation() {
-            if (DOM.uploadSection.style.display === 'block') return;
-            
-            DOM.mainContent.classList.remove('fade-in');
-            DOM.mainContent.classList.add('fade-out');
-
+            if (DOM.uploadSection.style.display === 'block' && !DOM.uploadSection.classList.contains('fade-out')) return;
+            DOM.mainContent.classList.remove('fade-in'); DOM.mainContent.classList.add('fade-out');
             setTimeout(() => {
-                DOM.mainContent.style.display = 'none';
-                DOM.mainContent.classList.remove('fade-out');
-
-                DOM.uploadSection.style.display = 'block';
+                DOM.mainContent.style.display = 'none'; DOM.mainContent.classList.remove('fade-out');
+                DOM.uploadSection.style.display = 'block'; DOM.uploadSection.classList.remove('fade-out');
                 DOM.uploadSection.classList.add('fade-in');
-                requestAnimationFrame(() => {
-                    // No need to remove class
-                });
-                DOM.fileName.textContent = '';
-                DOM.uploadButton.disabled = true;
-                DOM.fileInput.value = null;
+                DOM.fileName.textContent = ''; DOM.uploadButton.disabled = true; DOM.fileInput.value = null;
             }, ANIMATION_DURATION);
         }
-
 
         function showCustomConfirm(title, message, onConfirm) {
-            DOM.modalTitle.textContent = title;
-            DOM.modalMessage.textContent = message;
+            DOM.modalTitle.textContent = title; DOM.modalMessage.textContent = message;
             currentModalConfirmCallback = onConfirm;
-            DOM.customModal.classList.add('show');
-            DOM.modalConfirmButton.focus();
+            DOM.customModal.classList.add('show'); DOM.modalConfirmButton.focus();
         }
-        function hideCustomConfirm() {
-            DOM.customModal.classList.remove('show');
-            currentModalConfirmCallback = null;
-        }
+        function hideCustomConfirm() { DOM.customModal.classList.remove('show'); currentModalConfirmCallback = null; }
 
         function handleFileSelection(event) {
             const file = event.target.files[0];
-            DOM.fileName.textContent = file ? file.name : '';
-            DOM.uploadButton.disabled = !file;
+            DOM.fileName.textContent = file ? file.name : ''; DOM.uploadButton.disabled = !file;
         }
-
         function handleFileUpload() {
             const file = DOM.fileInput.files[0];
             if (!file) { showToast('Wybierz plik CSV'); return; }
@@ -663,298 +486,187 @@
             reader.onerror = () => showToast('Błąd podczas odczytu pliku.');
             reader.onloadend = () => {
                 DOM.fileInput.value = null; 
-                if (DOM.uploadSection.style.display !== 'none') {
-                    DOM.fileName.textContent = '';
-                    DOM.uploadButton.disabled = true;
-                }
+                if (DOM.uploadSection.style.display !== 'none') { DOM.fileName.textContent = ''; DOM.uploadButton.disabled = true; }
             };
             reader.readAsText(file);
         }
 
         function parseCSV(content) {
             try {
-                // ... (CSV parsing logic - unchanged, assuming it's fine)
                 const lines = content.split('\n').map(l => l.trim()).filter(Boolean);
                 if (lines.length < 2) throw new Error('Plik CSV jest pusty lub zawiera tylko nagłówki.');
-                
                 const headers = lines[0].split(',').map(h => h.trim());
                 if (!validateHeaders(headers)) throw new Error('Nieprawidłowy format pliku CSV. Sprawdź nagłówki.');
-
                 const newWorkoutPlan = [];
                 for (let i = 1; i < lines.length; i++) {
                     const values = lines[i].split(',').map(v => v.trim());
                     if (values.length !== headers.length) throw new Error(`Błąd w linii ${i + 1}: Niewłaściwa liczba kolumn.`);
-                    
-                    const dayData = {
-                        day: parseInt(values[0], 10),
-                        pushups: parseInt(values[1], 10),
-                        plank: parseInt(values[2], 10),
-                        bike: parseInt(values[3], 10)
-                    };
-
+                    const dayData = { day: parseInt(values[0],10), pushups: parseInt(values[1],10), plank: parseInt(values[2],10), bike: parseInt(values[3],10) };
                     if (Object.values(dayData).some(isNaN)) throw new Error(`Błąd w linii ${i + 1}: Wartości muszą być liczbami.`);
-                    if (dayData.day <= 0 || dayData.pushups < 0 || dayData.plank < 0 || dayData.bike < 0) {
-                        throw new Error(`Błąd w linii ${i + 1}: Wartości nie mogą być ujemne (dzień > 0).`);
-                    }
+                    if (dayData.day <= 0 || dayData.pushups < 0 || dayData.plank < 0 || dayData.bike < 0) throw new Error(`Błąd w linii ${i + 1}: Wartości nie mogą być ujemne (dzień > 0).`);
                     newWorkoutPlan.push({
-                        day: dayData.day,
-                        exercises: [
+                        day: dayData.day, exercises: [
                             { id: 'pushups', name: 'Pompki', value: dayData.pushups, unit: '', type: 'count' },
                             { id: 'plank', name: 'Plank', value: dayData.plank, unit: 'sekund', type: 'timer' },
-                            { id: 'bike', name: 'Rower stacjonarny', value: dayData.bike, unit: 'minut', type: 'count' }
-                        ]
-                    });
+                            { id: 'bike', name: 'Rower stacjonarny', value: dayData.bike, unit: 'minut', type: 'count' }]});
                 }
-                
                 newWorkoutPlan.sort((a, b) => a.day - b.day);
-                if (new Set(newWorkoutPlan.map(p => p.day)).size !== newWorkoutPlan.length) {
-                    throw new Error('Plik CSV zawiera zduplikowane numery dni.');
-                }
+                if (new Set(newWorkoutPlan.map(p => p.day)).size !== newWorkoutPlan.length) throw new Error('Plik CSV zawiera zduplikowane numery dni.');
                 if (newWorkoutPlan.length === 0) throw new Error('Brak danych treningowych w pliku CSV.');
-
-                state.workoutPlan = newWorkoutPlan;
-                state.confettiShownForDays = [];
-                resetProgressWithoutConfirmation(); 
-                state.currentDay = state.workoutPlan[0].day; 
-                
-                showMainContentWithAnimation(); // Use animated transition
-                renderWorkoutPlan();
-                saveStateToLocalStorage();
-                showToast('Plan treningowy wczytany!');
-
-            } catch (e) {
-                console.error('Error parsing CSV:', e);
-                showToast(e.message || 'Błąd podczas przetwarzania pliku CSV.');
-            }
+                state.workoutPlan = newWorkoutPlan; state.confettiShownForDays = [];
+                resetProgressWithoutConfirmation(); state.currentDay = state.workoutPlan[0].day; 
+                showMainContentWithAnimation(); renderWorkoutPlan();
+                saveStateToLocalStorage(); showToast('Plan treningowy wczytany!');
+            } catch (e) { console.error('Error parsing CSV:', e); showToast(e.message || 'Błąd podczas przetwarzania pliku CSV.'); }
         }
 
         function validateHeaders(headers) {
             const required = ['Dzień', 'Pompki', 'Plank (sekundy)', 'Rower (minuty)'];
             return required.every(h => headers.includes(h));
         }
-
-        function renderWorkoutPlan() {
-            renderDaysProgress();
-            renderCurrentDayExercises();
-            updateDayProgress();
-        }
-
+        function renderWorkoutPlan() { renderDaysProgress(); renderCurrentDayExercises(); updateDayProgress(); }
         function renderDaysProgress() {
             DOM.daysProgress.innerHTML = '';
             state.workoutPlan.forEach(dayPlan => { 
-                const dayNumber = dayPlan.day;
-                const dayEl = document.createElement('div');
+                const dayNumber = dayPlan.day; const dayEl = document.createElement('div');
                 dayEl.className = 'day-indicator';
                 dayEl.classList.toggle('active', dayNumber === state.currentDay);
                 dayEl.classList.toggle('completed', state.completedDays.includes(dayNumber));
-                dayEl.textContent = dayNumber;
-                dayEl.addEventListener('click', () => {
-                    if (state.currentDay !== dayNumber) {
-                        state.currentDay = dayNumber;
-                        renderWorkoutPlan(); 
-                        saveStateToLocalStorage();
-                    }
-                });
+                dayEl.textContent = dayNumber; dayEl.tabIndex = 0; dayEl.setAttribute('role', 'button');
+                dayEl.setAttribute('aria-label', `Przejdź do dnia ${dayNumber}`);
+                dayEl.addEventListener('click', () => { if (state.currentDay !== dayNumber) { state.currentDay = dayNumber; renderWorkoutPlan(); saveStateToLocalStorage(); } });
+                dayEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (state.currentDay !== dayNumber) { state.currentDay = dayNumber; renderWorkoutPlan(); saveStateToLocalStorage(); } } });
                 DOM.daysProgress.appendChild(dayEl);
             });
         }
-
         function renderCurrentDayExercises() {
-            DOM.exerciseList.innerHTML = '';
-            DOM.currentDayElement.textContent = state.currentDay;
+            DOM.exerciseList.innerHTML = ''; DOM.currentDayElement.textContent = state.currentDay;
             const currentDayPlan = state.workoutPlan.find(d => d.day === state.currentDay);
-
             if (!currentDayPlan) {
-                if (state.workoutPlan.length > 0) {
-                    state.currentDay = state.workoutPlan[0].day; 
-                    saveStateToLocalStorage();
-                    renderWorkoutPlan(); 
-                } else showUploadSectionWithAnimation(); // Use animated transition
-                return;
+                if (state.workoutPlan.length > 0) { state.currentDay = state.workoutPlan[0].day; saveStateToLocalStorage(); renderWorkoutPlan(); }
+                else showUploadSectionWithAnimation(); return;
             }
-            
             currentDayPlan.exercises.forEach(ex => {
-                const li = document.createElement('li');
-                li.className = 'exercise-item';
+                const li = document.createElement('li'); li.className = 'exercise-item';
                 const isDone = isExerciseCompleted(state.currentDay, ex.id);
-                
-                li.innerHTML = `
-                    <div class="exercise-title">${ex.name}</div>
-                    <div class="exercise-value">${ex.value} ${ex.unit}</div>
-                    <div class="action-container">
-                        ${ex.type === 'timer' ? `
-                            <div class="timer" id="timer-${ex.id}">${isDone ? formatTime(0) : formatTime(ex.value)}</div>
-                            <button class="btn ${isDone ? 'btn-success' : ''}" id="btn-${ex.id}" ${isDone ? 'disabled' : ''} data-initial-seconds="${ex.value}">
-                                ${isDone ? `${ex.name} wykonane` : 'START'}
-                            </button>
-                        ` : `
-                            <button class="btn ${isDone ? 'btn-success' : ''}" id="btn-${ex.id}" ${isDone ? 'disabled' : ''}>
-                                ${isDone ? `${ex.name} wykonane` : 'Wykonaj'}
-                            </button>
-                        `}
-                    </div>`;
+                li.innerHTML = `<div class="exercise-title">${ex.name}</div> <div class="exercise-value">${ex.value} ${ex.unit}</div>
+                    <div class="action-container"> ${ex.type === 'timer' ?
+                        `<div class="timer" id="timer-${ex.id}">${isDone ? formatTime(0) : formatTime(ex.value)}</div>
+                         <button class="btn ${isDone ? 'btn-success' : ''}" id="btn-${ex.id}" ${isDone ? 'disabled' : ''} data-initial-seconds="${ex.value}"> ${isDone ? `${ex.name} wykonane` : 'START'} </button>` :
+                        `<button class="btn ${isDone ? 'btn-success' : ''}" id="btn-${ex.id}" ${isDone ? 'disabled' : ''}> ${isDone ? `${ex.name} wykonane` : 'Wykonaj'} </button>`
+                    } </div>`;
                 DOM.exerciseList.appendChild(li);
-
                 const button = li.querySelector(`#btn-${ex.id}`);
-                if (ex.type === 'timer' && !isDone) {
-                    button.addEventListener('click', () => handleTimerAction(ex.id, ex.name));
-                } else if (ex.type === 'count' && !isDone) {
-                    button.addEventListener('click', () => completeExercise(state.currentDay, ex.id, ex.name));
-                }
+                if (ex.type === 'timer' && !isDone) button.addEventListener('click', () => handleTimerAction(ex.id, ex.name));
+                else if (ex.type === 'count' && !isDone) button.addEventListener('click', () => completeExercise(state.currentDay, ex.id, ex.name));
             });
         }
-
         function handleTimerAction(exerciseId, exerciseName) {
-            const button = document.getElementById(`btn-${exerciseId}`);
-            const timerEl = document.getElementById(`timer-${exerciseId}`);
-            const timerState = button.dataset.timerState || 'idle';
-            const initialSecs = parseInt(button.dataset.initialSeconds);
-
-            if (timerState === 'idle') {
-                button.dataset.remainingSeconds = initialSecs;
-                button.dataset.timerState = 'running';
-                button.textContent = 'PAUZA';
-                startTicking(exerciseId, exerciseName, button, timerEl);
-            } else if (timerState === 'running') {
-                clearInterval(parseInt(button.dataset.timerId));
-                button.dataset.timerState = 'paused';
-                button.textContent = 'WZNOW';
-            } else if (timerState === 'paused') {
-                button.dataset.timerState = 'running';
-                button.textContent = 'PAUZA';
-                startTicking(exerciseId, exerciseName, button, timerEl); 
-            }
+            const button = document.getElementById(`btn-${exerciseId}`); const timerEl = document.getElementById(`timer-${exerciseId}`);
+            const timerState = button.dataset.timerState || 'idle'; const initialSecs = parseInt(button.dataset.initialSeconds);
+            if (timerState === 'idle') { button.dataset.remainingSeconds = initialSecs; button.dataset.timerState = 'running'; button.textContent = 'PAUZA'; startTicking(exerciseId, exerciseName, button, timerEl); }
+            else if (timerState === 'running') { clearInterval(parseInt(button.dataset.timerId)); button.dataset.timerState = 'paused'; button.textContent = 'WZNOW'; }
+            else if (timerState === 'paused') { button.dataset.timerState = 'running'; button.textContent = 'PAUZA'; startTicking(exerciseId, exerciseName, button, timerEl); }
         }
-
         function startTicking(exerciseId, exerciseName, button, timerEl) {
-            let remaining = parseInt(button.dataset.remainingSeconds);
-            timerEl.textContent = formatTime(remaining);
+            let remaining = parseInt(button.dataset.remainingSeconds); timerEl.textContent = formatTime(remaining);
             const intervalId = setInterval(() => {
-                remaining--;
-                button.dataset.remainingSeconds = remaining;
-                timerEl.textContent = formatTime(remaining);
-                if (remaining <= 0) { 
-                    clearInterval(intervalId);
-                    timerEl.textContent = formatTime(0);
-                    completeExercise(state.currentDay, exerciseId, exerciseName);
-                    showToast(`${exerciseName} ukończone!`);
-                }
+                remaining--; button.dataset.remainingSeconds = remaining; timerEl.textContent = formatTime(remaining);
+                if (remaining <= 0) { clearInterval(intervalId); timerEl.textContent = formatTime(0); completeExercise(state.currentDay, exerciseId, exerciseName); showToast(`${exerciseName} ukończone!`); }
             }, 1000);
             button.dataset.timerId = intervalId;
         }
-
-        function formatTime(s) {
-            s = Math.max(0, s);
-            const mins = Math.floor(s / 60).toString().padStart(2, '0');
-            const secs = (s % 60).toString().padStart(2, '0');
-            return `${mins}:${secs}`;
-        }
-
+        function formatTime(s) { s = Math.max(0, s); const mins = Math.floor(s / 60).toString().padStart(2, '0'); const secs = (s % 60).toString().padStart(2, '0'); return `${mins}:${secs}`; }
         function completeExercise(day, exerciseId, exerciseName) {
             state.completedExercises[day] = state.completedExercises[day] || [];
-            if (!state.completedExercises[day].includes(exerciseId)) {
-                state.completedExercises[day].push(exerciseId);
-            }
-            
+            if (!state.completedExercises[day].includes(exerciseId)) { state.completedExercises[day].push(exerciseId); }
             const button = document.getElementById(`btn-${exerciseId}`);
             if (button) {
-                button.textContent = `${exerciseName} wykonane`;
-                button.classList.remove('btn-outline'); 
-                button.classList.add('btn-success');
-                button.disabled = true;
+                button.textContent = `${exerciseName} wykonane`; button.classList.remove('btn-outline'); button.classList.add('btn-success'); button.disabled = true;
                 if (button.dataset.timerId) clearInterval(parseInt(button.dataset.timerId));
                 ['timerId', 'timerState', 'remainingSeconds', 'initialSeconds'].forEach(d => delete button.dataset[d]);
-                const timerEl = document.getElementById(`timer-${exerciseId}`);
-                if (timerEl) timerEl.textContent = formatTime(0);
+                const timerEl = document.getElementById(`timer-${exerciseId}`); if (timerEl) timerEl.textContent = formatTime(0);
             }
             updateDayProgress();
             const currentDayPlan = state.workoutPlan.find(d => d.day === state.currentDay);
             if (currentDayPlan) {
-                const totalEx = currentDayPlan.exercises.length;
-                const completedExCount = state.completedExercises[state.currentDay]?.length || 0;
-                if (totalEx > 0 && completedExCount === totalEx && !state.confettiShownForDays.includes(state.currentDay)) {
-                    showConfetti();
-                    state.confettiShownForDays.push(state.currentDay);
-                }
+                const totalEx = currentDayPlan.exercises.length; const completedExCount = state.completedExercises[state.currentDay]?.length || 0;
+                if (totalEx > 0 && completedExCount === totalEx && !state.confettiShownForDays.includes(state.currentDay)) { showConfetti(); state.confettiShownForDays.push(state.currentDay); }
             }
             saveStateToLocalStorage();
         }
-
-        function isExerciseCompleted(day, exerciseId) {
-            return state.completedExercises[day]?.includes(exerciseId) || false;
-        }
-
+        function isExerciseCompleted(day, exerciseId) { return state.completedExercises[day]?.includes(exerciseId) || false; }
         function updateDayProgress() {
-            const currentDayPlan = state.workoutPlan.find(d => d.day === state.currentDay);
-            if (!currentDayPlan) return;
-            const totalEx = currentDayPlan.exercises.length;
-            const completedCount = state.completedExercises[state.currentDay]?.length || 0;
+            const currentDayPlan = state.workoutPlan.find(d => d.day === state.currentDay); if (!currentDayPlan) return;
+            const totalEx = currentDayPlan.exercises.length; const completedCount = state.completedExercises[state.currentDay]?.length || 0;
             DOM.dayProgressElement.textContent = `${completedCount}/${totalEx}`;
             DOM.nextDayButton.disabled = totalEx === 0 || completedCount < totalEx;
         }
-
         function moveToNextDay() {
-            if (!state.completedDays.includes(state.currentDay)) {
-                state.completedDays.push(state.currentDay);
-            }
+            if (!state.completedDays.includes(state.currentDay)) { state.completedDays.push(state.currentDay); }
             const currentIndex = state.workoutPlan.findIndex(p => p.day === state.currentDay);
             const currentDayNum = state.workoutPlan[currentIndex].day;
-
-            if (currentIndex === -1 || currentIndex + 1 >= state.workoutPlan.length) {
-                showToast('Gratulacje! Ukończyłeś cały plan treningowy!');
-                renderDaysProgress(); 
-                saveStateToLocalStorage();
-                return;
-            }
+            if (currentIndex === -1 || currentIndex + 1 >= state.workoutPlan.length) { showToast('Gratulacje! Ukończyłeś cały plan treningowy!'); renderDaysProgress(); saveStateToLocalStorage(); return; }
             state.currentDay = state.workoutPlan[currentIndex + 1].day;
-            renderWorkoutPlan();
-            saveStateToLocalStorage();
+            renderWorkoutPlan(); saveStateToLocalStorage();
             showToast(`Dzień ${currentDayNum} ukończony! Przejście do dnia ${state.currentDay}`);
         }
-
-        function resetProgress() {
-            showCustomConfirm('Reset Postępu', 'Czy na pewno chcesz zresetować postęp treningowy?', () => {
-                resetProgressWithoutConfirmation();
-                showToast('Postęp zresetowany.');
-            });
-        }
-
+        function resetProgress() { showCustomConfirm('Reset Postępu', 'Czy na pewno chcesz zresetować postęp treningowy?', () => { resetProgressWithoutConfirmation(); showToast('Postęp zresetowany.'); }); }
         function resetProgressWithoutConfirmation() {
-            state.completedDays = [];
-            state.completedExercises = {};
-            state.confettiShownForDays = [];
+            state.completedDays = []; state.completedExercises = {}; state.confettiShownForDays = [];
             state.currentDay = state.workoutPlan.length > 0 ? state.workoutPlan[0].day : 1;
             document.querySelectorAll('button[data-timerid]').forEach(b => clearInterval(parseInt(b.dataset.timerId)));
-            if (state.workoutPlan.length > 0 && DOM.mainContent.style.display !== 'none') {
-                 renderWorkoutPlan();
-            }
+            if (state.workoutPlan.length > 0 && DOM.mainContent.style.display !== 'none') { renderWorkoutPlan(); }
             saveStateToLocalStorage();
         }
-
-        function showToast(message) {
-            DOM.toast.textContent = message;
-            DOM.toast.classList.add('show');
-            setTimeout(() => DOM.toast.classList.remove('show'), 3000);
-        }
-
+        function showToast(message) { DOM.toast.textContent = message; DOM.toast.classList.add('show'); setTimeout(() => DOM.toast.classList.remove('show'), 3000); }
         function showConfetti() {
             const confettiCount = 60;
             const colors = ['var(--primary-color)', 'var(--success-color)', '#ffcc00', 'var(--danger-color)', '#5856d6', '#ff9500'];
             for (let i = 0; i < confettiCount; i++) {
-                const particle = document.createElement('div');
-                particle.classList.add('confetti-particle');
+                const particle = document.createElement('div'); particle.classList.add('confetti-particle');
                 const size = Math.random() * 8 + 4;
                 Object.assign(particle.style, {
-                    width: `${size}px`, height: `${size}px`,
-                    backgroundColor: colors[Math.floor(Math.random() * colors.length)],
+                    width: `${size}px`, height: `${size}px`, backgroundColor: colors[Math.floor(Math.random() * colors.length)],
                     left: `${Math.random() * 100}vw`, top: `-${size + Math.random() * 20}px`,
-                    animationDuration: `${Math.random() * 2 + 2.5}s`,
-                    animationDelay: `${Math.random() * 1}s`
-                });
+                    animationDuration: `${Math.random() * 2 + 2.5}s`, animationDelay: `${Math.random() * 1}s` });
                 DOM.body.appendChild(particle);
                 particle.addEventListener('animationend', () => particle.remove());
             }
         }
+
+        function calculateAndRenderStats() {
+            let completedDaysCount = state.completedDays.length;
+            let totalPushups = 0;
+            let totalPlankSeconds = 0;
+            let totalBikeMinutes = 0;
+
+            state.completedDays.forEach(dayNumber => {
+                const dayPlan = state.workoutPlan.find(dp => dp.day === dayNumber);
+                // Ensure the day has a plan and was actually completed (all exercises for that day are in completedExercises)
+                if (dayPlan && state.completedExercises[dayNumber] && state.completedExercises[dayNumber].length === dayPlan.exercises.length) {
+                    dayPlan.exercises.forEach(exercise => {
+                        if (exercise.id === 'pushups') totalPushups += exercise.value;
+                        else if (exercise.id === 'plank') totalPlankSeconds += exercise.value;
+                        else if (exercise.id === 'bike') totalBikeMinutes += exercise.value;
+                    });
+                } else if (dayPlan && (!state.completedExercises[dayNumber] || state.completedExercises[dayNumber].length !== dayPlan.exercises.length)) {
+                    // This handles a potential edge case: if a day is in `completedDays` but for some reason
+                    // not all its exercises were marked in `completedExercises`.
+                    // For now, we only count fully completed days for exercise totals.
+                    // If a day is in completedDays but not all exercises were done, we still count it as a completed day,
+                    // but its exercises won't add to the totals unless they were individually marked.
+                    // A stricter approach might be to re-evaluate how `completedDays` is populated.
+                    // The current logic in `moveToNextDay` adds to `completedDays` when all exercises are done for that day.
+                }
+            });
+
+            DOM.statsCompletedDays.textContent = completedDaysCount;
+            DOM.statsTotalPushups.textContent = totalPushups;
+            DOM.statsTotalPlank.textContent = totalPlankSeconds;
+            DOM.statsTotalBike.textContent = totalBikeMinutes;
+        }
+
     </script>
 </body>
 </html>
