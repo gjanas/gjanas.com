@@ -20,6 +20,7 @@
             --btn-outline-hover-bg: rgba(0, 122, 255, 0.08);
             --btn-outline-danger-hover-bg: rgba(255, 59, 48, 0.08);
             --focus-ring-color: rgba(0, 122, 255, 0.5);
+            --settings-icon-fill: var(--primary-color);
         }
 
         body.dark-theme {
@@ -37,6 +38,7 @@
             --btn-outline-hover-bg: rgba(10, 132, 255, 0.15);
             --btn-outline-danger-hover-bg: rgba(255, 69, 58, 0.15);
             --focus-ring-color: rgba(10, 132, 255, 0.6);
+            --settings-icon-fill: var(--primary-color);
         }
 
         * {
@@ -68,7 +70,7 @@
         }
 
         .header {
-            padding: 12px 16px;
+            padding: 10px 16px; /* Adjusted padding */
             text-align: center;
             font-weight: 600;
             font-size: 18px;
@@ -85,17 +87,33 @@
         .header-title {
             flex-grow: 1;
             text-align: center;
-            margin-left: 30px; 
+            margin-left: 38px; /* Approx width of settings button + padding */
         }
         .settings-button {
             background: none;
             border: none;
-            color: var(--primary-color);
-            font-size: 24px;
+            color: var(--settings-icon-fill); /* Use variable for SVG fill */
             cursor: pointer;
-            padding: 5px;
+            padding: 6px; /* Adjust padding around SVG */
             line-height: 1;
-            border-radius: 8px;
+            border-radius: 50%; /* Make it circular for better tap target / focus */
+            display: flex; /* For aligning SVG inside */
+            align-items: center;
+            justify-content: center;
+            width: 38px; /* Explicit width */
+            height: 38px; /* Explicit height */
+            transition: background-color 0.2s;
+        }
+        .settings-button svg {
+            width: 24px; /* Control SVG size */
+            height: 24px;
+            fill: currentColor; /* SVG inherits color from button's text color */
+        }
+        .settings-button:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+        body.dark-theme .settings-button:hover {
+            background-color: rgba(255,255,255,0.1);
         }
         .settings-button:focus-visible {
             outline: 2px solid transparent;
@@ -181,28 +199,25 @@
 
         .toast {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background-color: rgba(20,20,20,0.9); /* Darker for better contrast on light/dark */
-            color: white; padding: 12px 20px; border-radius: 10px;
+            background-color: rgba(20,20,20,0.9); color: white; padding: 12px 20px; border-radius: 10px;
             opacity: 0; transition: opacity 0.3s ease-in-out; pointer-events: none;
             z-index: 3000; text-align: center; max-width: 80%;
         }
-        /* body.dark-theme .toast - already good with dark background */
         .toast.show { opacity: 1; }
         
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.6); /* Slightly darker overlay */
-            display: flex; align-items: center; justify-content: center; z-index: 2000;
+            background-color: rgba(0, 0, 0, 0.6); display: flex;
+            align-items: center; justify-content: center; z-index: 2000;
             opacity: 0; transition: opacity 0.3s ease; pointer-events: none;
         }
         .modal-overlay.show { opacity: 1; pointer-events: auto; }
         .modal-content {
             background-color: var(--card-bg-color); padding: 24px; border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2); /* Stronger shadow for modals */
-            width: 90%; max-width: 400px;
-            text-align: center; transform: scale(0.95) translateY(10px); /* Start slightly down */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); width: 90%; max-width: 400px;
+            text-align: center; transform: scale(0.95) translateY(10px);
             transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s ease, background-color 0.3s ease;
-            opacity: 0; /* Start transparent for modal animation */
+            opacity: 0;
         }
         .modal-overlay.show .modal-content { transform: scale(1) translateY(0); opacity: 1; }
         .modal-content h3 {
@@ -216,15 +231,33 @@
 
         .settings-modal-content .btn, .stats-modal-content .btn {
             margin-bottom: 12px; text-align: left; padding-left: 16px;
-            display: block; width: 100%; /* Make buttons full width in these modals */
+            display: block; width: 100%;
         }
         .settings-modal-content .btn:last-child, .stats-modal-content .btn:last-child { margin-bottom: 0; }
         .stats-modal-content p { text-align: left; margin-bottom: 8px; font-size: 15px; }
         .stats-modal-content p strong { font-weight: 500; color: var(--text-color); }
 
+        /* Confetti Optimization */
+        .confetti-particle {
+            position: fixed;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 1500;
+            /* Apply will-change to hint browser about upcoming transformations */
+            will-change: transform, opacity; 
+            animation: fall linear forwards;
+        }
 
-        .confetti-particle { position: fixed; pointer-events: none; opacity: 0; z-index: 1500; animation: fall linear forwards; }
-        @keyframes fall { 0% { transform: translateY(0) rotateZ(0deg); opacity: 1; } 100% { transform: translateY(calc(100vh + 30px)) rotateZ(720deg); opacity: 0; } }
+        @keyframes fall {
+            0% {
+                transform: translate3d(0, 0, 0) rotateZ(0deg); /* Use translate3d */
+                opacity: 1;
+            }
+            100% {
+                transform: translate3d(0, calc(100vh + 30px), 0) rotateZ(360deg); /* Simpler rotation, adjust if needed */
+                opacity: 0;
+            }
+        }
 
         .view { animation-duration: 0.3s; animation-timing-function: ease-in-out; animation-fill-mode: forwards; }
         .fade-in { animation-name: fadeInAnimation; opacity: 0; }
@@ -237,9 +270,10 @@
             .btn { padding: 10px; }
             .modal-actions { flex-direction: column-reverse; }
             .modal-actions .btn { width: 100%; }
-            .header-title { margin-left: 20px; font-size: 17px; }
-            .settings-button { font-size: 22px; }
-            .settings-modal-content .btn, .stats-modal-content .btn { padding: 12px 16px; } /* Ensure consistent padding on mobile */
+            .header-title { margin-left: 28px; font-size: 17px; } /* Adjust for SVG icon */
+            .settings-button { width: 34px; height: 34px; padding: 5px; }
+            .settings-button svg { width: 22px; height: 22px; }
+            .settings-modal-content .btn, .stats-modal-content .btn { padding: 12px 16px; }
         }
     </style>
 </head>
@@ -247,7 +281,11 @@
     <div class="container">
         <div class="header" id="appHeader">
             <span class="header-title">Trening Tracker</span>
-            <button id="settingsButton" class="settings-button" aria-label="Otwórz ustawienia">⚙️</button>
+            <button id="settingsButton" class="settings-button" aria-label="Otwórz ustawienia">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.25 C14.34,2.04,14.15,1.88,13.92,1.88h-3.84c-0.23,0-0.43,0.15-0.48,0.37L9.22,4.65c-0.59,0.23-1.12,0.55-1.62,0.93L5.21,4.62 C4.99,4.54,4.74,4.62,4.62,4.83L2.71,8.15c-0.11,0.2-0.06,0.47,0.12,0.61l2.03,1.58C4.8,10.69,4.78,11,4.78,11.31 c0,0.32,0.02,0.64,0.07,0.95l-2.03,1.58c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96 c0.5,0.38,1.03,0.7,1.62,0.94l0.38,2.37c0.05,0.22,0.24,0.37,0.48,0.37h3.84c0.23,0,0.43-0.15,0.48-0.37l0.38-2.37 c0.59-0.23,1.12-0.55,1.62-0.93l2.39,0.96c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                </svg>
+            </button>
         </div>
 
         <div id="uploadSection" class="card view">
@@ -311,8 +349,8 @@
             <div id="statsContent">
                 <p>Ukończone dni: <strong id="statsCompletedDays">0</strong></p>
                 <p>Suma pompek: <strong id="statsTotalPushups">0</strong></p>
-                <p>Suma czasu plank: <strong id="statsTotalPlank">0</strong> s</p> <!-- Added unit -->
-                <p>Suma czasu na rowerze: <strong id="statsTotalBike">0</strong> min</p> <!-- Added unit -->
+                <p>Suma czasu plank: <strong id="statsTotalPlank">0</strong> s</p>
+                <p>Suma czasu na rowerze: <strong id="statsTotalBike">0</strong> min</p>
             </div>
             <button id="closeStatsModalButton" class="btn">Zamknij</button>
         </div>
@@ -325,7 +363,7 @@
             completedExercises: {}, confettiShownForDays: [], currentTheme: 'light'
         };
 
-        const DOM = {
+        const DOM = { // ... (DOM object largely unchanged, ensure all IDs are correct)
             body: document.body, appHeader: document.getElementById('appHeader'),
             settingsButton: document.getElementById('settingsButton'),
             uploadSection: document.getElementById('uploadSection'), mainContent: document.getElementById('mainContent'),
@@ -353,6 +391,7 @@
         };
         let currentModalConfirmCallback = null;
         const ANIMATION_DURATION = 300;
+        const CONFETTI_COUNT = 40; // Reduced confetti count for performance
 
         // Event Listeners
         DOM.settingsButton.addEventListener('click', openSettingsModal);
@@ -393,7 +432,7 @@
 
         init();
 
-        function init() {
+        function init() { /* ... (unchanged) ... */ 
             loadStateFromLocalStorage();
             loadThemePreference();
             if (state.workoutPlan.length > 0) {
@@ -406,8 +445,7 @@
             }
             DOM.appHeader.classList.toggle('scrolled', window.scrollY > 0);
         }
-
-        function loadStateFromLocalStorage() {
+        function loadStateFromLocalStorage() { /* ... (unchanged) ... */ 
             const savedState = localStorage.getItem('workoutTrackerState');
             if (savedState) {
                 try {
@@ -417,37 +455,41 @@
                 } catch (e) { console.error('Failed to parse saved state:', e); localStorage.removeItem('workoutTrackerState'); Object.assign(state, { confettiShownForDays: [], currentTheme: 'light' }); }
             } else { Object.assign(state, { confettiShownForDays: [], currentTheme: 'light' }); }
         }
-        function saveStateToLocalStorage() { localStorage.setItem('workoutTrackerState', JSON.stringify(state)); }
-
-        function loadThemePreference() {
+        function saveStateToLocalStorage() { /* ... (unchanged) ... */ 
+             localStorage.setItem('workoutTrackerState', JSON.stringify(state));
+        }
+        function loadThemePreference() { /* ... (unchanged) ... */ 
             const savedTheme = localStorage.getItem('themePreference');
             if (savedTheme) state.currentTheme = savedTheme;
             applyTheme();
         }
-        function saveThemePreference() { localStorage.setItem('themePreference', state.currentTheme); }
-        function applyTheme() {
+        function saveThemePreference() { /* ... (unchanged) ... */ 
+            localStorage.setItem('themePreference', state.currentTheme);
+        }
+        function applyTheme() { /* ... (unchanged) ... */ 
             DOM.body.classList.toggle('dark-theme', state.currentTheme === 'dark');
             DOM.themeSwitcherButton.textContent = `Motyw: ${state.currentTheme === 'dark' ? 'Jasny' : 'Ciemny'}`;
         }
-        function toggleTheme() {
+        function toggleTheme() { /* ... (unchanged) ... */ 
             state.currentTheme = state.currentTheme === 'light' ? 'dark' : 'light';
             applyTheme(); saveThemePreference();
         }
-
-        function openSettingsModal() {
+        function openSettingsModal() { /* ... (unchanged) ... */ 
             DOM.settingsModal.classList.add('show'); DOM.themeSwitcherButton.focus();
         }
-        function closeSettingsModal() { DOM.settingsModal.classList.remove('show'); }
-
-        function openStatsModal() {
+        function closeSettingsModal() { /* ... (unchanged) ... */ 
+            DOM.settingsModal.classList.remove('show');
+        }
+        function openStatsModal() { /* ... (unchanged) ... */ 
             closeSettingsModal(); 
             calculateAndRenderStats();
             DOM.statsModal.classList.add('show');
             DOM.closeStatsModalButton.focus();
         }
-        function closeStatsModal() { DOM.statsModal.classList.remove('show'); }
-
-        function showMainContentWithAnimation() {
+        function closeStatsModal() { /* ... (unchanged) ... */ 
+            DOM.statsModal.classList.remove('show');
+        }
+        function showMainContentWithAnimation() { /* ... (unchanged) ... */ 
             if (DOM.mainContent.style.display === 'block' && !DOM.mainContent.classList.contains('fade-out')) return;
             DOM.uploadSection.classList.remove('fade-in'); DOM.uploadSection.classList.add('fade-out');
             setTimeout(() => {
@@ -456,7 +498,7 @@
                 DOM.mainContent.classList.add('fade-in');
             }, ANIMATION_DURATION);
         }
-        function showUploadSectionWithAnimation() {
+        function showUploadSectionWithAnimation() { /* ... (unchanged) ... */ 
             if (DOM.uploadSection.style.display === 'block' && !DOM.uploadSection.classList.contains('fade-out')) return;
             DOM.mainContent.classList.remove('fade-in'); DOM.mainContent.classList.add('fade-out');
             setTimeout(() => {
@@ -466,19 +508,19 @@
                 DOM.fileName.textContent = ''; DOM.uploadButton.disabled = true; DOM.fileInput.value = null;
             }, ANIMATION_DURATION);
         }
-
-        function showCustomConfirm(title, message, onConfirm) {
+        function showCustomConfirm(title, message, onConfirm) { /* ... (unchanged) ... */ 
             DOM.modalTitle.textContent = title; DOM.modalMessage.textContent = message;
             currentModalConfirmCallback = onConfirm;
             DOM.customModal.classList.add('show'); DOM.modalConfirmButton.focus();
         }
-        function hideCustomConfirm() { DOM.customModal.classList.remove('show'); currentModalConfirmCallback = null; }
-
-        function handleFileSelection(event) {
+        function hideCustomConfirm() { /* ... (unchanged) ... */ 
+            DOM.customModal.classList.remove('show'); currentModalConfirmCallback = null;
+        }
+        function handleFileSelection(event) { /* ... (unchanged) ... */ 
             const file = event.target.files[0];
             DOM.fileName.textContent = file ? file.name : ''; DOM.uploadButton.disabled = !file;
         }
-        function handleFileUpload() {
+        function handleFileUpload() { /* ... (unchanged) ... */ 
             const file = DOM.fileInput.files[0];
             if (!file) { showToast('Wybierz plik CSV'); return; }
             const reader = new FileReader();
@@ -490,8 +532,7 @@
             };
             reader.readAsText(file);
         }
-
-        function parseCSV(content) {
+        function parseCSV(content) { /* ... (unchanged) ... */ 
             try {
                 const lines = content.split('\n').map(l => l.trim()).filter(Boolean);
                 if (lines.length < 2) throw new Error('Plik CSV jest pusty lub zawiera tylko nagłówki.');
@@ -519,13 +560,14 @@
                 saveStateToLocalStorage(); showToast('Plan treningowy wczytany!');
             } catch (e) { console.error('Error parsing CSV:', e); showToast(e.message || 'Błąd podczas przetwarzania pliku CSV.'); }
         }
-
-        function validateHeaders(headers) {
+        function validateHeaders(headers) { /* ... (unchanged) ... */ 
             const required = ['Dzień', 'Pompki', 'Plank (sekundy)', 'Rower (minuty)'];
             return required.every(h => headers.includes(h));
         }
-        function renderWorkoutPlan() { renderDaysProgress(); renderCurrentDayExercises(); updateDayProgress(); }
-        function renderDaysProgress() {
+        function renderWorkoutPlan() { /* ... (unchanged) ... */ 
+            renderDaysProgress(); renderCurrentDayExercises(); updateDayProgress();
+        }
+        function renderDaysProgress() { /* ... (unchanged, includes ARIA for day indicators) ... */ 
             DOM.daysProgress.innerHTML = '';
             state.workoutPlan.forEach(dayPlan => { 
                 const dayNumber = dayPlan.day; const dayEl = document.createElement('div');
@@ -539,7 +581,7 @@
                 DOM.daysProgress.appendChild(dayEl);
             });
         }
-        function renderCurrentDayExercises() {
+        function renderCurrentDayExercises() { /* ... (unchanged) ... */ 
             DOM.exerciseList.innerHTML = ''; DOM.currentDayElement.textContent = state.currentDay;
             const currentDayPlan = state.workoutPlan.find(d => d.day === state.currentDay);
             if (!currentDayPlan) {
@@ -561,14 +603,14 @@
                 else if (ex.type === 'count' && !isDone) button.addEventListener('click', () => completeExercise(state.currentDay, ex.id, ex.name));
             });
         }
-        function handleTimerAction(exerciseId, exerciseName) {
+        function handleTimerAction(exerciseId, exerciseName) { /* ... (unchanged) ... */ 
             const button = document.getElementById(`btn-${exerciseId}`); const timerEl = document.getElementById(`timer-${exerciseId}`);
             const timerState = button.dataset.timerState || 'idle'; const initialSecs = parseInt(button.dataset.initialSeconds);
             if (timerState === 'idle') { button.dataset.remainingSeconds = initialSecs; button.dataset.timerState = 'running'; button.textContent = 'PAUZA'; startTicking(exerciseId, exerciseName, button, timerEl); }
             else if (timerState === 'running') { clearInterval(parseInt(button.dataset.timerId)); button.dataset.timerState = 'paused'; button.textContent = 'WZNOW'; }
             else if (timerState === 'paused') { button.dataset.timerState = 'running'; button.textContent = 'PAUZA'; startTicking(exerciseId, exerciseName, button, timerEl); }
         }
-        function startTicking(exerciseId, exerciseName, button, timerEl) {
+        function startTicking(exerciseId, exerciseName, button, timerEl) { /* ... (unchanged) ... */ 
             let remaining = parseInt(button.dataset.remainingSeconds); timerEl.textContent = formatTime(remaining);
             const intervalId = setInterval(() => {
                 remaining--; button.dataset.remainingSeconds = remaining; timerEl.textContent = formatTime(remaining);
@@ -576,8 +618,10 @@
             }, 1000);
             button.dataset.timerId = intervalId;
         }
-        function formatTime(s) { s = Math.max(0, s); const mins = Math.floor(s / 60).toString().padStart(2, '0'); const secs = (s % 60).toString().padStart(2, '0'); return `${mins}:${secs}`; }
-        function completeExercise(day, exerciseId, exerciseName) {
+        function formatTime(s) { /* ... (unchanged) ... */ 
+            s = Math.max(0, s); const mins = Math.floor(s / 60).toString().padStart(2, '0'); const secs = (s % 60).toString().padStart(2, '0'); return `${mins}:${secs}`;
+        }
+        function completeExercise(day, exerciseId, exerciseName) { /* ... (unchanged, confetti logic included) ... */ 
             state.completedExercises[day] = state.completedExercises[day] || [];
             if (!state.completedExercises[day].includes(exerciseId)) { state.completedExercises[day].push(exerciseId); }
             const button = document.getElementById(`btn-${exerciseId}`);
@@ -595,14 +639,16 @@
             }
             saveStateToLocalStorage();
         }
-        function isExerciseCompleted(day, exerciseId) { return state.completedExercises[day]?.includes(exerciseId) || false; }
-        function updateDayProgress() {
+        function isExerciseCompleted(day, exerciseId) { /* ... (unchanged) ... */ 
+            return state.completedExercises[day]?.includes(exerciseId) || false;
+        }
+        function updateDayProgress() { /* ... (unchanged) ... */ 
             const currentDayPlan = state.workoutPlan.find(d => d.day === state.currentDay); if (!currentDayPlan) return;
             const totalEx = currentDayPlan.exercises.length; const completedCount = state.completedExercises[state.currentDay]?.length || 0;
             DOM.dayProgressElement.textContent = `${completedCount}/${totalEx}`;
             DOM.nextDayButton.disabled = totalEx === 0 || completedCount < totalEx;
         }
-        function moveToNextDay() {
+        function moveToNextDay() { /* ... (unchanged) ... */ 
             if (!state.completedDays.includes(state.currentDay)) { state.completedDays.push(state.currentDay); }
             const currentIndex = state.workoutPlan.findIndex(p => p.day === state.currentDay);
             const currentDayNum = state.workoutPlan[currentIndex].day;
@@ -611,62 +657,76 @@
             renderWorkoutPlan(); saveStateToLocalStorage();
             showToast(`Dzień ${currentDayNum} ukończony! Przejście do dnia ${state.currentDay}`);
         }
-        function resetProgress() { showCustomConfirm('Reset Postępu', 'Czy na pewno chcesz zresetować postęp treningowy?', () => { resetProgressWithoutConfirmation(); showToast('Postęp zresetowany.'); }); }
-        function resetProgressWithoutConfirmation() {
+        function resetProgress() { /* ... (unchanged) ... */ 
+            showCustomConfirm('Reset Postępu', 'Czy na pewno chcesz zresetować postęp treningowy?', () => { resetProgressWithoutConfirmation(); showToast('Postęp zresetowany.'); });
+        }
+        function resetProgressWithoutConfirmation() { /* ... (unchanged) ... */ 
             state.completedDays = []; state.completedExercises = {}; state.confettiShownForDays = [];
             state.currentDay = state.workoutPlan.length > 0 ? state.workoutPlan[0].day : 1;
             document.querySelectorAll('button[data-timerid]').forEach(b => clearInterval(parseInt(b.dataset.timerId)));
             if (state.workoutPlan.length > 0 && DOM.mainContent.style.display !== 'none') { renderWorkoutPlan(); }
             saveStateToLocalStorage();
         }
-        function showToast(message) { DOM.toast.textContent = message; DOM.toast.classList.add('show'); setTimeout(() => DOM.toast.classList.remove('show'), 3000); }
+        function showToast(message) { /* ... (unchanged) ... */ 
+            DOM.toast.textContent = message; DOM.toast.classList.add('show'); setTimeout(() => DOM.toast.classList.remove('show'), 3000);
+        }
+        
         function showConfetti() {
-            const confettiCount = 60;
             const colors = ['var(--primary-color)', 'var(--success-color)', '#ffcc00', 'var(--danger-color)', '#5856d6', '#ff9500'];
-            for (let i = 0; i < confettiCount; i++) {
-                const particle = document.createElement('div'); particle.classList.add('confetti-particle');
-                const size = Math.random() * 8 + 4;
+            for (let i = 0; i < CONFETTI_COUNT; i++) { // Use constant for count
+                const particle = document.createElement('div');
+                particle.classList.add('confetti-particle');
+                const size = Math.random() * 6 + 3; // Smaller particles: 3px to 9px
+                const xPosition = Math.random() * 100; // vw
+                // Random horizontal movement factor for translate3d
+                const horizontalMovement = (Math.random() - 0.5) * 50; // +/- 25px horizontal drift
+
                 Object.assign(particle.style, {
-                    width: `${size}px`, height: `${size}px`, backgroundColor: colors[Math.floor(Math.random() * colors.length)],
-                    left: `${Math.random() * 100}vw`, top: `-${size + Math.random() * 20}px`,
-                    animationDuration: `${Math.random() * 2 + 2.5}s`, animationDelay: `${Math.random() * 1}s` });
+                    width: `${size}px`, height: `${size}px`,
+                    backgroundColor: colors[Math.floor(Math.random() * colors.length)],
+                    left: `${xPosition}vw`,
+                    top: `-${size + Math.random() * 20}px`, // Start above viewport
+                    animationDuration: `${Math.random() * 1.5 + 2.0}s`, // 2.0-3.5 seconds
+                    animationDelay: `${Math.random() * 0.5}s` // Stagger start up to 0.5s
+                });
+                // Store the horizontal movement on the particle for use in the animation keyframes if needed,
+                // or directly manipulate transform during animation if using JS animation.
+                // For CSS animation, we can vary the end X position slightly if we make multiple @keyframes rules
+                // or accept that horizontal drift is harder with pure CSS without more complex setup.
+                // The translate3d(0, ...) in keyframes will primarily handle vertical fall.
+                // For now, the keyframes apply the same vertical fall to all.
+                
+                // We can add a random horizontal offset to the translate3d X value in JS if we were
+                // dynamically setting the animation for each, but for a shared CSS keyframe:
+                // particle.style.setProperty('--confetti-x-drift', `${horizontalMovement}px`);
+                // And then in @keyframes: transform: translate3d(var(--confetti-x-drift), ...)
+                // However, this requires setting custom property per particle which can be complex.
+                // A simpler approach is to just let `left` position them initially and they fall mostly straight.
+
                 DOM.body.appendChild(particle);
                 particle.addEventListener('animationend', () => particle.remove());
             }
         }
 
-        function calculateAndRenderStats() {
+        function calculateAndRenderStats() { /* ... (unchanged) ... */ 
             let completedDaysCount = state.completedDays.length;
-            let totalPushups = 0;
-            let totalPlankSeconds = 0;
-            let totalBikeMinutes = 0;
+            let totalPushups = 0; let totalPlankSeconds = 0; let totalBikeMinutes = 0;
 
             state.completedDays.forEach(dayNumber => {
                 const dayPlan = state.workoutPlan.find(dp => dp.day === dayNumber);
-                // Ensure the day has a plan and was actually completed (all exercises for that day are in completedExercises)
                 if (dayPlan && state.completedExercises[dayNumber] && state.completedExercises[dayNumber].length === dayPlan.exercises.length) {
                     dayPlan.exercises.forEach(exercise => {
                         if (exercise.id === 'pushups') totalPushups += exercise.value;
                         else if (exercise.id === 'plank') totalPlankSeconds += exercise.value;
                         else if (exercise.id === 'bike') totalBikeMinutes += exercise.value;
                     });
-                } else if (dayPlan && (!state.completedExercises[dayNumber] || state.completedExercises[dayNumber].length !== dayPlan.exercises.length)) {
-                    // This handles a potential edge case: if a day is in `completedDays` but for some reason
-                    // not all its exercises were marked in `completedExercises`.
-                    // For now, we only count fully completed days for exercise totals.
-                    // If a day is in completedDays but not all exercises were done, we still count it as a completed day,
-                    // but its exercises won't add to the totals unless they were individually marked.
-                    // A stricter approach might be to re-evaluate how `completedDays` is populated.
-                    // The current logic in `moveToNextDay` adds to `completedDays` when all exercises are done for that day.
                 }
             });
-
             DOM.statsCompletedDays.textContent = completedDaysCount;
             DOM.statsTotalPushups.textContent = totalPushups;
             DOM.statsTotalPlank.textContent = totalPlankSeconds;
             DOM.statsTotalBike.textContent = totalBikeMinutes;
         }
-
     </script>
 </body>
 </html>
