@@ -9,12 +9,11 @@
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      margin: 0;
+      margin: 0 auto;
       padding: 1rem;
       background: #f2f2f7;
       color: #000;
       max-width: 390px;
-      margin: auto;
     }
     h1 {
       font-size: 1.5rem;
@@ -22,7 +21,24 @@
       margin-bottom: 1rem;
     }
     #upload-section {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    #day-progress {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .day-box {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      background-color: #ccc;
+    }
+    .day-box.done {
+      background-color: #4caf50;
     }
     .exercise {
       background: white;
@@ -34,7 +50,8 @@
     .done {
       color: green;
       font-weight: bold;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
+      text-align: center;
     }
     sl-button::part(base) {
       width: 100%;
@@ -45,20 +62,22 @@
   <h1>Trening - Dzień <span id="day-number"></span></h1>
   <div id="upload-section">
     <input type="file" id="csvFile" accept=".csv" />
+    <br /><br />
     <sl-button variant="primary" onclick="resetProgress()">Resetuj Progres</sl-button>
   </div>
+  <div id="day-progress"></div>
   <div id="exercise-list"></div>
 
   <script type="module">
     import initSqlJs from 'https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/sql-wasm.js';
 
-    let db, todayData = {}, dbLoaded = false;
+    let db, plan = [], todayData = {}, dbLoaded = false;
 
     const initDB = async () => {
       const SQL = await initSqlJs({ locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/${file}` });
       const saved = localStorage.getItem('trening_db');
       db = new SQL.Database(saved ? new Uint8Array(JSON.parse(saved)) : undefined);
-      if (!saved) db.run("CREATE TABLE progress(day INT, pushups INT, plank INT, bike INT);");
+      if (!saved) db.run("CREATE TABLE progress(day INT PRIMARY KEY, pushups INT, plank INT, bike INT);");
       dbLoaded = true;
     };
 
@@ -88,7 +107,7 @@
       if (row.length === 0) db.run(`INSERT INTO progress VALUES (${day}, 0, 0, 0);`);
       db.run(`UPDATE progress SET ${type} = 1 WHERE day = ${day}`);
       saveDB();
-      showToday(todayData);
+      showToday(plan);
     };
 
     const isDone = (day, type) => {
@@ -96,16 +115,30 @@
       return row[0]?.values[0][0] === 1;
     };
 
-    const showToday = (plan) => {
-      const day = plan.day;
-      document.getElementById("day-number").textContent = day;
+    const isDayComplete = (day) => {
+      const row = db.exec(`SELECT * FROM progress WHERE day = ${day}`);
+      return row[0]?.values[0].slice(1).every(v => v === 1);
+    };
+
+    const showToday = (planData) => {
       const container = document.getElementById("exercise-list");
       container.innerHTML = '';
 
+      const dayProgress = document.getElementById("day-progress");
+      dayProgress.innerHTML = '';
+      planData.forEach(entry => {
+        const box = document.createElement("div");
+        box.className = "day-box" + (isDayComplete(entry.day) ? " done" : "");
+        dayProgress.appendChild(box);
+      });
+
+      const today = planData.find(row => !isDayComplete(row.day)) || planData[planData.length - 1];
+      document.getElementById("day-number").textContent = today.day;
+
       const types = [
-        { label: "Pompki", type: "pushups", amount: plan.pushups },
-        { label: "Plank", type: "plank", amount: plan.plank },
-        { label: "Rower", type: "bike", amount: plan.bike },
+        { label: "Pompki", type: "pushups", amount: today.pushups },
+        { label: "Plank", type: "plank", amount: today.plank },
+        { label: "Rower", type: "bike", amount: today.bike },
       ];
 
       types.forEach(({ label, type, amount }) => {
@@ -116,7 +149,7 @@
         title.innerHTML = `<strong>${label}:</strong> ${amount} ${type === 'plank' ? 'sekund' : (type === 'bike' ? 'minut' : 'powtórzeń')}`;
 
         const content = document.createElement("div");
-        if (isDone(day, type)) {
+        if (isDone(today.day, type)) {
           content.innerHTML = `<div class='done'>${label} wykonane</div>`;
         } else if (type === 'plank') {
           const btn = document.createElement("sl-button");
@@ -130,7 +163,7 @@
               remaining--;
               if (remaining <= 0) {
                 clearInterval(interval);
-                markDone(day, type);
+                markDone(today.day, type);
               } else {
                 btn.textContent = `Pozostało ${remaining}s`;
               }
@@ -141,7 +174,7 @@
           const btn = document.createElement("sl-button");
           btn.textContent = `Rozpocznij ${label}`;
           btn.variant = "primary";
-          btn.addEventListener("click", () => markDone(day, type));
+          btn.addEventListener("click", () => markDone(today.day, type));
           content.appendChild(btn);
         }
 
@@ -155,12 +188,8 @@
       localStorage.removeItem('trening_db');
       await initDB();
       const file = e.target.files[0];
-      const plan = await readCSV(file);
-      todayData = plan.find(row => {
-        const rowDone = db.exec(`SELECT * FROM progress WHERE day = ${row.day}`);
-        return !rowDone[0] || rowDone[0].values[0].includes(0);
-      }) || plan[plan.length - 1];
-      showToday(todayData);
+      plan = await readCSV(file);
+      showToday(plan);
     });
 
     await initDB();
