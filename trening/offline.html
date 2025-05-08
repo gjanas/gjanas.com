@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trening Tracker - Offline</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f2f2f7;
+            color: #1c1c1e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 400px;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 16px;
+            color: #1c1c1e;
+        }
+        p {
+            font-size: 16px;
+            color: #8e8e93;
+            line-height: 1.5;
+        }
+         /* Simple dark mode detection based on preference (optional) */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #000000;
+                color: #ffffff;
+            }
+            h1 {
+                 color: #ffffff;
+            }
+             p {
+                color: #8d8d92;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Jesteś offline</h1>
+        <p>Nie można załadować tej strony, ponieważ nie masz połączenia z internetem. Sprawdź połączenie i spróbuj ponownie.</p>
+        <p>Podstawowa zawartość aplikacji może być dostępna, jeśli została wcześniej zapisana w pamięci podręcznej.</p>
+    </div>
+</body>
+</html>
