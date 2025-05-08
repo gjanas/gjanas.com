@@ -1,14 +1,12 @@
 // service-worker.js
 
-const CACHE_NAME = 'trening-tracker-cache-v1'; // Wersjonuj nazwę cache'u
+const CACHE_NAME = 'trening-tracker-cache-v2'; // Increased version due to offline page addition
 const URLS_TO_CACHE = [
-  'index.html', // Główny plik aplikacji
-  'manifest.json', // Manifest PWA
-  // Dodaj ścieżki do kluczowych ikon zdefiniowanych w manifeście
+  'index.html',
+  'manifest.json',
+  'offline.html', // Add the offline fallback page
   'icons/icon-192x192.png',
   'icons/icon-512x512.png',
-  // Możesz dodać tu inne statyczne zasoby, jeśli będziesz je miał w przyszłości
-  // np. 'css/style.css', 'js/main.js' (ale u nas są inline)
 ];
 
 // Instalacja Service Workera i cache'owanie zasobów
@@ -17,13 +15,20 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('Opened cache:', CACHE_NAME);
-        return cache.addAll(URLS_TO_CACHE);
+        // Use addAll safely - if one fails, the whole install might fail.
+        // Consider adding resources individually if some are non-critical.
+        return cache.addAll(URLS_TO_CACHE)
+          .catch(error => {
+             console.error('Failed to cache one or more resources during install:', error);
+             // Decide if install should fail or continue without the failed resource
+             // For critical resources like index.html, failure might be appropriate.
+          });
       })
       .catch(err => {
-        console.error('Failed to open cache or add URLs:', err);
+        console.error('Failed to open cache:', err);
       })
   );
-  self.skipWaiting(); // Aktywuj nowego SW natychmiast
+  self.skipWaiting();
 });
 
 // Aktywacja Service Workera i czyszczenie starych cache'ów
@@ -38,37 +43,40 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim()) // Claim clients after cache cleanup
   );
-  return self.clients.claim(); // Przejmij kontrolę nad otwartymi klientami
 });
 
 // Przechwytywanie żądań sieciowych
 self.addEventListener('fetch', (event) => {
-  // Obsługuj tylko żądania GET
+  // Ignore non-GET requests
   if (event.request.method !== 'GET') {
     return;
   }
 
+  // Strategy: Cache falling back to network, then offline page
   event.respondWith(
     caches.match(event.request)
-      .then((response) => {
-        // Jeśli zasób jest w cache, zwróć go
-        if (response) {
+      .then((cachedResponse) => {
+        // Return cached response if found
+        if (cachedResponse) {
           // console.log('Serving from cache:', event.request.url);
-          return response;
+          return cachedResponse;
         }
 
-        // Jeśli nie ma w cache, spróbuj pobrać z sieci
+        // Not in cache, fetch from network
         // console.log('Fetching from network:', event.request.url);
         return fetch(event.request).then(
           (networkResponse) => {
-            // Sprawdź, czy otrzymaliśmy prawidłową odpowiedź
+            // Check if we received a valid response
             if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+               // If the network response is bad, don't cache it, just return it
+               // Or potentially try the offline page immediately? For now, return bad response.
+              console.warn('Bad network response:', networkResponse);
               return networkResponse;
             }
 
-            // Sklonuj odpowiedź, ponieważ strumień można odczytać tylko raz
+            // Clone the response to cache it
             const responseToCache = networkResponse.clone();
 
             caches.open(CACHE_NAME)
@@ -79,10 +87,10 @@ self.addEventListener('fetch', (event) => {
 
             return networkResponse;
           }
-        ).catch(error => {
-          console.error('Fetch failed; returning offline page instead.', error);
-          // Opcjonalnie: Można tu zwrócić stronę offline, jeśli taka istnieje
-          // return caches.match('offline.html'); 
+        ).catch((error) => {
+          // Network request failed, try to serve offline page
+          console.log('Network fetch failed, serving offline page. Error:', error);
+          return caches.match('offline.html');
         });
       })
   );
