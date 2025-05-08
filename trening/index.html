@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Trening Tracker</title>
-    <!-- Link to manifest will be added later -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#007aff" id="metaThemeColor"> <!-- ID to update it dynamically -->
     <style>
         :root {
             --main-bg-color: #f2f2f7;
@@ -22,6 +23,8 @@
             --btn-outline-danger-hover-bg: rgba(255, 59, 48, 0.08);
             --focus-ring-color: rgba(0, 122, 255, 0.5);
             --settings-icon-fill: var(--primary-color);
+            /* Theme color for meta tag - light */
+            --meta-theme-color-light: #007aff; 
         }
 
         body.dark-theme {
@@ -40,8 +43,11 @@
             --btn-outline-danger-hover-bg: rgba(255, 69, 58, 0.15);
             --focus-ring-color: rgba(10, 132, 255, 0.6);
             --settings-icon-fill: var(--primary-color);
+            /* Theme color for meta tag - dark */
+            --meta-theme-color-dark: #000000; /* Or var(--main-bg-color) if you prefer header color */
         }
 
+        /* ... (reszta stylów bez zmian - pomijam dla skrócenia) ... */
         * {
             margin: 0;
             padding: 0;
@@ -203,8 +209,8 @@
             will-change: transform, opacity; animation: fall linear forwards;
         }
         @keyframes fall {
-            0% { transform: translate3d(0, -10px, 0) rotateZ(0deg); opacity: 1; } /* Start slightly above origin point */
-            100% { transform: translate3d(0, 150px, 0) rotateZ(180deg); opacity: 0; } /* Shorter fall, less rotation */
+            0% { transform: translate3d(0, -10px, 0) rotateZ(0deg); opacity: 1; }
+            100% { transform: translate3d(0, 150px, 0) rotateZ(180deg); opacity: 0; }
         }
 
         .view { animation-duration: 0.3s; animation-timing-function: ease-in-out; animation-fill-mode: forwards; }
@@ -285,7 +291,7 @@
             <h3>Ustawienia</h3>
             <button id="themeSwitcherButton" class="btn btn-outline">Motyw: Jasny</button>
             <button id="statsButton" class="btn btn-outline">Statystyki</button>
-            <button id="exportDataButton" class="btn btn-outline">Eksportuj Dane</button> <!-- New Button -->
+            <button id="exportDataButton" class="btn btn-outline">Eksportuj Dane</button>
             <button id="uploadNewPlanButtonModal" class="btn btn-outline">Nowy Plan CSV</button>
             <button id="resetProgressButtonModal" class="btn btn-outline danger">Resetuj Postęp</button>
             <button id="closeSettingsModalButton" class="btn btn-close-modal">Zamknij</button>
@@ -313,6 +319,7 @@
 
         const DOM = {
             body: document.body, appHeader: document.getElementById('appHeader'),
+            metaThemeColor: document.getElementById('metaThemeColor'), // For PWA theme color
             settingsButton: document.getElementById('settingsButton'),
             uploadSection: document.getElementById('uploadSection'), mainContent: document.getElementById('mainContent'),
             fileInput: document.getElementById('fileInput'), fileInputButton: document.getElementById('fileInputButton'),
@@ -327,7 +334,7 @@
             settingsModal: document.getElementById('settingsModal'),
             themeSwitcherButton: document.getElementById('themeSwitcherButton'),
             statsButton: document.getElementById('statsButton'),
-            exportDataButton: document.getElementById('exportDataButton'), // New DOM element
+            exportDataButton: document.getElementById('exportDataButton'),
             uploadNewPlanButtonModal: document.getElementById('uploadNewPlanButtonModal'),
             resetProgressButtonModal: document.getElementById('resetProgressButtonModal'),
             closeSettingsModalButton: document.getElementById('closeSettingsModalButton'),
@@ -340,38 +347,26 @@
         };
         let currentModalConfirmCallback = null;
         const ANIMATION_DURATION = 300;
-        const CONFETTI_COUNT = 20; // Reduced further for "burst" effect
+        const CONFETTI_COUNT = 20;
 
-        // Event Listeners
         DOM.settingsButton.addEventListener('click', openSettingsModal);
         DOM.fileInputButton.addEventListener('click', () => DOM.fileInput.click());
         DOM.fileInput.addEventListener('change', handleFileSelection);
         DOM.uploadButton.addEventListener('click', handleFileUpload);
         DOM.nextDayButton.addEventListener('click', moveToNextDay);
-        
         DOM.themeSwitcherButton.addEventListener('click', toggleTheme);
         DOM.statsButton.addEventListener('click', openStatsModal);
-        DOM.exportDataButton.addEventListener('click', exportData); // New listener
-        DOM.uploadNewPlanButtonModal.addEventListener('click', () => {
-            closeSettingsModal(); showUploadSectionWithAnimation();
-        });
-        DOM.resetProgressButtonModal.addEventListener('click', () => {
-            closeSettingsModal(); resetProgress(); 
-        });
+        DOM.exportDataButton.addEventListener('click', exportData);
+        DOM.uploadNewPlanButtonModal.addEventListener('click', () => { closeSettingsModal(); showUploadSectionWithAnimation(); });
+        DOM.resetProgressButtonModal.addEventListener('click', () => { closeSettingsModal(); resetProgress(); });
         DOM.closeSettingsModalButton.addEventListener('click', closeSettingsModal);
         DOM.settingsModal.addEventListener('click', (e) => e.target === DOM.settingsModal && closeSettingsModal());
-
         DOM.closeStatsModalButton.addEventListener('click', closeStatsModal);
         DOM.statsModal.addEventListener('click', (e) => e.target === DOM.statsModal && closeStatsModal());
-
         window.addEventListener('scroll', () => DOM.appHeader.classList.toggle('scrolled', window.scrollY > 0));
-        DOM.modalConfirmButton.addEventListener('click', () => {
-            if (currentModalConfirmCallback) currentModalConfirmCallback();
-            hideCustomConfirm();
-        });
+        DOM.modalConfirmButton.addEventListener('click', () => { if (currentModalConfirmCallback) currentModalConfirmCallback(); hideCustomConfirm(); });
         DOM.modalCancelButton.addEventListener('click', hideCustomConfirm);
         DOM.customModal.addEventListener('click', (e) => e.target === DOM.customModal && hideCustomConfirm());
-        
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 if (DOM.customModal.classList.contains('show')) hideCustomConfirm();
@@ -381,10 +376,6 @@
         });
 
         init();
-        // --- (Rest of the JS code from previous version, starting from function init() down to calculateAndRenderStats()) ---
-        // --- It's important to include all functions from init() downwards here ---
-        // --- The only new function added below is exportData() ---
-        // --- And the confetti animation / particle creation is updated in showConfetti() ---
 
         function init() {
             loadStateFromLocalStorage();
@@ -418,9 +409,14 @@
             applyTheme();
         }
         function saveThemePreference() { localStorage.setItem('themePreference', state.currentTheme); }
+        
         function applyTheme() {
             DOM.body.classList.toggle('dark-theme', state.currentTheme === 'dark');
             DOM.themeSwitcherButton.textContent = `Motyw: ${state.currentTheme === 'dark' ? 'Jasny' : 'Ciemny'}`;
+            // Update meta theme-color for PWA
+            const newThemeColor = getComputedStyle(document.documentElement)
+                .getPropertyValue(state.currentTheme === 'dark' ? '--meta-theme-color-dark' : '--meta-theme-color-light').trim();
+            DOM.metaThemeColor.setAttribute('content', newThemeColor);
         }
         function toggleTheme() {
             state.currentTheme = state.currentTheme === 'light' ? 'dark' : 'light';
@@ -429,13 +425,7 @@
 
         function openSettingsModal() { DOM.settingsModal.classList.add('show'); DOM.themeSwitcherButton.focus(); }
         function closeSettingsModal() { DOM.settingsModal.classList.remove('show'); }
-
-        function openStatsModal() {
-            closeSettingsModal(); 
-            calculateAndRenderStats();
-            DOM.statsModal.classList.add('show');
-            DOM.closeStatsModalButton.focus();
-        }
+        function openStatsModal() { closeSettingsModal(); calculateAndRenderStats(); DOM.statsModal.classList.add('show'); DOM.closeStatsModalButton.focus(); }
         function closeStatsModal() { DOM.statsModal.classList.remove('show'); }
 
         function showMainContentWithAnimation() {
@@ -614,25 +604,18 @@
         
         function showConfetti() {
             const colors = ['var(--primary-color)', 'var(--success-color)', '#ffcc00', 'var(--danger-color)'];
-            // Determine origin point for confetti (e.g., center top of viewport)
-            const originX = 50; // vw
-            const originY = 0;  // vh (top)
-
+            const originX = 50; const originY = 0; 
             for (let i = 0; i < CONFETTI_COUNT; i++) {
-                const particle = document.createElement('div');
-                particle.classList.add('confetti-particle');
-                const size = Math.random() * 5 + 2; // Smaller: 2px to 7px
-                // Spread particles a bit horizontally from origin
-                const initialXOffset = (Math.random() - 0.5) * 30; // +/- 15vw from originX
-
+                const particle = document.createElement('div'); particle.classList.add('confetti-particle');
+                const size = Math.random() * 5 + 2; 
+                const initialXOffset = (Math.random() - 0.5) * 40; // +/- 20vw from originX for a bit wider burst
                 Object.assign(particle.style, {
                     width: `${size}px`, height: `${size}px`,
                     backgroundColor: colors[Math.floor(Math.random() * colors.length)],
-                    left: `calc(${originX}vw + ${initialXOffset}px)`, // Start near center top
-                    top: `${originY}vh`, // Start at the very top
-                    animationDuration: `${Math.random() * 1 + 1.0}s`, // 1.0-2.0 seconds for shorter burst
-                    animationDelay: `${Math.random() * 0.2}s` // Stagger start up to 0.2s
-                });
+                    left: `calc(${originX}vw + ${initialXOffset}px)`,
+                    top: `${originY}vh`,
+                    animationDuration: `${Math.random() * 1 + 1.0}s`, 
+                    animationDelay: `${Math.random() * 0.2}s` });
                 DOM.body.appendChild(particle);
                 particle.addEventListener('animationend', () => particle.remove());
             }
@@ -660,34 +643,22 @@
         function exportData() {
             try {
                 const dataToExport = {
-                    version: "1.0.0", // Optional: version your backup format
-                    timestamp: new Date().toISOString(),
-                    workoutPlan: state.workoutPlan,
-                    currentDay: state.currentDay,
-                    completedDays: state.completedDays,
-                    completedExercises: state.completedExercises,
-                    confettiShownForDays: state.confettiShownForDays,
-                    currentTheme: state.currentTheme
+                    version: "1.0.0", timestamp: new Date().toISOString(),
+                    workoutPlan: state.workoutPlan, currentDay: state.currentDay,
+                    completedDays: state.completedDays, completedExercises: state.completedExercises,
+                    confettiShownForDays: state.confettiShownForDays, currentTheme: state.currentTheme
                 };
-                const jsonData = JSON.stringify(dataToExport, null, 2); // Pretty print JSON
+                const jsonData = JSON.stringify(dataToExport, null, 2);
                 const blob = new Blob([jsonData], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                const dateStr = new Date().toISOString().slice(0,10); // YYYY-MM-DD
+                const a = document.createElement('a'); a.href = url;
+                const dateStr = new Date().toISOString().slice(0,10);
                 a.download = `trening-tracker-backup-${dateStr}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                showToast('Dane wyeksportowane pomyślnie!');
-                closeSettingsModal();
-            } catch (error) {
-                console.error("Błąd podczas eksportu danych:", error);
-                showToast("Wystąpił błąd podczas eksportu danych.");
-            }
+                showToast('Dane wyeksportowane pomyślnie!'); closeSettingsModal();
+            } catch (error) { console.error("Błąd podczas eksportu danych:", error); showToast("Wystąpił błąd podczas eksportu danych."); }
         }
-
     </script>
 </body>
 </html>
