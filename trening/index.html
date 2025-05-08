@@ -27,6 +27,7 @@
             --focus-ring-color: rgba(10, 132, 255, 0.6); --settings-icon-fill: var(--primary-color);
             --meta-theme-color-dark: #000000;
         }
+        /* ... (reszta stylów bez zmian - pomijam dla skrócenia) ... */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--main-bg-color); color: var(--text-color); font-size: 16px; line-height: 1.6; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; transition: background-color 0.3s ease, color 0.3s ease; }
         .container { max-width: 500px; margin: 0 auto; padding: 16px; width: 100%; }
@@ -60,7 +61,7 @@
         .timer { font-size: 24px; font-weight: 600; text-align: center; margin: 10px 0; }
         .upload-container { display: flex; flex-direction: column; gap: 8px; }
         .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
-        .file-input-wrapper input[type=file], #importFileInput { position: absolute; left: -9999px; top: -9999px; opacity: 0; } /* Hide import input */
+        .file-input-wrapper input[type=file], #importFileInput { position: absolute; left: -9999px; top: -9999px; opacity: 0; }
         .file-name { margin-top: 8px; font-size: 14px; color: var(--secondary-text-color); text-align: center; min-height: 1.2em; transition: color 0.3s ease; }
         .days-progress { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; justify-content: center; }
         .day-indicator { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background-color: var(--day-indicator-bg); color: var(--day-indicator-text); border-radius: 50%; font-weight: 600; font-size: 14px; transition: background-color 0.3s, color 0.3s, transform 0.1s, filter 0.1s; cursor: pointer; }
@@ -108,7 +109,7 @@
                 <div class="upload-container">
                     <div class="file-input-wrapper">
                         <button class="btn btn-outline" id="fileInputButton">Wybierz plik CSV</button>
-                        <input type="file" id="csvFileInput" accept=".csv"> <!-- Changed ID for clarity -->
+                        <input type="file" id="csvFileInput" accept=".csv">
                     </div>
                     <div class="file-name" id="fileName"></div>
                     <button class="btn" id="uploadButton" disabled>Wczytaj plan</button>
@@ -152,8 +153,8 @@
             <button id="themeSwitcherButton" class="btn btn-outline">Motyw: Jasny</button>
             <button id="statsButton" class="btn btn-outline">Statystyki</button>
             <button id="exportDataButton" class="btn btn-outline">Eksportuj Dane</button>
-            <button id="importDataButton" class="btn btn-outline">Importuj Dane</button> <!-- New Button -->
-            <input type="file" id="importFileInput" accept=".json" style="display: none;"> <!-- Hidden input for import -->
+            <button id="importDataButton" class="btn btn-outline">Importuj Dane</button>
+            <input type="file" id="importFileInput" accept=".json">
             <button id="uploadNewPlanButtonModal" class="btn btn-outline">Nowy Plan CSV</button>
             <button id="resetProgressButtonModal" class="btn btn-outline danger">Resetuj Postęp</button>
             <button id="closeSettingsModalButton" class="btn btn-close-modal">Zamknij</button>
@@ -184,8 +185,8 @@
             metaThemeColor: document.getElementById('metaThemeColor'),
             settingsButton: document.getElementById('settingsButton'),
             uploadSection: document.getElementById('uploadSection'), mainContent: document.getElementById('mainContent'),
-            csvFileInput: document.getElementById('csvFileInput'), // Updated ID
-            fileInputButton: document.getElementById('fileInputButton'), // This button triggers csvFileInput
+            csvFileInput: document.getElementById('csvFileInput'),
+            fileInputButton: document.getElementById('fileInputButton'),
             fileName: document.getElementById('fileName'), uploadButton: document.getElementById('uploadButton'),
             currentDayElement: document.getElementById('currentDay'), dayProgressElement: document.getElementById('dayProgress'),
             exerciseList: document.getElementById('exerciseList'), daysProgress: document.getElementById('daysProgress'),
@@ -198,8 +199,8 @@
             themeSwitcherButton: document.getElementById('themeSwitcherButton'),
             statsButton: document.getElementById('statsButton'),
             exportDataButton: document.getElementById('exportDataButton'),
-            importDataButton: document.getElementById('importDataButton'), // New
-            importFileInput: document.getElementById('importFileInput'), // New
+            importDataButton: document.getElementById('importDataButton'),
+            importFileInput: document.getElementById('importFileInput'),
             uploadNewPlanButtonModal: document.getElementById('uploadNewPlanButtonModal'),
             resetProgressButtonModal: document.getElementById('resetProgressButtonModal'),
             closeSettingsModalButton: document.getElementById('closeSettingsModalButton'),
@@ -214,19 +215,16 @@
         const ANIMATION_DURATION = 300;
         const CONFETTI_COUNT = 20;
 
-        // Event Listeners
         DOM.settingsButton.addEventListener('click', openSettingsModal);
-        DOM.fileInputButton.addEventListener('click', () => DOM.csvFileInput.click()); // Triggers CSV input
-        DOM.csvFileInput.addEventListener('change', handleCsvFileSelection); // Changed listener to specific input
-        DOM.uploadButton.addEventListener('click', handleCsvFileUpload); // Changed handler name for clarity
+        DOM.fileInputButton.addEventListener('click', () => DOM.csvFileInput.click());
+        DOM.csvFileInput.addEventListener('change', handleCsvFileSelection);
+        DOM.uploadButton.addEventListener('click', handleCsvFileUpload);
         DOM.nextDayButton.addEventListener('click', moveToNextDay);
-        
         DOM.themeSwitcherButton.addEventListener('click', toggleTheme);
         DOM.statsButton.addEventListener('click', openStatsModal);
         DOM.exportDataButton.addEventListener('click', exportData);
-        DOM.importDataButton.addEventListener('click', () => DOM.importFileInput.click()); // Triggers JSON import input
-        DOM.importFileInput.addEventListener('change', handleImportFileSelection); // New listener for JSON import
-
+        DOM.importDataButton.addEventListener('click', () => DOM.importFileInput.click());
+        DOM.importFileInput.addEventListener('change', handleImportFileSelection);
         DOM.uploadNewPlanButtonModal.addEventListener('click', () => { closeSettingsModal(); showUploadSectionWithAnimation(); });
         DOM.resetProgressButtonModal.addEventListener('click', () => { closeSettingsModal(); resetProgress(); });
         DOM.closeSettingsModalButton.addEventListener('click', closeSettingsModal);
@@ -247,366 +245,158 @@
 
         init();
 
-        function init() { /* ... (unchanged) ... */ 
-            loadStateFromLocalStorage();
-            loadThemePreference();
+        function init() { 
+            loadStateFromLocalStorage(); loadThemePreference();
             if (state.workoutPlan.length > 0) {
-                DOM.uploadSection.style.display = 'none';
-                DOM.mainContent.style.display = 'block';
+                DOM.uploadSection.style.display = 'none'; DOM.mainContent.style.display = 'block';
                 renderWorkoutPlan();
             } else {
-                DOM.mainContent.style.display = 'none';
-                DOM.uploadSection.style.display = 'block';
+                DOM.mainContent.style.display = 'none'; DOM.uploadSection.style.display = 'block';
             }
             DOM.appHeader.classList.toggle('scrolled', window.scrollY > 0);
         }
-        function loadStateFromLocalStorage() { /* ... (unchanged) ... */ 
+        function loadStateFromLocalStorage() { 
             const savedState = localStorage.getItem('workoutTrackerState');
             if (savedState) {
-                try {
-                    const parsedState = JSON.parse(savedState);
-                    const defaultState = { confettiShownForDays: [], currentTheme: 'light' };
-                    Object.assign(state, defaultState, parsedState);
-                } catch (e) { console.error('Failed to parse saved state:', e); localStorage.removeItem('workoutTrackerState'); Object.assign(state, { confettiShownForDays: [], currentTheme: 'light' }); }
+                try { const parsedState = JSON.parse(savedState); const defaultState = { confettiShownForDays: [], currentTheme: 'light' }; Object.assign(state, defaultState, parsedState); }
+                catch (e) { console.error('Failed to parse saved state:', e); localStorage.removeItem('workoutTrackerState'); Object.assign(state, { confettiShownForDays: [], currentTheme: 'light' }); }
             } else { Object.assign(state, { confettiShownForDays: [], currentTheme: 'light' }); }
         }
-        function saveStateToLocalStorage() { /* ... (unchanged) ... */ 
-            localStorage.setItem('workoutTrackerState', JSON.stringify(state));
-        }
-        function loadThemePreference() { /* ... (unchanged) ... */ 
-            const savedTheme = localStorage.getItem('themePreference');
-            if (savedTheme) state.currentTheme = savedTheme;
-            applyTheme();
-        }
-        function saveThemePreference() { /* ... (unchanged) ... */ 
-            localStorage.setItem('themePreference', state.currentTheme);
-        }
-        function applyTheme() { /* ... (Updated to handle metaThemeColor) ... */ 
+        function saveStateToLocalStorage() { localStorage.setItem('workoutTrackerState', JSON.stringify(state)); }
+        function loadThemePreference() { const savedTheme = localStorage.getItem('themePreference'); if (savedTheme) state.currentTheme = savedTheme; applyTheme(); }
+        function saveThemePreference() { localStorage.setItem('themePreference', state.currentTheme); }
+        function applyTheme() {
             DOM.body.classList.toggle('dark-theme', state.currentTheme === 'dark');
             DOM.themeSwitcherButton.textContent = `Motyw: ${state.currentTheme === 'dark' ? 'Jasny' : 'Ciemny'}`;
-            const newThemeColor = getComputedStyle(document.documentElement)
-                .getPropertyValue(state.currentTheme === 'dark' ? '--meta-theme-color-dark' : '--meta-theme-color-light').trim();
+            const newThemeColor = getComputedStyle(document.documentElement).getPropertyValue(state.currentTheme === 'dark' ? '--meta-theme-color-dark' : '--meta-theme-color-light').trim();
             if (DOM.metaThemeColor) DOM.metaThemeColor.setAttribute('content', newThemeColor);
         }
-        function toggleTheme() { /* ... (unchanged) ... */ 
-            state.currentTheme = state.currentTheme === 'light' ? 'dark' : 'light';
-            applyTheme(); saveThemePreference();
-        }
-        function openSettingsModal() { /* ... (unchanged) ... */ 
-            DOM.settingsModal.classList.add('show'); DOM.themeSwitcherButton.focus();
-        }
-        function closeSettingsModal() { /* ... (unchanged) ... */ 
-            DOM.settingsModal.classList.remove('show');
-        }
-        function openStatsModal() { /* ... (unchanged) ... */ 
-            closeSettingsModal(); calculateAndRenderStats(); DOM.statsModal.classList.add('show'); DOM.closeStatsModalButton.focus();
-        }
-        function closeStatsModal() { /* ... (unchanged) ... */ 
-            DOM.statsModal.classList.remove('show');
-        }
-        function showMainContentWithAnimation() { /* ... (unchanged) ... */ 
-             if (DOM.mainContent.style.display === 'block' && !DOM.mainContent.classList.contains('fade-out')) return;
+        function toggleTheme() { state.currentTheme = state.currentTheme === 'light' ? 'dark' : 'light'; applyTheme(); saveThemePreference(); }
+        function openSettingsModal() { DOM.settingsModal.classList.add('show'); DOM.themeSwitcherButton.focus(); }
+        function closeSettingsModal() { DOM.settingsModal.classList.remove('show'); }
+        function openStatsModal() { closeSettingsModal(); calculateAndRenderStats(); DOM.statsModal.classList.add('show'); DOM.closeStatsModalButton.focus(); }
+        function closeStatsModal() { DOM.statsModal.classList.remove('show'); }
+        function showMainContentWithAnimation() {
+            if (DOM.mainContent.style.display === 'block' && !DOM.mainContent.classList.contains('fade-out')) return;
             DOM.uploadSection.classList.remove('fade-in'); DOM.uploadSection.classList.add('fade-out');
-            setTimeout(() => {
-                DOM.uploadSection.style.display = 'none'; DOM.uploadSection.classList.remove('fade-out');
-                DOM.mainContent.style.display = 'block'; DOM.mainContent.classList.remove('fade-out');
-                DOM.mainContent.classList.add('fade-in');
-            }, ANIMATION_DURATION);
+            setTimeout(() => { DOM.uploadSection.style.display = 'none'; DOM.uploadSection.classList.remove('fade-out'); DOM.mainContent.style.display = 'block'; DOM.mainContent.classList.remove('fade-out'); DOM.mainContent.classList.add('fade-in'); }, ANIMATION_DURATION);
         }
-        function showUploadSectionWithAnimation() { /* ... (unchanged) ... */ 
+        function showUploadSectionWithAnimation() {
             if (DOM.uploadSection.style.display === 'block' && !DOM.uploadSection.classList.contains('fade-out')) return;
             DOM.mainContent.classList.remove('fade-in'); DOM.mainContent.classList.add('fade-out');
-            setTimeout(() => {
-                DOM.mainContent.style.display = 'none'; DOM.mainContent.classList.remove('fade-out');
-                DOM.uploadSection.style.display = 'block'; DOM.uploadSection.classList.remove('fade-out');
-                DOM.uploadSection.classList.add('fade-in');
-                DOM.fileName.textContent = ''; DOM.uploadButton.disabled = true; DOM.csvFileInput.value = null; // Clear CSV input
-            }, ANIMATION_DURATION);
+            setTimeout(() => { DOM.mainContent.style.display = 'none'; DOM.mainContent.classList.remove('fade-out'); DOM.uploadSection.style.display = 'block'; DOM.uploadSection.classList.remove('fade-out'); DOM.uploadSection.classList.add('fade-in'); DOM.fileName.textContent = ''; DOM.uploadButton.disabled = true; DOM.csvFileInput.value = null; }, ANIMATION_DURATION);
         }
-        function showCustomConfirm(title, message, onConfirm) { /* ... (unchanged) ... */ 
-            DOM.modalTitle.textContent = title; DOM.modalMessage.textContent = message;
-            currentModalConfirmCallback = onConfirm;
-            DOM.customModal.classList.add('show'); DOM.modalConfirmButton.focus();
-        }
-        function hideCustomConfirm() { /* ... (unchanged) ... */ 
-            DOM.customModal.classList.remove('show'); currentModalConfirmCallback = null;
-        }
+        function showCustomConfirm(title, message, onConfirm) { DOM.modalTitle.textContent = title; DOM.modalMessage.textContent = message; currentModalConfirmCallback = onConfirm; DOM.customModal.classList.add('show'); DOM.modalConfirmButton.focus(); }
+        function hideCustomConfirm() { DOM.customModal.classList.remove('show'); currentModalConfirmCallback = null; }
 
-        function handleCsvFileSelection(event) { // Renamed
-            const file = event.target.files[0];
-            DOM.fileName.textContent = file ? file.name : ''; DOM.uploadButton.disabled = !file;
-        }
-        function handleCsvFileUpload() { // Renamed
-            const file = DOM.csvFileInput.files[0];
-            if (!file) { showToast('Wybierz plik CSV'); return; }
-            const reader = new FileReader();
-            reader.onload = (e) => parseCSV(e.target.result);
+        function handleCsvFileSelection(event) { const file = event.target.files[0]; DOM.fileName.textContent = file ? file.name : ''; DOM.uploadButton.disabled = !file; }
+        function handleCsvFileUpload() {
+            const file = DOM.csvFileInput.files[0]; if (!file) { showToast('Wybierz plik CSV'); return; }
+            const reader = new FileReader(); reader.onload = (e) => parseCSV(e.target.result);
             reader.onerror = () => showToast('Błąd podczas odczytu pliku CSV.');
-            reader.onloadend = () => {
-                DOM.csvFileInput.value = null; 
-                if (DOM.uploadSection.style.display !== 'none') { DOM.fileName.textContent = ''; DOM.uploadButton.disabled = true; }
-            };
+            reader.onloadend = () => { DOM.csvFileInput.value = null; if (DOM.uploadSection.style.display !== 'none') { DOM.fileName.textContent = ''; DOM.uploadButton.disabled = true; } };
             reader.readAsText(file);
         }
-
-        function parseCSV(content) { /* ... (unchanged) ... */ 
+        function parseCSV(content) {
             try {
-                const lines = content.split('\n').map(l => l.trim()).filter(Boolean);
-                if (lines.length < 2) throw new Error('Plik CSV jest pusty lub zawiera tylko nagłówki.');
-                const headers = lines[0].split(',').map(h => h.trim());
-                if (!validateHeaders(headers)) throw new Error('Nieprawidłowy format pliku CSV. Sprawdź nagłówki.');
-                const newWorkoutPlan = [];
-                for (let i = 1; i < lines.length; i++) {
-                    const values = lines[i].split(',').map(v => v.trim());
-                    if (values.length !== headers.length) throw new Error(`Błąd w linii ${i + 1}: Niewłaściwa liczba kolumn.`);
-                    const dayData = { day: parseInt(values[0],10), pushups: parseInt(values[1],10), plank: parseInt(values[2],10), bike: parseInt(values[3],10) };
-                    if (Object.values(dayData).some(isNaN)) throw new Error(`Błąd w linii ${i + 1}: Wartości muszą być liczbami.`);
-                    if (dayData.day <= 0 || dayData.pushups < 0 || dayData.plank < 0 || dayData.bike < 0) throw new Error(`Błąd w linii ${i + 1}: Wartości nie mogą być ujemne (dzień > 0).`);
-                    newWorkoutPlan.push({
-                        day: dayData.day, exercises: [
-                            { id: 'pushups', name: 'Pompki', value: dayData.pushups, unit: '', type: 'count' },
-                            { id: 'plank', name: 'Plank', value: dayData.plank, unit: 'sekund', type: 'timer' },
-                            { id: 'bike', name: 'Rower stacjonarny', value: dayData.bike, unit: 'minut', type: 'count' }]});
-                }
-                newWorkoutPlan.sort((a, b) => a.day - b.day);
-                if (new Set(newWorkoutPlan.map(p => p.day)).size !== newWorkoutPlan.length) throw new Error('Plik CSV zawiera zduplikowane numery dni.');
-                if (newWorkoutPlan.length === 0) throw new Error('Brak danych treningowych w pliku CSV.');
-                state.workoutPlan = newWorkoutPlan; state.confettiShownForDays = [];
-                resetProgressWithoutConfirmation(); state.currentDay = state.workoutPlan[0].day; 
-                showMainContentWithAnimation(); renderWorkoutPlan();
-                saveStateToLocalStorage(); showToast('Plan treningowy wczytany!');
-            } catch (e) { console.error('Error parsing CSV:', e); showToast(e.message || 'Błąd podczas przetwarzania pliku CSV.'); }
+                const lines=content.split('\n').map(l=>l.trim()).filter(Boolean); if(lines.length<2)throw new Error('Plik CSV jest pusty lub zawiera tylko nagłówki.');
+                const headers=lines[0].split(',').map(h=>h.trim()); if(!validateHeaders(headers))throw new Error('Nieprawidłowy format pliku CSV. Sprawdź nagłówki.');
+                const newWorkoutPlan=[]; for(let i=1;i<lines.length;i++){const values=lines[i].split(',').map(v=>v.trim()); if(values.length!==headers.length)throw new Error(`Błąd w linii ${i+1}: Niewłaściwa liczba kolumn.`); const dayData={day:parseInt(values[0],10),pushups:parseInt(values[1],10),plank:parseInt(values[2],10),bike:parseInt(values[3],10)}; if(Object.values(dayData).some(isNaN))throw new Error(`Błąd w linii ${i+1}: Wartości muszą być liczbami.`); if(dayData.day<=0||dayData.pushups<0||dayData.plank<0||dayData.bike<0)throw new Error(`Błąd w linii ${i+1}: Wartości nie mogą być ujemne (dzień > 0).`); newWorkoutPlan.push({day:dayData.day,exercises:[{id:'pushups',name:'Pompki',value:dayData.pushups,unit:'',type:'count'},{id:'plank',name:'Plank',value:dayData.plank,unit:'sekund',type:'timer'},{id:'bike',name:'Rower stacjonarny',value:dayData.bike,unit:'minut',type:'count'}]});}
+                newWorkoutPlan.sort((a,b)=>a.day-b.day); if(new Set(newWorkoutPlan.map(p=>p.day)).size!==newWorkoutPlan.length)throw new Error('Plik CSV zawiera zduplikowane numery dni.'); if(newWorkoutPlan.length===0)throw new Error('Brak danych treningowych w pliku CSV.');
+                state.workoutPlan=newWorkoutPlan;state.confettiShownForDays=[]; resetProgressWithoutConfirmation();state.currentDay=state.workoutPlan[0].day; showMainContentWithAnimation();renderWorkoutPlan(); saveStateToLocalStorage();showToast('Plan treningowy wczytany!');
+            }catch(e){console.error('Error parsing CSV:',e);showToast(e.message||'Błąd podczas przetwarzania pliku CSV.');}
         }
-        function validateHeaders(headers) { /* ... (unchanged) ... */ 
-            const required = ['Dzień', 'Pompki', 'Plank (sekundy)', 'Rower (minuty)'];
-            return required.every(h => headers.includes(h));
+        function validateHeaders(headers){const required=['Dzień','Pompki','Plank (sekundy)','Rower (minuty)']; return required.every(h=>headers.includes(h));}
+        function renderWorkoutPlan(){renderDaysProgress();renderCurrentDayExercises();updateDayProgress();}
+        function renderDaysProgress(){
+            DOM.daysProgress.innerHTML=''; state.workoutPlan.forEach(dayPlan=>{const dayNumber=dayPlan.day;const dayEl=document.createElement('div');dayEl.className='day-indicator';dayEl.classList.toggle('active',dayNumber===state.currentDay);dayEl.classList.toggle('completed',state.completedDays.includes(dayNumber));dayEl.textContent=dayNumber;dayEl.tabIndex=0;dayEl.setAttribute('role','button');dayEl.setAttribute('aria-label',`Przejdź do dnia ${dayNumber}`);dayEl.addEventListener('click',()=>{if(state.currentDay!==dayNumber){state.currentDay=dayNumber;renderWorkoutPlan();saveStateToLocalStorage();}});dayEl.addEventListener('keydown',(e)=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(state.currentDay!==dayNumber){state.currentDay=dayNumber;renderWorkoutPlan();saveStateToLocalStorage();}}});DOM.daysProgress.appendChild(dayEl);});
         }
-        function renderWorkoutPlan() { /* ... (unchanged) ... */ 
-            renderDaysProgress(); renderCurrentDayExercises(); updateDayProgress();
+        function renderCurrentDayExercises(){
+            DOM.exerciseList.innerHTML='';DOM.currentDayElement.textContent=state.currentDay; const currentDayPlan=state.workoutPlan.find(d=>d.day===state.currentDay);
+            if(!currentDayPlan){if(state.workoutPlan.length>0){state.currentDay=state.workoutPlan[0].day;saveStateToLocalStorage();renderWorkoutPlan();}else showUploadSectionWithAnimation();return;}
+            currentDayPlan.exercises.forEach(ex=>{const li=document.createElement('li');li.className='exercise-item';const isDone=isExerciseCompleted(state.currentDay,ex.id);li.innerHTML=`<div class="exercise-title">${ex.name}</div> <div class="exercise-value">${ex.value} ${ex.unit}</div> <div class="action-container"> ${ex.type==='timer'?`<div class="timer" id="timer-${ex.id}">${isDone?formatTime(0):formatTime(ex.value)}</div> <button class="btn ${isDone?'btn-success':''}" id="btn-${ex.id}" ${isDone?'disabled':''} data-initial-seconds="${ex.value}"> ${isDone?`${ex.name} wykonane`:'START'} </button>`:`<button class="btn ${isDone?'btn-success':''}" id="btn-${ex.id}" ${isDone?'disabled':''}> ${isDone?`${ex.name} wykonane`:'Wykonaj'} </button>`} </div>`;DOM.exerciseList.appendChild(li);const button=li.querySelector(`#btn-${ex.id}`);if(ex.type==='timer'&&!isDone)button.addEventListener('click',()=>handleTimerAction(ex.id,ex.name));else if(ex.type==='count'&&!isDone)button.addEventListener('click',()=>completeExercise(state.currentDay,ex.id,ex.name));});
         }
-        function renderDaysProgress() { /* ... (unchanged) ... */ 
-            DOM.daysProgress.innerHTML = '';
-            state.workoutPlan.forEach(dayPlan => { 
-                const dayNumber = dayPlan.day; const dayEl = document.createElement('div');
-                dayEl.className = 'day-indicator';
-                dayEl.classList.toggle('active', dayNumber === state.currentDay);
-                dayEl.classList.toggle('completed', state.completedDays.includes(dayNumber));
-                dayEl.textContent = dayNumber; dayEl.tabIndex = 0; dayEl.setAttribute('role', 'button');
-                dayEl.setAttribute('aria-label', `Przejdź do dnia ${dayNumber}`);
-                dayEl.addEventListener('click', () => { if (state.currentDay !== dayNumber) { state.currentDay = dayNumber; renderWorkoutPlan(); saveStateToLocalStorage(); } });
-                dayEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (state.currentDay !== dayNumber) { state.currentDay = dayNumber; renderWorkoutPlan(); saveStateToLocalStorage(); } } });
-                DOM.daysProgress.appendChild(dayEl);
-            });
+        function handleTimerAction(exerciseId,exerciseName){
+            const button=document.getElementById(`btn-${exerciseId}`);const timerEl=document.getElementById(`timer-${exerciseId}`);const timerState=button.dataset.timerState||'idle';const initialSecs=parseInt(button.dataset.initialSeconds);
+            if(timerState==='idle'){button.dataset.remainingSeconds=initialSecs;button.dataset.timerState='running';button.textContent='PAUZA';startTicking(exerciseId,exerciseName,button,timerEl);}else if(timerState==='running'){clearInterval(parseInt(button.dataset.timerId));button.dataset.timerState='paused';button.textContent='WZNOW';}else if(timerState==='paused'){button.dataset.timerState='running';button.textContent='PAUZA';startTicking(exerciseId,exerciseName,button,timerEl);}}
+        function startTicking(exerciseId,exerciseName,button,timerEl){
+            let remaining=parseInt(button.dataset.remainingSeconds);timerEl.textContent=formatTime(remaining);const intervalId=setInterval(()=>{remaining--;button.dataset.remainingSeconds=remaining;timerEl.textContent=formatTime(remaining);if(remaining<=0){clearInterval(intervalId);timerEl.textContent=formatTime(0);completeExercise(state.currentDay,exerciseId,exerciseName);showToast(`${exerciseName} ukończone!`);}},1000);button.dataset.timerId=intervalId;
         }
-        function renderCurrentDayExercises() { /* ... (unchanged) ... */ 
-            DOM.exerciseList.innerHTML = ''; DOM.currentDayElement.textContent = state.currentDay;
-            const currentDayPlan = state.workoutPlan.find(d => d.day === state.currentDay);
-            if (!currentDayPlan) {
-                if (state.workoutPlan.length > 0) { state.currentDay = state.workoutPlan[0].day; saveStateToLocalStorage(); renderWorkoutPlan(); }
-                else showUploadSectionWithAnimation(); return;
-            }
-            currentDayPlan.exercises.forEach(ex => {
-                const li = document.createElement('li'); li.className = 'exercise-item';
-                const isDone = isExerciseCompleted(state.currentDay, ex.id);
-                li.innerHTML = `<div class="exercise-title">${ex.name}</div> <div class="exercise-value">${ex.value} ${ex.unit}</div>
-                    <div class="action-container"> ${ex.type === 'timer' ?
-                        `<div class="timer" id="timer-${ex.id}">${isDone ? formatTime(0) : formatTime(ex.value)}</div>
-                         <button class="btn ${isDone ? 'btn-success' : ''}" id="btn-${ex.id}" ${isDone ? 'disabled' : ''} data-initial-seconds="${ex.value}"> ${isDone ? `${ex.name} wykonane` : 'START'} </button>` :
-                        `<button class="btn ${isDone ? 'btn-success' : ''}" id="btn-${ex.id}" ${isDone ? 'disabled' : ''}> ${isDone ? `${ex.name} wykonane` : 'Wykonaj'} </button>`
-                    } </div>`;
-                DOM.exerciseList.appendChild(li);
-                const button = li.querySelector(`#btn-${ex.id}`);
-                if (ex.type === 'timer' && !isDone) button.addEventListener('click', () => handleTimerAction(ex.id, ex.name));
-                else if (ex.type === 'count' && !isDone) button.addEventListener('click', () => completeExercise(state.currentDay, ex.id, ex.name));
-            });
-        }
-        function handleTimerAction(exerciseId, exerciseName) { /* ... (unchanged) ... */ 
-            const button = document.getElementById(`btn-${exerciseId}`); const timerEl = document.getElementById(`timer-${exerciseId}`);
-            const timerState = button.dataset.timerState || 'idle'; const initialSecs = parseInt(button.dataset.initialSeconds);
-            if (timerState === 'idle') { button.dataset.remainingSeconds = initialSecs; button.dataset.timerState = 'running'; button.textContent = 'PAUZA'; startTicking(exerciseId, exerciseName, button, timerEl); }
-            else if (timerState === 'running') { clearInterval(parseInt(button.dataset.timerId)); button.dataset.timerState = 'paused'; button.textContent = 'WZNOW'; }
-            else if (timerState === 'paused') { button.dataset.timerState = 'running'; button.textContent = 'PAUZA'; startTicking(exerciseId, exerciseName, button, timerEl); }
-        }
-        function startTicking(exerciseId, exerciseName, button, timerEl) { /* ... (unchanged) ... */ 
-            let remaining = parseInt(button.dataset.remainingSeconds); timerEl.textContent = formatTime(remaining);
-            const intervalId = setInterval(() => {
-                remaining--; button.dataset.remainingSeconds = remaining; timerEl.textContent = formatTime(remaining);
-                if (remaining <= 0) { clearInterval(intervalId); timerEl.textContent = formatTime(0); completeExercise(state.currentDay, exerciseId, exerciseName); showToast(`${exerciseName} ukończone!`); }
-            }, 1000);
-            button.dataset.timerId = intervalId;
-        }
-        function formatTime(s) { /* ... (unchanged) ... */ 
-            s = Math.max(0, s); const mins = Math.floor(s / 60).toString().padStart(2, '0'); const secs = (s % 60).toString().padStart(2, '0'); return `${mins}:${secs}`;
-        }
-        function completeExercise(day, exerciseId, exerciseName) { /* ... (unchanged) ... */ 
-            state.completedExercises[day] = state.completedExercises[day] || [];
-            if (!state.completedExercises[day].includes(exerciseId)) { state.completedExercises[day].push(exerciseId); }
-            const button = document.getElementById(`btn-${exerciseId}`);
-            if (button) {
-                button.textContent = `${exerciseName} wykonane`; button.classList.remove('btn-outline'); button.classList.add('btn-success'); button.disabled = true;
-                if (button.dataset.timerId) clearInterval(parseInt(button.dataset.timerId));
-                ['timerId', 'timerState', 'remainingSeconds', 'initialSeconds'].forEach(d => delete button.dataset[d]);
-                const timerEl = document.getElementById(`timer-${exerciseId}`); if (timerEl) timerEl.textContent = formatTime(0);
-            }
-            updateDayProgress();
-            const currentDayPlan = state.workoutPlan.find(d => d.day === state.currentDay);
-            if (currentDayPlan) {
-                const totalEx = currentDayPlan.exercises.length; const completedExCount = state.completedExercises[state.currentDay]?.length || 0;
-                if (totalEx > 0 && completedExCount === totalEx && !state.confettiShownForDays.includes(state.currentDay)) { showConfetti(); state.confettiShownForDays.push(state.currentDay); }
-            }
+        function formatTime(s){s=Math.max(0,s);const mins=Math.floor(s/60).toString().padStart(2,'0');const secs=(s%60).toString().padStart(2,'0');return`${mins}:${secs}`;}
+        function completeExercise(day,exerciseId,exerciseName){
+            state.completedExercises[day]=state.completedExercises[day]||[];if(!state.completedExercises[day].includes(exerciseId)){state.completedExercises[day].push(exerciseId);}
+            const button=document.getElementById(`btn-${exerciseId}`);if(button){button.textContent=`${exerciseName} wykonane`;button.classList.remove('btn-outline');button.classList.add('btn-success');button.disabled=true;if(button.dataset.timerId)clearInterval(parseInt(button.dataset.timerId));['timerId','timerState','remainingSeconds','initialSeconds'].forEach(d=>delete button.dataset[d]);const timerEl=document.getElementById(`timer-${exerciseId}`);if(timerEl)timerEl.textContent=formatTime(0);}
+            updateDayProgress();const currentDayPlan=state.workoutPlan.find(d=>d.day===state.currentDay);if(currentDayPlan){const totalEx=currentDayPlan.exercises.length;const completedExCount=state.completedExercises[state.currentDay]?.length||0;if(totalEx>0&&completedExCount===totalEx&&!state.confettiShownForDays.includes(state.currentDay)){showConfetti();state.confettiShownForDays.push(state.currentDay);}}
             saveStateToLocalStorage();
         }
-        function isExerciseCompleted(day, exerciseId) { /* ... (unchanged) ... */ 
-            return state.completedExercises[day]?.includes(exerciseId) || false;
+        function isExerciseCompleted(day,exerciseId){return state.completedExercises[day]?.includes(exerciseId)||false;}
+        function updateDayProgress(){
+            const currentDayPlan=state.workoutPlan.find(d=>d.day===state.currentDay);if(!currentDayPlan)return;const totalEx=currentDayPlan.exercises.length;const completedCount=state.completedExercises[state.currentDay]?.length||0;DOM.dayProgressElement.textContent=`${completedCount}/${totalEx}`;DOM.nextDayButton.disabled=totalEx===0||completedCount<totalEx;
         }
-        function updateDayProgress() { /* ... (unchanged) ... */ 
-            const currentDayPlan = state.workoutPlan.find(d => d.day === state.currentDay); if (!currentDayPlan) return;
-            const totalEx = currentDayPlan.exercises.length; const completedCount = state.completedExercises[state.currentDay]?.length || 0;
-            DOM.dayProgressElement.textContent = `${completedCount}/${totalEx}`;
-            DOM.nextDayButton.disabled = totalEx === 0 || completedCount < totalEx;
+        function moveToNextDay(){
+            if(!state.completedDays.includes(state.currentDay)){state.completedDays.push(state.currentDay);}
+            const currentIndex=state.workoutPlan.findIndex(p=>p.day===state.currentDay);const currentDayNum=state.workoutPlan[currentIndex].day;
+            if(currentIndex===-1||currentIndex+1>=state.workoutPlan.length){showToast('Gratulacje! Ukończyłeś cały plan treningowy!');renderDaysProgress();saveStateToLocalStorage();return;}
+            state.currentDay=state.workoutPlan[currentIndex+1].day;renderWorkoutPlan();saveStateToLocalStorage();showToast(`Dzień ${currentDayNum} ukończony! Przejście do dnia ${state.currentDay}`);
         }
-        function moveToNextDay() { /* ... (unchanged) ... */ 
-            if (!state.completedDays.includes(state.currentDay)) { state.completedDays.push(state.currentDay); }
-            const currentIndex = state.workoutPlan.findIndex(p => p.day === state.currentDay);
-            const currentDayNum = state.workoutPlan[currentIndex].day;
-            if (currentIndex === -1 || currentIndex + 1 >= state.workoutPlan.length) { showToast('Gratulacje! Ukończyłeś cały plan treningowy!'); renderDaysProgress(); saveStateToLocalStorage(); return; }
-            state.currentDay = state.workoutPlan[currentIndex + 1].day;
-            renderWorkoutPlan(); saveStateToLocalStorage();
-            showToast(`Dzień ${currentDayNum} ukończony! Przejście do dnia ${state.currentDay}`);
-        }
-        function resetProgress() { /* ... (unchanged) ... */ 
-            showCustomConfirm('Reset Postępu', 'Czy na pewno chcesz zresetować postęp treningowy?', () => { resetProgressWithoutConfirmation(); showToast('Postęp zresetowany.'); });
-        }
-        function resetProgressWithoutConfirmation() { /* ... (unchanged) ... */ 
-            state.completedDays = []; state.completedExercises = {}; state.confettiShownForDays = [];
-            state.currentDay = state.workoutPlan.length > 0 ? state.workoutPlan[0].day : 1;
-            document.querySelectorAll('button[data-timerid]').forEach(b => clearInterval(parseInt(b.dataset.timerId)));
-            if (state.workoutPlan.length > 0 && DOM.mainContent.style.display !== 'none') { renderWorkoutPlan(); }
+        function resetProgress(){showCustomConfirm('Reset Postępu','Czy na pewno chcesz zresetować postęp treningowy?',()=>{resetProgressWithoutConfirmation();showToast('Postęp zresetowany.');});}
+        function resetProgressWithoutConfirmation(){
+            state.completedDays=[];state.completedExercises={};state.confettiShownForDays=[];state.currentDay=state.workoutPlan.length>0?state.workoutPlan[0].day:1;
+            document.querySelectorAll('button[data-timerid]').forEach(b=>clearInterval(parseInt(b.dataset.timerId)));
+            if(state.workoutPlan.length>0&&DOM.mainContent.style.display!=='none'){renderWorkoutPlan();}
             saveStateToLocalStorage();
         }
-        function showToast(message) { /* ... (unchanged) ... */ 
-            DOM.toast.textContent = message; DOM.toast.classList.add('show'); setTimeout(() => DOM.toast.classList.remove('show'), 3000);
+        function showToast(message){DOM.toast.textContent=message;DOM.toast.classList.add('show');setTimeout(()=>DOM.toast.classList.remove('show'),3000);}
+        function showConfetti(){
+            const colors=['var(--primary-color)','var(--success-color)','#ffcc00','var(--danger-color)'];const originX=50;const originY=0;
+            for(let i=0;i<CONFETTI_COUNT;i++){const particle=document.createElement('div');particle.classList.add('confetti-particle');const size=Math.random()*5+2;const initialXOffset=(Math.random()-0.5)*40;Object.assign(particle.style,{width:`${size}px`,height:`${size}px`,backgroundColor:colors[Math.floor(Math.random()*colors.length)],left:`calc(${originX}vw + ${initialXOffset}px)`,top:`${originY}vh`,animationDuration:`${Math.random()*1+1.0}s`,animationDelay:`${Math.random()*0.2}s`});DOM.body.appendChild(particle);particle.addEventListener('animationend',()=>particle.remove());}
         }
-        function showConfetti() { /* ... (Updated for "burst") ... */ 
-            const colors = ['var(--primary-color)', 'var(--success-color)', '#ffcc00', 'var(--danger-color)'];
-            const originX = 50; const originY = 0; 
-            for (let i = 0; i < CONFETTI_COUNT; i++) {
-                const particle = document.createElement('div'); particle.classList.add('confetti-particle');
-                const size = Math.random() * 5 + 2; 
-                const initialXOffset = (Math.random() - 0.5) * 40;
-                Object.assign(particle.style, {
-                    width: `${size}px`, height: `${size}px`, backgroundColor: colors[Math.floor(Math.random() * colors.length)],
-                    left: `calc(${originX}vw + ${initialXOffset}px)`, top: `${originY}vh`,
-                    animationDuration: `${Math.random() * 1 + 1.0}s`, animationDelay: `${Math.random() * 0.2}s` });
-                DOM.body.appendChild(particle);
-                particle.addEventListener('animationend', () => particle.remove());
-            }
+        function calculateAndRenderStats(){
+            let completedDaysCount=state.completedDays.length;let totalPushups=0;let totalPlankSeconds=0;let totalBikeMinutes=0;
+            state.completedDays.forEach(dayNumber=>{const dayPlan=state.workoutPlan.find(dp=>dp.day===dayNumber);if(dayPlan&&state.completedExercises[dayNumber]&&state.completedExercises[dayNumber].length===dayPlan.exercises.length){dayPlan.exercises.forEach(exercise=>{if(exercise.id==='pushups')totalPushups+=exercise.value;else if(exercise.id==='plank')totalPlankSeconds+=exercise.value;else if(exercise.id==='bike')totalBikeMinutes+=exercise.value;});}});
+            DOM.statsCompletedDays.textContent=completedDaysCount;DOM.statsTotalPushups.textContent=totalPushups;DOM.statsTotalPlank.textContent=totalPlankSeconds;DOM.statsTotalBike.textContent=totalBikeMinutes;
         }
-        function calculateAndRenderStats() { /* ... (unchanged) ... */ 
-            let completedDaysCount = state.completedDays.length;
-            let totalPushups = 0; let totalPlankSeconds = 0; let totalBikeMinutes = 0;
-            state.completedDays.forEach(dayNumber => {
-                const dayPlan = state.workoutPlan.find(dp => dp.day === dayNumber);
-                if (dayPlan && state.completedExercises[dayNumber] && state.completedExercises[dayNumber].length === dayPlan.exercises.length) {
-                    dayPlan.exercises.forEach(exercise => {
-                        if (exercise.id === 'pushups') totalPushups += exercise.value;
-                        else if (exercise.id === 'plank') totalPlankSeconds += exercise.value;
-                        else if (exercise.id === 'bike') totalBikeMinutes += exercise.value;
-                    });
-                }
-            });
-            DOM.statsCompletedDays.textContent = completedDaysCount;
-            DOM.statsTotalPushups.textContent = totalPushups;
-            DOM.statsTotalPlank.textContent = totalPlankSeconds;
-            DOM.statsTotalBike.textContent = totalBikeMinutes;
+        function exportData(){
+            try{const dataToExport={version:"1.0.0",timestamp:new Date().toISOString(),workoutPlan:state.workoutPlan,currentDay:state.currentDay,completedDays:state.completedDays,completedExercises:state.completedExercises,confettiShownForDays:state.confettiShownForDays,currentTheme:state.currentTheme};const jsonData=JSON.stringify(dataToExport,null,2);const blob=new Blob([jsonData],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;const dateStr=new Date().toISOString().slice(0,10);a.download=`trening-tracker-backup-${dateStr}.json`;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);showToast('Dane wyeksportowane pomyślnie!');closeSettingsModal();}
+            catch(error){console.error("Błąd podczas eksportu danych:",error);showToast("Wystąpił błąd podczas eksportu danych.");}
         }
-
-        function exportData() { /* ... (Updated to include confettiShownForDays) ... */ 
-            try {
-                const dataToExport = {
-                    version: "1.0.0", timestamp: new Date().toISOString(),
-                    workoutPlan: state.workoutPlan, currentDay: state.currentDay,
-                    completedDays: state.completedDays, completedExercises: state.completedExercises,
-                    confettiShownForDays: state.confettiShownForDays, // Added
-                    currentTheme: state.currentTheme
-                };
-                const jsonData = JSON.stringify(dataToExport, null, 2);
-                const blob = new Blob([jsonData], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a'); a.href = url;
-                const dateStr = new Date().toISOString().slice(0,10);
-                a.download = `trening-tracker-backup-${dateStr}.json`;
-                document.body.appendChild(a); a.click(); document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                showToast('Dane wyeksportowane pomyślnie!'); closeSettingsModal();
-            } catch (error) { console.error("Błąd podczas eksportu danych:", error); showToast("Wystąpił błąd podczas eksportu danych."); }
+        function handleImportFileSelection(event){
+            const file=event.target.files[0];if(!file)return;
+            const reader=new FileReader();reader.onload=function(e){processImportData(e.target.result);};
+            reader.onerror=function(){showToast('Błąd podczas odczytu pliku importu.');};
+            reader.readAsText(file);DOM.importFileInput.value=null;
+        }
+        function processImportData(jsonData){
+            try{const importedData=JSON.parse(jsonData);
+                const requiredKeys=['version','workoutPlan','currentDay','completedDays','completedExercises','currentTheme','confettiShownForDays']; // confettiShownForDays added to required
+                const hasRequiredKeys=requiredKeys.every(key=>key in importedData);
+                const isWorkoutPlanArray=Array.isArray(importedData.workoutPlan);
+                if(!hasRequiredKeys||!isWorkoutPlanArray){throw new Error('Nieprawidłowy format pliku importu.');}
+                showCustomConfirm('Import Danych','Zaimportowanie danych nadpisze obecny stan aplikacji. Czy chcesz kontynuować?',()=>{
+                    state.workoutPlan=importedData.workoutPlan||[];
+                    state.currentDay=importedData.currentDay||(state.workoutPlan.length>0?state.workoutPlan[0].day:1);
+                    state.completedDays=importedData.completedDays||[];
+                    state.completedExercises=importedData.completedExercises||{};
+                    state.confettiShownForDays=importedData.confettiShownForDays||[];
+                    state.currentTheme=importedData.currentTheme||'light';
+                    applyTheme();saveThemePreference();saveStateToLocalStorage();closeSettingsModal();
+                    if(state.workoutPlan.length>0){renderWorkoutPlan();showMainContentWithAnimation();}else{showUploadSectionWithAnimation();}
+                    showToast('Dane zaimportowane pomyślnie!');});
+            }catch(error){console.error("Błąd podczas importu danych:",error);showToast(error.message||"Wystąpił błąd podczas przetwarzania pliku importu.");}
         }
 
-        // Import Data Functions
-        function handleImportFileSelection(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                processImportData(e.target.result);
-            };
-            reader.onerror = function() {
-                showToast('Błąd podczas odczytu pliku importu.');
-            };
-            reader.readAsText(file);
-            DOM.importFileInput.value = null; // Reset file input
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./service-worker.js') // Ensure path is correct
+              .then(registration => {
+                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+              })
+              .catch(error => {
+                console.log('ServiceWorker registration failed: ', error);
+              });
+          });
         }
-
-        function processImportData(jsonData) {
-            try {
-                const importedData = JSON.parse(jsonData);
-
-                // Basic validation
-                const requiredKeys = ['version', 'workoutPlan', 'currentDay', 'completedDays', 'completedExercises', 'currentTheme'];
-                const hasRequiredKeys = requiredKeys.every(key => key in importedData);
-                const isWorkoutPlanArray = Array.isArray(importedData.workoutPlan);
-
-                if (!hasRequiredKeys || !isWorkoutPlanArray) {
-                    throw new Error('Nieprawidłowy format pliku importu. Brak wymaganych danych lub plan treningowy nie jest tablicą.');
-                }
-                // More specific validation could be added here (e.g., check types of values)
-
-                showCustomConfirm(
-                    'Import Danych',
-                    'Zaimportowanie danych nadpisze obecny stan aplikacji. Czy chcesz kontynuować?',
-                    () => {
-                        // Apply imported state
-                        state.workoutPlan = importedData.workoutPlan || [];
-                        state.currentDay = importedData.currentDay || (state.workoutPlan.length > 0 ? state.workoutPlan[0].day : 1);
-                        state.completedDays = importedData.completedDays || [];
-                        state.completedExercises = importedData.completedExercises || {};
-                        state.confettiShownForDays = importedData.confettiShownForDays || []; // Import confetti state
-                        state.currentTheme = importedData.currentTheme || 'light';
-                        
-                        applyTheme(); // Apply imported theme
-                        saveThemePreference(); // Save imported theme preference
-                        saveStateToLocalStorage(); // Save all imported state
-
-                        closeSettingsModal();
-
-                        if (state.workoutPlan.length > 0) {
-                            renderWorkoutPlan();
-                            showMainContentWithAnimation();
-                        } else {
-                            // If imported plan is empty, show upload section
-                            showUploadSectionWithAnimation();
-                        }
-                        showToast('Dane zaimportowane pomyślnie!');
-                    }
-                );
-
-            } catch (error) {
-                console.error("Błąd podczas importu danych:", error);
-                showToast(error.message || "Wystąpił błąd podczas przetwarzania pliku importu.");
-            }
-        }
-
     </script>
 </body>
 </html>
