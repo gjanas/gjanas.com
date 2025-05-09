@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#007aff">
     <link rel="manifest" href="manifest.json">
     <style>
-        :root {
+        :root { /* ... (zmienne CSS bez zmian) ... */
             --main-bg-color: #f2f2f7; --card-bg-color: #ffffff; --primary-color: #007aff;
             --success-color: #34c759; --text-color: #1c1c1e; --secondary-text-color: #8e8e93;
             --border-color: #d1d1d6; --danger-color: #ff3b30; --header-bg-color: var(--main-bg-color);
@@ -15,9 +15,8 @@
             --btn-outline-hover-bg: rgba(0, 122, 255, 0.08);
             --btn-outline-danger-hover-bg: rgba(255, 59, 48, 0.08);
             --focus-ring-color: rgba(0, 122, 255, 0.5);
-            /* --warning-color: #ff9500; (Nie jest już potrzebne dla odznaczania) */
         }
-        body.dark-theme {
+        body.dark-theme { /* ... (zmienne CSS dla motywu ciemnego bez zmian) ... */
             --main-bg-color: #000000; --card-bg-color: #1c1c1e; --primary-color: #0a84ff;
             --success-color: #30d158; --text-color: #ffffff; --secondary-text-color: #8d8d92;
             --border-color: #3a3a3c; --danger-color: #ff453a; --header-bg-color: var(--main-bg-color);
@@ -25,7 +24,6 @@
             --btn-outline-hover-bg: rgba(10, 132, 255, 0.15);
             --btn-outline-danger-hover-bg: rgba(255, 69, 58, 0.15);
             --focus-ring-color: rgba(10, 132, 255, 0.6);
-            /* --warning-color: #ff9f0a; */
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--main-bg-color); color: var(--text-color); font-size: 16px; line-height: 1.6; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; transition: background-color 0.3s ease, color 0.3s ease; }
@@ -46,14 +44,14 @@
         .exercise-item:last-child { border-bottom: none; }
         .exercise-title { font-weight: 500; }
         .exercise-value { color: var(--secondary-text-color); font-size: 14px; transition: color 0.3s ease; }
-        .action-container { display: flex; align-items: center; gap: 8px; } /* Remains for potential future use with multiple buttons, but not strictly needed now for single button */
-        .action-container .btn { flex-grow: 1; }
+        .action-container { /* For exercise buttons */ display: block; /* Allows timer to be above button */ }
+        .action-container .btn { /* flex-grow: 1; No longer needed as it's the only block element or below timer */ }
 
         .btn { width: 100%; padding: 12px; background-color: var(--primary-color); color: white; border: none; border-radius: 10px; font-weight: 500; cursor: pointer; font-size: 16px; transition: background-color 0.2s, opacity 0.2s, transform 0.1s, filter 0.1s, color 0.3s ease, border-color 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn svg { width: 20px; height: 20px; fill: currentColor;}
         .btn:disabled { opacity: 0.6; cursor: not-allowed; } 
         .btn-success { background-color: var(--success-color); }
-        .btn-success:hover:not(:disabled) { filter: brightness(1.05); } /* Slight hover for clickable success button */
+        .btn-success:hover:not(:disabled) { filter: brightness(1.05); } 
         .btn-outline { background-color: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); }
         .btn-outline.danger { border-color: var(--danger-color); color: var(--danger-color); }
         .btn-danger { background-color: var(--danger-color); }
@@ -162,46 +160,35 @@
                 li.className = 'exercise-item';
                 const isDone = isExerciseCompleted(state.currentDay, ex.id);
                 
-                let buttonContent; // To hold the main button's inner HTML or the full button
+                let actionHtml = '';
+
+                if (ex.type === 'timer') {
+                    actionHtml += `<div class="timer" id="timer-${ex.id}">${isDone && !button.dataset.timerState ? formatTime(0) : formatTime(ex.value)}</div>`;
+                }
+
                 let buttonClasses = 'btn';
+                let buttonText = '';
                 let buttonDisabled = false;
                 let eventHandler;
 
                 if (isDone) {
                     buttonClasses += ' btn-success';
-                    // Przycisk "Wykonane" jest teraz klikalny, aby odznaczyć
-                    // buttonDisabled = true; // Nie jest już disabled
-                    buttonContent = `${ex.name} wykonane (Odznacz)`;
+                    buttonText = `${ex.name} wykonane`;
+                    // Przycisk "Wykonane" jest teraz klikalny, aby odznaczyć, więc nie jest disabled.
+                    // buttonDisabled = true; // Removed
                     eventHandler = () => { console.log('Uncomplete (success) button clicked:', ex.id); uncompleteExercise(state.currentDay, ex.id, ex.name); };
                 } else {
                     if (ex.type === 'timer') {
-                        // For timer, we need the timer display div and the button itself
-                        // The buttonContent here will be the actual button for the timer
-                        buttonContent = `
-                            <div class="timer" id="timer-${ex.id}">${formatTime(ex.value)}</div>
-                            <button class="${buttonClasses}" id="btn-${ex.id}" data-initial-seconds="${ex.value}">START</button>`;
-                        // Event handler will be attached to the inner button later
+                        buttonText = 'START';
+                        eventHandler = () => { console.log('Timer button clicked:', ex.id); handleTimerAction(ex.id, ex.name); };
                     } else {
-                        buttonContent = `<button class="${buttonClasses}" id="btn-${ex.id}">Wykonaj</button>`;
+                        buttonText = 'Wykonaj';
                         eventHandler = () => { console.log('Complete button clicked:', ex.id); completeExercise(state.currentDay, ex.id, ex.name); };
                     }
                 }
                 
-                // If it's not a timer or it's a completed timer, wrap the buttonContent for structure
-                // For active timers, buttonContent already IS the full structure (timer div + button)
-                let actionHtml;
-                if (ex.type === 'timer' && !isDone) {
-                    actionHtml = buttonContent; // It's already the full timer + button structure
-                } else {
-                    actionHtml = `<button class="${buttonClasses}" id="btn-${ex.id}" ${buttonDisabled ? 'disabled' : ''}>${isDone ? buttonContent : ex.name /* Should be "Wykonaj" or similar, but content is already in buttonContent */ }</button>`;
-                    if(isDone) { // Adjust for the new structure where buttonContent is just text
-                         actionHtml = `<button class="${buttonClasses}" id="btn-${ex.id}">${buttonContent}</button>`;
-                    } else if (ex.type !== 'timer') { // For "Wykonaj" buttons
-                         actionHtml = `<button class="${buttonClasses}" id="btn-${ex.id}">Wykonaj</button>`;
-                    }
-                }
-
-
+                actionHtml += `<button class="${buttonClasses}" id="btn-${ex.id}" ${buttonDisabled ? 'disabled' : ''} ${ex.type === 'timer' && !isDone ? `data-initial-seconds="${ex.value}"` : ''}>${buttonText}</button>`;
+                
                 li.innerHTML = `
                     <div class="exercise-title">${ex.name}</div>
                     <div class="exercise-value">${ex.value} ${ex.unit}</div>
@@ -211,18 +198,11 @@
                 DOM.exerciseList.appendChild(li);
                 
                 const buttonElement = li.querySelector(`#btn-${ex.id}`);
-                if (buttonElement) { // If the main button exists
-                    if (isDone) {
-                        buttonElement.addEventListener('click', eventHandler);
-                    } else if (ex.type !== 'timer') { // For "Wykonaj" type
-                        buttonElement.addEventListener('click', eventHandler);
-                    } else { // For timer, the START button
-                         buttonElement.addEventListener('click', () => { console.log('Timer button clicked:', ex.id); handleTimerAction(ex.id, ex.name); });
-                    }
+                if (buttonElement) {
+                    buttonElement.addEventListener('click', eventHandler);
                 }
             });
         }
-
 
         function handleTimerAction(exerciseId, exerciseName) { /* ... (unchanged) ... */ const button = document.getElementById(`btn-${exerciseId}`); const timerEl = document.getElementById(`timer-${exerciseId}`); const timerState = button.dataset.timerState || 'idle'; const initialSecs = parseInt(button.dataset.initialSeconds); if (timerState === 'idle') { button.dataset.remainingSeconds = initialSecs; button.dataset.timerState = 'running'; button.textContent = 'PAUZA'; startTicking(exerciseId, exerciseName, button, timerEl); } else if (timerState === 'running') { clearInterval(parseInt(button.dataset.timerId)); button.dataset.timerState = 'paused'; button.textContent = 'WZNOW'; } else if (timerState === 'paused') { button.dataset.timerState = 'running'; button.textContent = 'PAUZA'; startTicking(exerciseId, exerciseName, button, timerEl); } }
         function startTicking(exerciseId, exerciseName, button, timerEl) { /* ... (unchanged) ... */ let remaining = parseInt(button.dataset.remainingSeconds); timerEl.textContent = formatTime(remaining); const intervalId = setInterval(() => { remaining--; button.dataset.remainingSeconds = remaining; timerEl.textContent = formatTime(remaining); if (remaining <= 0) { clearInterval(intervalId); timerEl.textContent = formatTime(0); completeExercise(state.currentDay, exerciseId, exerciseName); showToast(`${exerciseName} ukończone!`); } }, 1000); button.dataset.timerId = intervalId; }
@@ -247,15 +227,14 @@
         function uncompleteExercise(day, exerciseId, exerciseName) { 
             if (state.completedExercises[day]) { state.completedExercises[day] = state.completedExercises[day].filter(id => id !== exerciseId); if (state.completedExercises[day].length === 0) { delete state.completedExercises[day]; } } 
             
-            // Reset timer state if it was a timer, by re-rendering it will get initial values
             const exercise = state.workoutPlan.find(d => d.day === day)?.exercises.find(ex => ex.id === exerciseId);
             if (exercise && exercise.type === 'timer') {
                 const button = document.getElementById(`btn-${exerciseId}`);
-                if (button) { // Clear any timer-specific data attributes
-                    delete button.dataset.timerId;
-                    delete button.dataset.timerState;
-                    delete button.dataset.remainingSeconds;
+                if (button) { 
+                    delete button.dataset.timerId; delete button.dataset.timerState; delete button.dataset.remainingSeconds;
                 }
+                const timerEl = document.getElementById(`timer-${exerciseId}`);
+                if(timerEl) timerEl.textContent = formatTime(exercise.value); // Reset timer display
             }
             
             renderCurrentDayExercises(); updateDayProgress(); saveStateToLocalStorage(); 
@@ -279,5 +258,3 @@
     </script>
 </body>
 </html>
-Use code with caution.
-Html
