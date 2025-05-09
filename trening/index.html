@@ -44,23 +44,20 @@
         .exercise-item:last-child { border-bottom: none; }
         .exercise-title { font-weight: 500; }
         .exercise-value { color: var(--secondary-text-color); font-size: 14px; transition: color 0.3s ease; }
-        .action-container { /* For exercise buttons */ display: block; /* Allows timer to be above button */ }
-        .action-container .btn { /* flex-grow: 1; No longer needed as it's the only block element or below timer */ }
-
+        .action-container { display: block; }
         .btn { width: 100%; padding: 12px; background-color: var(--primary-color); color: white; border: none; border-radius: 10px; font-weight: 500; cursor: pointer; font-size: 16px; transition: background-color 0.2s, opacity 0.2s, transform 0.1s, filter 0.1s, color 0.3s ease, border-color 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn svg { width: 20px; height: 20px; fill: currentColor;}
         .btn:disabled { opacity: 0.6; cursor: not-allowed; } 
-        .btn-success { background-color: var(--success-color); }
-        .btn-success:hover:not(:disabled) { filter: brightness(1.05); } 
+        .btn.btn-success { background-color: var(--success-color); } /* Combined class for specificity */
+        .btn.btn-success:hover:not(:disabled) { filter: brightness(1.05); } 
         .btn-outline { background-color: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); }
         .btn-outline.danger { border-color: var(--danger-color); color: var(--danger-color); }
         .btn-danger { background-color: var(--danger-color); }
         .btn:not(:disabled):active { filter: brightness(0.9); transform: translateY(1px); }
         .btn-outline:not(:disabled):active { background-color: var(--btn-outline-hover-bg); filter: none; transform: translateY(1px); }
         .btn-outline.danger:not(:disabled):active { background-color: var(--btn-outline-danger-hover-bg); }
-        .btn-danger:not(:disabled):active, .btn-success:not(:disabled):active { filter: brightness(0.9); transform: translateY(1px); }
+        .btn-danger:not(:disabled):active, .btn.btn-success:not(:disabled):active { filter: brightness(0.9); transform: translateY(1px); } /* Ensure active state for clickable success button */
         .btn:focus-visible, .btn-outline:focus-visible { outline: 2px solid transparent; box-shadow: 0 0 0 3px var(--focus-ring-color); }
-        
         .timer { font-size: 24px; font-weight: 600; text-align: center; margin: 10px 0; }
         .upload-container, .import-container { display: flex; flex-direction: column; gap: 8px; }
         .import-container { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-color); }
@@ -160,47 +157,50 @@
                 li.className = 'exercise-item';
                 const isDone = isExerciseCompleted(state.currentDay, ex.id);
                 
-                let actionHtml = '';
+                const actionContainer = document.createElement('div');
+                actionContainer.className = 'action-container';
 
                 if (ex.type === 'timer') {
-                    actionHtml += `<div class="timer" id="timer-${ex.id}">${isDone && !button.dataset.timerState ? formatTime(0) : formatTime(ex.value)}</div>`;
+                    const timerDiv = document.createElement('div');
+                    timerDiv.className = 'timer';
+                    timerDiv.id = `timer-${ex.id}`;
+                    // Display 00:00 if done and timer is not active, otherwise initial value
+                    // Or if timer is active/paused, it will be updated by its own logic via handleTimerAction
+                    const buttonElemForTimerCheck = document.getElementById(`btn-${ex.id}`);
+                    let timerInitialValue = ex.value;
+                    if (buttonElemForTimerCheck && buttonElemForTimerCheck.dataset.remainingSeconds) {
+                        timerInitialValue = parseInt(buttonElemForTimerCheck.dataset.remainingSeconds);
+                    }
+                    timerDiv.textContent = isDone ? formatTime(0) : formatTime(timerInitialValue);
+                    actionContainer.appendChild(timerDiv);
                 }
 
-                let buttonClasses = 'btn';
-                let buttonText = '';
-                let buttonDisabled = false;
-                let eventHandler;
+                const button = document.createElement('button');
+                button.classList.add('btn');
+                button.id = `btn-${ex.id}`;
 
                 if (isDone) {
-                    buttonClasses += ' btn-success';
-                    buttonText = `${ex.name} wykonane`;
-                    // Przycisk "Wykonane" jest teraz klikalny, aby odznaczyć, więc nie jest disabled.
-                    // buttonDisabled = true; // Removed
-                    eventHandler = () => { console.log('Uncomplete (success) button clicked:', ex.id); uncompleteExercise(state.currentDay, ex.id, ex.name); };
+                    button.classList.add('btn-success');
+                    button.textContent = `${ex.name} wykonane`;
+                    // button.disabled = true; // Not disabled anymore to allow uncomplete
+                    button.onclick = () => { console.log('Uncomplete (success) button clicked:', ex.id); uncompleteExercise(state.currentDay, ex.id, ex.name); };
                 } else {
                     if (ex.type === 'timer') {
-                        buttonText = 'START';
-                        eventHandler = () => { console.log('Timer button clicked:', ex.id); handleTimerAction(ex.id, ex.name); };
+                        button.textContent = 'START'; // Default text, handleTimerAction will manage PAUSE/RESUME
+                        button.dataset.initialSeconds = ex.value;
+                        button.onclick = () => { console.log('Timer button clicked:', ex.id); handleTimerAction(ex.id, ex.name); };
                     } else {
-                        buttonText = 'Wykonaj';
-                        eventHandler = () => { console.log('Complete button clicked:', ex.id); completeExercise(state.currentDay, ex.id, ex.name); };
+                        button.textContent = 'Wykonaj';
+                        button.onclick = () => { console.log('Complete button clicked:', ex.id); completeExercise(state.currentDay, ex.id, ex.name); };
                     }
                 }
-                
-                actionHtml += `<button class="${buttonClasses}" id="btn-${ex.id}" ${buttonDisabled ? 'disabled' : ''} ${ex.type === 'timer' && !isDone ? `data-initial-seconds="${ex.value}"` : ''}>${buttonText}</button>`;
+                actionContainer.appendChild(button);
                 
                 li.innerHTML = `
                     <div class="exercise-title">${ex.name}</div>
-                    <div class="exercise-value">${ex.value} ${ex.unit}</div>
-                    <div class="action-container">
-                        ${actionHtml}
-                    </div>`;
+                    <div class="exercise-value">${ex.value} ${ex.unit}</div>`;
+                li.appendChild(actionContainer);
                 DOM.exerciseList.appendChild(li);
-                
-                const buttonElement = li.querySelector(`#btn-${ex.id}`);
-                if (buttonElement) {
-                    buttonElement.addEventListener('click', eventHandler);
-                }
             });
         }
 
@@ -232,9 +232,9 @@
                 const button = document.getElementById(`btn-${exerciseId}`);
                 if (button) { 
                     delete button.dataset.timerId; delete button.dataset.timerState; delete button.dataset.remainingSeconds;
+                    // initialSeconds remains as it's part of the plan
                 }
-                const timerEl = document.getElementById(`timer-${exerciseId}`);
-                if(timerEl) timerEl.textContent = formatTime(exercise.value); // Reset timer display
+                // Timer display will be reset by renderCurrentDayExercises
             }
             
             renderCurrentDayExercises(); updateDayProgress(); saveStateToLocalStorage(); 
