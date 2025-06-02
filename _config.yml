@@ -20,7 +20,7 @@ author: Grzegorz Janas
 ###############################################
 
 navbar-links:
-  About Me: "aboutme"
+#  About Me: "aboutme"
   Resources:
     - Beautiful Jekyll: "https://beautifuljekyll.com"
     - Ptaki: "https://gjanas.com/ptaki"
@@ -59,7 +59,7 @@ social-network-links:
  # whatsapp: 15551212
 #  medium: yourname
   reddit: gjanas
-#  linkedin: daattali
+  linkedin: janasgrzegorz
 #  xing: yourname
 #  stackoverflow: "3943160/daattali"
 #  snapchat: deanat78
