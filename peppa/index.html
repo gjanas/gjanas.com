@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz o Śwince Peppie</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f8ff; /* Jasnoniebieskie tło */
+            color: #333;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        .quiz-container {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        h1 {
+            color: #ff69b4; /* Różowy */
+            margin-bottom: 20px;
+        }
+        #question-text {
+            font-size: 1.3em;
+            margin-bottom: 25px;
+            min-height: 60px; /* Aby uniknąć skakania layoutu */
+            white-space: pre-line; /* Zachowuje nowe linie z danych pytań */
+        }
+        .answer-buttons button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 1.1em;
+            border: 2px solid #ff69b4; /* Różowa ramka */
+            border-radius: 8px;
+            background-color: #fff0f5; /* Jasnoróżowy */
+            color: #333;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        .answer-buttons button:hover {
+            background-color: #ffe4e1; /* Ciemniejszy różowy przy najechaniu */
+        }
+        .answer-buttons button:active {
+            transform: scale(0.98);
+        }
+        #message {
+            margin-top: 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+            min-height: 30px; /* Aby uniknąć skakania layoutu */
+        }
+        .correct {
+            background-color: #90ee90 !important; /* Jasnozielony */
+            border-color: #32cd32 !important; /* Ciemnozielony */
+        }
+        .incorrect {
+            background-color: #ffcccb !important; /* Jasnoczerwony */
+            border-color: #ff0000 !important; /* Czerwony */
+        }
+        .message-correct {
+            color: #32cd32;
+        }
+        .message-incorrect {
+            color: #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>Quiz o Śwince Peppie</h1>
+        <div id="question-text">Ładowanie pytania...</div>
+        <div class="answer-buttons">
+            <button id="btn-a" onclick="checkAnswer(0)"></button>
+            <button id="btn-b" onclick="checkAnswer(1)"></button>
+            <button id="btn-c" onclick="checkAnswer(2)"></button>
+        </div>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        const questions = [
+            { questionText: "Jaki kolor sukienki\nnajczęściej nosi Świnka Peppa?", answers: ["Niebieską", "Czerwoną", "Żółtą"], correctAnswerIndex: 1 },
+            { questionText: "Jak nazywa się młodszy\nbrat Świnki Peppy?", answers: ["George", "Danny", "Pedro"], correctAnswerIndex: 0 },
+            { questionText: "Co najbardziej lubi robić Świnka Peppa\ni jej rodzina, gdy pada deszcz?", answers: ["Czytać książki", "Oglądać telewizję", "Skakać po błotnistych kałużach"], correctAnswerIndex: 2 },
+            { questionText: "Kto jest najlepszą\nprzyjaciółką Świnki Peppy?", answers: ["Owca Suzy", "Zebra Zoe", "Królik Rebecca"], correctAnswerIndex: 0 },
+            { questionText: "Jakiego zwierzaka ma George,\nbrat Peppy?", answers: ["Misia", "Dinozaura", "Samochodzik"], correctAnswerIndex: 1 },
+            { questionText: "Gdzie pracuje\nTata Świnka?", answers: ["Jest nauczycielem", "Jest architektem/\ninżynierem", "Jest lekarzem"], correctAnswerIndex: 1 },
+            { questionText: "Jak nazywają się dziadkowie\nŚwinki Peppy od strony Mamy Świnki?", answers: ["Babcia Świnka i Dziadek Świnka", "Babcia Królik i Dziadek Królik", "Babcia Pies i Dziadek Pies"], correctAnswerIndex: 0 },
+            { questionText: "Czym Dziadek Świnka bardzo\nlubi się zajmować w swoim ogrodzie?", answers: ["Uprawiać warzywa", "Grać w piłkę", "Czytać gazetę"], correctAnswerIndex: 0 },
+            { questionText: "Jakiego instrumentu muzycznego\nuczy się grać Świnka Peppa?", answers: ["Pianina", "Bębenka", "Gitary"], correctAnswerIndex: 1 },
+            { questionText: "Co mówi Świnka Peppa na początku\nprawie każdego odcinka?", answers: ["\"Cześć, to ja, Peppa!\"", "\"Jestem Świnka Peppa.\" (i reszta)", "\"Dzień dobry wszystkim!\""], correctAnswerIndex: 1 },
+            { questionText: "Kto jest nauczycielką Świnki\nPeppy w przedszkolu?", answers: ["Pani Gazela", "Pani Królik", "Pani Zebra"], correctAnswerIndex: 0 },
+            { questionText: "Jakiego koloru jest samochód\nrodziny Świnek?", answers: ["Niebieski", "Czerwony", "Zielony"], correctAnswerIndex: 1 },
+            { questionText: "Co George (Jacek) często mówi,\ngdy jest smutny?", answers: ["\"Ojej!\"", "\"Łee!\" (płacz)", "\"Nie chcę!\""], correctAnswerIndex: 1 },
+            { questionText: "Kto jest listonoszem\nw świecie Świnki Peppy?", answers: ["Pan Zebra", "Pan Byk", "Pan Wilk"], correctAnswerIndex: 0 },
+            { questionText: "Jak nazywa się kuzynka\nŚwinki Peppy, która jest starsza?", answers: ["Chloe", "Candy", "Emily"], correctAnswerIndex: 0 },
+            { questionText: "Jaki jest ulubiony program TV\nPeppy i George'a o warzywach?", answers: ["Pan Ziemniak", "Pani Marchewka", "Wesołe Warzywa"], correctAnswerIndex: 0 },
+            { questionText: "Czym zajmuje się Dziadek Świnka,\ngdy nie jest w ogrodzie?", answers: ["W warsztacie", "Na swojej łódce", "W bibliotece"], correctAnswerIndex: 1 },
+            { questionText: "Kiedy Peppa i George się śmieją,\nco często robią?", answers: ["Klaszczą w ręce", "Skaczą w górę i w dół", "Padają na plecy i chichoczą"], correctAnswerIndex: 2 },
+            { questionText: "Jak nazywa się złota rybka\nŚwinki Peppy?", answers: ["Złotka", "Pływaczka", "Bubbles"], correctAnswerIndex: 0 },
+            { questionText: "Kto w świecie Peppy pracuje\njako weterynarz?", answers: ["Doktor Chomik", "Doktor Niedźwiedź", "Doktor Słoń"], correctAnswerIndex: 0 },
+            { questionText: "Jak nazywa się pluszowy miś\nPeppy?", answers: ["Teddy", "Misiu", "Przytulak"], correctAnswerIndex: 0 },
+            { questionText: "Co często gubi Tata Świnka?", answers: ["Kluczyki do samochodu", "Okulary", "Telefon"], correctAnswerIndex: 1 },
+            { questionText: "Kto jest bardzo mądry i wie\ndużo o gwiazdach i planetach?", answers: ["Słonik Edmond", "Lisek Freddy", "Kucyk Pedro"], correctAnswerIndex: 0 },
+            { questionText: "Jaką grę Peppa i przyjaciele\nczęsto grają na dworze?", answers: ["W chowanego", "W \"Kto pierwszy...?\"", "W \"Ryczące zwierzęta\""], correctAnswerIndex: 2 },
+            { questionText: "Jaki pojazd ma Pani Królik,\nktórym często pomaga innym?", answers: ["Helikopter ratunkowy", "Ciężarówka pomocy", "Łódź podwodna"], correctAnswerIndex: 0 },
+            { questionText: "Gdzie Peppa i George często\nbawią się ze swoimi przyjaciółmi?", answers: ["W kuchni", "W sypialni Peppy i George'a", "W garażu"], correctAnswerIndex: 1 },
+            { questionText: "Jaki dźwięk wydaje ulubiony\ndinozaur George'a?", answers: ["\"Miau!\"", "\"Grrr! Dinozaur!\"", "\"Piiip!\""], correctAnswerIndex: 1 },
+            { questionText: "Jakiego koloru jest domek,\nw którym mieszka rodzina Świnek?", answers: ["Żółty z czerwonym dachem", "Niebieski z zielonym dachem", "Czerwony z żółtym dachem"], correctAnswerIndex: 0 },
+            { questionText: "Kto bardzo lubi marchewki?", answers: ["Rebecca Królik", "Danny Pies", "Suzy Owca"], correctAnswerIndex: 0 },
+            { questionText: "Kto jest dentystą\nw świecie Świnki Peppy?", answers: ["Doktor Słoń", "Doktor Krokodyl", "Doktor Niedźwiedź Bruno"], correctAnswerIndex: 0 }
+            // Możesz dodać więcej pytań tutaj, kopiując format
+        ];
+
+        let currentQuestionIndex;
+        let shuffledQuestions = [];
+        let questionAnsweredCorrectly = false;
+        let score = 0; // Opcjonalne śledzenie wyniku
+
+        const questionTextElement = document.getElementById('question-text');
+        const answerButtonElements = [
+            document.getElementById('btn-a'),
+            document.getElementById('btn-b'),
+            document.getElementById('btn-c')
+        ];
+        const messageElement = document.getElementById('message');
+
+        function startGame() {
+            // Tasowanie pytań (Fisher-Yates shuffle)
+            let tempQuestions = [...questions];
+            shuffledQuestions = [];
+            while (tempQuestions.length > 0) {
+                const randomIndex = Math.floor(Math.random() * tempQuestions.length);
+                shuffledQuestions.push(tempQuestions.splice(randomIndex, 1)[0]);
+            }
+            currentQuestionIndex = 0;
+            score = 0;
+            loadNextQuestion();
+        }
+
+        function loadNextQuestion() {
+            resetButtonStates();
+            questionAnsweredCorrectly = false;
+            messageElement.textContent = '';
+            messageElement.className = '';
+
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                const question = shuffledQuestions[currentQuestionIndex];
+                questionTextElement.textContent = question.questionText;
+                question.answers.forEach((answer, index) => {
+                    answerButtonElements[index].textContent = answer;
+                });
+            } else {
+                // Koniec gry
+                questionTextElement.textContent = `Koniec Gry! Twój wynik: ${score} / ${shuffledQuestions.length}`;
+                answerButtonElements.forEach(btn => btn.style.display = 'none');
+                messageElement.textContent = 'Aby zagrać ponownie, odśwież stronę.';
+            }
+        }
+
+        function resetButtonStates() {
+            answerButtonElements.forEach(button => {
+                button.className = '';
+                button.disabled = false;
+            });
+        }
+
+        function checkAnswer(selectedIndex) {
+            if (questionAnsweredCorrectly) return; // Nie pozwól na zmianę odpowiedzi po poprawnej
+
+            const question = shuffledQuestions[currentQuestionIndex];
+            const selectedButton = answerButtonElements[selectedIndex];
+
+            if (selectedIndex === question.correctAnswerIndex) {
+                selectedButton.classList.add('correct');
+                messageElement.textContent = 'To dobra odpowiedź!';
+                messageElement.className = 'message-correct';
+                questionAnsweredCorrectly = true;
+                score++;
+                // Zablokuj pozostałe przyciski
+                answerButtonElements.forEach(btn => btn.disabled = true);
+                selectedButton.disabled = false; // Ale pozwól na ponowne kliknięcie poprawnego (bez efektu)
+
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    loadNextQuestion();
+                }, 1500); // Poczekaj chwilę przed przejściem do następnego pytania
+            } else {
+                selectedButton.classList.add('incorrect');
+                messageElement.textContent = 'Błędna odpowiedź. Spróbuj jeszcze raz!';
+                messageElement.className = 'message-incorrect';
+                selectedButton.disabled = true; // Zablokuj ten błędny przycisk do końca tego pytania
+            }
+        }
+
+        // Rozpocznij grę po załadowaniu strony
+        window.onload = startGame;
+    </script>
+</body>
+</html>
