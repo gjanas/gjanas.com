@@ -169,7 +169,7 @@
             { questionText: "Kto jest dentystą\nw świecie Świnki Peppy?", answers: ["Doktor Słoń", "Doktor Krokodyl", "Doktor Niedźwiedź Bruno"], correctAnswerIndex: 0 }
         ];
 
-        let currentQuestionIndexGlobal; // Zmieniona nazwa, aby uniknąć konfliktu z lokalną zmienną
+        let currentQuestionIndexGlobal;
         let shuffledQuestions = [];
         let questionAnsweredCorrectly = false;
         let score = 0;
@@ -193,7 +193,7 @@
             score = 0;
             answerButtonElements.forEach(btn => {
                 btn.style.display = 'block';
-                btn.onclick = function() { // Przypisanie event listenera tutaj
+                btn.onclick = function() { 
                     checkAnswer(parseInt(this.dataset.index));
                 };
             });
@@ -201,7 +201,9 @@
         }
 
         function loadNextQuestion() {
-            resetButtonStates();
+            // Resetuj stan PRZED załadowaniem nowego pytania
+            resetButtonStates(); 
+            
             questionAnsweredCorrectly = false;
             messageElement.textContent = '';
             messageElement.className = '';
@@ -211,13 +213,13 @@
                 questionTextElement.textContent = question.questionText;
                 question.answers.forEach((answer, index) => {
                     answerButtonElements[index].textContent = answer;
-                    answerButtonElements[index].classList.remove('correct', 'incorrect');
+                    // Usunięcie klas correct/incorrect jest już w resetButtonStates
                 });
             } else {
                 questionTextElement.textContent = `Super! Koniec Gry!\nZdobyłeś ${score} pkt!`;
                 answerButtonElements.forEach(btn => {
                     btn.style.display = 'none';
-                    btn.onclick = null; // Usuń event listener po zakończeniu gry
+                    btn.onclick = null; 
                 });
                 messageElement.textContent = 'Zagraj znów? Odśwież stronę!';
             }
@@ -225,13 +227,12 @@
 
         function resetButtonStates() {
             answerButtonElements.forEach(button => {
-                button.className = '';
+                button.className = ''; // Usuwa WSZYSTKIE klasy, w tym .correct i .incorrect
                 button.disabled = false;
             });
         }
 
         function checkAnswer(selectedIndex) {
-            // Sprawdź, czy przycisk jest już wyłączony (po błędnej odpowiedzi) i czy pytanie nie zostało już poprawnie odpowiedziane
             if (answerButtonElements[selectedIndex].disabled && !questionAnsweredCorrectly) {
                  return;
             }
@@ -242,17 +243,13 @@
             const question = shuffledQuestions[currentQuestionIndexGlobal];
             const selectedButton = answerButtonElements[selectedIndex];
 
-            // Usuń klasę 'incorrect' z innych przycisków, jeśli użytkownik zmienia zdanie
-            // ale tylko jeśli pytanie nie zostało jeszcze poprawnie odpowiedziane
             if (!questionAnsweredCorrectly) {
                 answerButtonElements.forEach(btn => {
                     if (btn !== selectedButton) {
                         btn.classList.remove('incorrect');
-                        // Nie włączaj ponownie przycisków, które były już błędne, chyba że to nowa próba
                     }
                 });
             }
-
 
             if (selectedIndex === question.correctAnswerIndex) {
                 selectedButton.classList.add('correct');
@@ -260,8 +257,7 @@
                 messageElement.className = 'message-correct';
                 questionAnsweredCorrectly = true;
                 score++;
-                answerButtonElements.forEach(btn => btn.disabled = true); // Zablokuj wszystkie
-                // selectedButton.disabled = false; // Niepotrzebne, bo i tak wszystkie są blokowane
+                answerButtonElements.forEach(btn => btn.disabled = true); 
 
                 setTimeout(() => {
                     currentQuestionIndexGlobal++;
@@ -271,7 +267,7 @@
                 selectedButton.classList.add('incorrect');
                 messageElement.textContent = 'Oj, spróbuj\njeszcze raz!';
                 messageElement.className = 'message-incorrect';
-                selectedButton.disabled = true; // Zablokuj tylko ten błędny przycisk
+                selectedButton.disabled = true; 
             }
         }
 
