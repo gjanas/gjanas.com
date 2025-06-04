@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Quiz: Świnka Peppa</title>
+    <title>Quiz o Śwince Peppie</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
@@ -15,166 +15,161 @@
             min-height: -webkit-fill-available;
             margin: 0;
             background-color: #ffe0f0; /* Bardzo jasny, ciepły róż */
-            color: #4A4A4A; /* Ciemnoszary dla tekstu */
-            padding: 15px;
+            color: #4A4A4A;
+            padding: 20px; /* Zwiększony padding dla lepszego dopasowania */
             box-sizing: border-box;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
         .quiz-container {
             background-color: #ffffff;
-            padding: 25px 20px; /* Więcej paddingu góra/dół */
+            padding: 25px 20px;
             border-radius: 15px;
             box-shadow: 0 5px 25px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 420px; /* Dostosowane do typowej szerokości telefonu */
+            max-width: 450px;
             text-align: center;
         }
         h1 {
-            color: #ff66a3; /* Bardziej żywy róż */
+            color: #e91e63; /* Głęboki różowy */
             margin-top: 0;
             margin-bottom: 25px;
-            font-size: 2em; /* Duży nagłówek */
-            font-weight: 700; /* Grubszy nagłówek */
+            font-size: 2em; /* Powiększona czcionka nagłówka */
+            font-weight: 600;
         }
         #question-text {
-            font-size: 1.6em; /* Bardzo duża czcionka pytania */
-            margin-bottom: 35px; /* Więcej miejsca pod pytaniem */
-            min-height: 80px;
-            white-space: pre-line;
-            line-height: 1.4; /* Dobra interlinia dla czytelności */
+            font-size: 1.5em; /* Duża czcionka pytania */
+            margin-bottom: 30px;
+            min-height: 70px;
+            white-space: pre-line; /* Zachowuje nowe linie z danych pytań */
+            line-height: 1.4;
             color: #333;
-            font-weight: 600; /* Grubsze pytanie */
+            font-weight: 500; /* Normalna grubość pytania dla czytelności */
         }
         .answer-buttons button {
             display: block;
             width: 100%;
-            padding: 20px 15px; /* Duży padding przycisków */
-            margin: 15px 0; /* Większy margines między przyciskami */
-            font-size: 1.4em; /* Duża czcionka na przyciskach */
+            padding: 18px 15px; /* Duży padding przycisków */
+            margin: 12px 0; /* Większy margines między przyciskami */
+            font-size: 1.3em; /* Duża czcionka na przyciskach */
             font-weight: 600; /* Grubszy tekst odpowiedzi */
-            border: 3px solid #ff99cc; /* Grubsza, wyraźna ramka */
+            border: 3px solid #f06292; /* Jaśniejsza różowa ramka, grubsza */
             border-radius: 12px;
-            background-color: #fff0f7; /* Jasny, przyjazny róż */
-            color: #5f5f5f; /* Ciemniejszy szary dla kontrastu */
+            background-color: #fce4ec;
+            color: #555;
             cursor: pointer;
             transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
             -webkit-tap-highlight-color: transparent;
         }
         .answer-buttons button:hover:not(:disabled) {
-            background-color: #ffe0f0;
-            border-color: #ff77bb;
+            background-color: #f8bbd0;
+            border-color: #ec407a;
         }
         .answer-buttons button:active:not(:disabled) {
-            transform: scale(0.96); /* Wyraźniejszy efekt wciśnięcia */
+            transform: scale(0.97);
         }
         .answer-buttons button:disabled {
             cursor: not-allowed;
-            opacity: 0.6;
+            opacity: 0.7;
         }
         #message {
-            margin-top: 30px;
-            font-size: 1.3em; /* Duża czcionka komunikatu */
-            font-weight: 700; /* Gruby komunikat */
-            min-height: 40px;
-            line-height: 1.5;
+            margin-top: 25px;
+            font-size: 1.3em; /* Powiększona czcionka komunikatu */
+            font-weight: 600;
+            min-height: 35px;
+            line-height: 1.4;
+            white-space: pre-line; /* Dla komunikatów wieloliniowych */
         }
         .correct {
-            background-color: #d4edda !important; /* Jasnozielone tło */
-            border-color: #5cb85c !important; /* Zielona ramka */
-            color: #155724 !important; /* Ciemnozielony tekst */
-            animation: pulseCorrect 0.5s;
+            background-color: #c8e6c9 !important;
+            border-color: #66bb6a !important;
+            color: #2e7d32 !important;
+            animation: pulseCorrect 0.4s ease-in-out;
         }
         .incorrect {
-            background-color: #f8d7da !important; /* Jasnoczerwone tło */
-            border-color: #d9534f !important; /* Czerwona ramka */
-            color: #721c24 !important; /* Ciemnoczerwony tekst */
-            animation: shakeIncorrect 0.5s;
+            background-color: #ffcdd2 !important;
+            border-color: #ef5350 !important;
+            color: #c62828 !important;
+            animation: shakeIncorrect 0.4s ease-in-out;
         }
         .message-correct {
-            color: #3c763d; /* Ciemny zielony */
+            color: #4caf50;
         }
         .message-incorrect {
-            color: #a94442; /* Ciemny czerwony */
+            color: #f44336;
         }
 
         @keyframes pulseCorrect {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
         }
         @keyframes shakeIncorrect {
             0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
         }
 
         @media (prefers-color-scheme: dark) {
-            body { background-color: #281c23; color: #f0e0e8; }
-            .quiz-container { background-color: #3d2c37; box-shadow: 0 5px 25px rgba(0,0,0,0.3); }
-            h1 { color: #ff8cc6; }
-            #question-text { color: #f0e0e8; }
-            .answer-buttons button {
-                border-color: #ff8cc6;
-                background-color: #4f3a48;
-                color: #f0e0e8;
-            }
-            .answer-buttons button:hover:not(:disabled) { background-color: #5e4856; border-color: #ff70b8; }
-            .correct { background-color: #305d3b !important; border-color: #6fbf7b !important; color: #ffffff !important; }
-            .incorrect { background-color: #7d3030 !important; border-color: #bf6f6f !important; color: #ffffff !important; }
-            .message-correct { color: #7fcd91; }
-            .message-incorrect { color: #cd7f7f; }
+            body { background-color: #1c1c1e; color: #f2f2f7; }
+            .quiz-container { background-color: #2c2c2e; box-shadow: 0 4px 20px rgba(0,0,0,0.25); }
+            h1 { color: #ff80ab; }
+            #question-text { color: #e5e5ea; }
+            .answer-buttons button { border-color: #ff80ab; background-color: #3a3a3c; color: #f2f2f7; }
+            .answer-buttons button:hover:not(:disabled) { background-color: #48484a; border-color: #ff5c9d; }
+            .correct { background-color: #34c759 !important; border-color: #2aa34a !important; color: #ffffff !important; }
+            .incorrect { background-color: #ff3b30 !important; border-color: #d9352e !important; color: #ffffff !important; }
+            .message-correct { color: #32d74b; }
+            .message-incorrect { color: #ff453a; }
         }
     </style>
 </head>
 <body>
     <div class="quiz-container">
-        <h1>Quiz: Peppa</h1> <!-- Skrócony tytuł -->
-        <div id="question-text"></div>
+        <h1>Quiz o Śwince Peppie</h1>
+        <div id="question-text">Ładowanie pytania...</div>
         <div class="answer-buttons">
-            <button id="btn-a"></button>
-            <button id="btn-b"></button>
-            <button id="btn-c"></button>
+            <button id="btn-a" data-index="0"></button>
+            <button id="btn-b" data-index="1"></button>
+            <button id="btn-c" data-index="2"></button>
         </div>
         <div id="message"></div>
     </div>
 
     <script>
         const questions = [
-            { questionText: "Jaki kolor ma\n sukienka Peppy?", answers: ["Niebieski", "Czerwony", "Żółty"], correctAnswerIndex: 1 },
-            { questionText: "Jak ma na imię\n brat Peppy?", answers: ["George", "Danny", "Pedro"], correctAnswerIndex: 0 },
-            { questionText: "Co Peppa lubi robić\n w deszczu?", answers: ["Czytać", "Grać", "Skakać w kałuży"], correctAnswerIndex: 2 },
-            { questionText: "Kto jest koleżanką\n Peppy?", answers: ["Owca Suzy", "Zebra Zoe", "Królik"], correctAnswerIndex: 0 },
-            { questionText: "Co ma George,\n brat Peppy?", answers: ["Miś", "Dinozaur", "Auto"], correctAnswerIndex: 1 },
-            { questionText: "Co robi\n Tata Świnka?", answers: ["Uczy", "Buduje domy", "Leczy"], correctAnswerIndex: 1 },
-            { questionText: "Dziadkowie Peppy\n to:", answers: ["Babcia i Dziadek Świnka", "Babcia i Dziadek Królik", "Babcia i Dziadek Pies"], correctAnswerIndex: 0 },
-            { questionText: "Co Dziadek Świnka\n ma w ogrodzie?", answers: ["Warzywa", "Piłkę", "Gazetę"], correctAnswerIndex: 0 },
-            { questionText: "Na czym gra\n Peppa?", answers: ["Na pianinie", "Na bębenku", "Na gitarze"], correctAnswerIndex: 1 },
-            { questionText: "Co mówi Peppa\n na początku bajki?", answers: ["\"Cześć!\"", "\"Jestem Peppa\"", "\"Dzień dobry\""], correctAnswerIndex: 1 },
-            { questionText: "Kto uczy Peppę\n w szkole?", answers: ["Pani Gazela", "Pani Królik", "Pani Zebra"], correctAnswerIndex: 0 },
-            { questionText: "Jaki kolor ma\n auto Świnek?", answers: ["Niebieski", "Czerwony", "Zielony"], correctAnswerIndex: 1 },
-            { questionText: "Co mówi George,\n gdy płacze?", answers: ["\"Ojej!\"", "\"Łee!\"", "\"Nie chcę!\""], correctAnswerIndex: 1 },
-            { questionText: "Kto nosi listy?", answers: ["Pan Zebra", "Pan Byk", "Pan Wilk"], correctAnswerIndex: 0 },
-            { questionText: "Starsza kuzynka\n Peppy to:", answers: ["Chloe", "Candy", "Emily"], correctAnswerIndex: 0 },
-            { questionText: "Ulubione warzywo\n w TV Peppy to:", answers: ["Pan Ziemniak", "Pani Marchewka", "Wesołe Warzywa"], correctAnswerIndex: 0 },
-            { questionText: "Gdzie pływa\n Dziadek Świnka?", answers: ["W aucie", "Na łódce", "W domu"], correctAnswerIndex: 1 },
-            { questionText: "Co robi Peppa,\n gdy się śmieje?", answers: ["Klaszcze", "Skacze", "Pada i chichocze"], correctAnswerIndex: 2 },
-            { questionText: "Jak ma na imię\n rybka Peppy?", answers: ["Złotka", "Pływak", "Bubbles"], correctAnswerIndex: 0 },
-            { questionText: "Kto leczy\n zwierzątka?", answers: ["Doktor Chomik", "Doktor Miś", "Doktor Słoń"], correctAnswerIndex: 0 },
-            { questionText: "Jak ma na imię\n miś Peppy?", answers: ["Teddy", "Misiu", "Pluszak"], correctAnswerIndex: 0 },
-            { questionText: "Co gubi\n Tata Świnka?", answers: ["Klucze", "Okulary", "Telefon"], correctAnswerIndex: 1 },
-            { questionText: "Kto zna się\n na gwiazdach?", answers: ["Słonik Edmond", "Lisek Freddy", "Kucyk Pedro"], correctAnswerIndex: 0 },
-            { questionText: "W co bawią się\n dzieci na dworze?", answers: ["W chowanego", "W berka", "W zwierzęta"], correctAnswerIndex: 2 },
-            { questionText: "Czym lata\n Pani Królik?", answers: ["Helikopterem", "Autem", "Łódką"], correctAnswerIndex: 0 },
-            { questionText: "Gdzie bawią się\n Peppa i George?", answers: ["W kuchni", "W pokoju", "W garażu"], correctAnswerIndex: 1 },
-            { questionText: "Jaki dźwięk robi\n dinozaur George'a?", answers: ["\"Miau!\"", "\"Grrr!\"", "\"Piiip!\""], correctAnswerIndex: 1 },
-            { questionText: "Jaki kolor ma\n dom Świnek?", answers: ["Żółty", "Niebieski", "Czerwony"], correctAnswerIndex: 0 }, // Uproszczona odp.
-            { questionText: "Kto lubi\n marchewki?", answers: ["Królik Rebecca", "Pies Danny", "Owca Suzy"], correctAnswerIndex: 0 },
-            { questionText: "Kto jest dentystą?", answers: ["Doktor Słoń", "Doktor Krokodyl", "Doktor Miś"], correctAnswerIndex: 0 }
+            { questionText: "Jaki kolor sukienki\nnajczęściej nosi Świnka Peppa?", answers: ["Niebieską", "Czerwoną", "Żółtą"], correctAnswerIndex: 1 },
+            { questionText: "Jak nazywa się młodszy\nbrat Świnki Peppy?", answers: ["George", "Danny", "Pedro"], correctAnswerIndex: 0 },
+            { questionText: "Co najbardziej lubi robić Świnka Peppa\ni jej rodzina, gdy pada deszcz?", answers: ["Czytać książki", "Oglądać telewizję", "Skakać po błotnistych kałużach"], correctAnswerIndex: 2 },
+            { questionText: "Kto jest najlepszą\nprzyjaciółką Świnki Peppy?", answers: ["Owca Suzy", "Zebra Zoe", "Królik Rebecca"], correctAnswerIndex: 0 },
+            { questionText: "Jakiego zwierzaka ma George,\nbrat Peppy?", answers: ["Misia", "Dinozaura", "Samochodzik"], correctAnswerIndex: 1 },
+            { questionText: "Gdzie pracuje\nTata Świnka?", answers: ["Jest nauczycielem", "Jest architektem/\ninżynierem", "Jest lekarzem"], correctAnswerIndex: 1 },
+            { questionText: "Jak nazywają się dziadkowie\nŚwinki Peppy od strony Mamy Świnki?", answers: ["Babcia Świnka i Dziadek Świnka", "Babcia Królik i Dziadek Królik", "Babcia Pies i Dziadek Pies"], correctAnswerIndex: 0 },
+            { questionText: "Czym Dziadek Świnka bardzo\nlubi się zajmować w swoim ogrodzie?", answers: ["Uprawiać warzywa", "Grać w piłkę", "Czytać gazetę"], correctAnswerIndex: 0 },
+            { questionText: "Jakiego instrumentu muzycznego\nuczy się grać Świnka Peppa?", answers: ["Pianina", "Bębenka", "Gitary"], correctAnswerIndex: 1 },
+            { questionText: "Co mówi Świnka Peppa na początku\nprawie każdego odcinka?", answers: ["\"Cześć, to ja, Peppa!\"", "\"Jestem Świnka Peppa.\" (i reszta)", "\"Dzień dobry wszystkim!\""], correctAnswerIndex: 1 },
+            { questionText: "Kto jest nauczycielką Świnki\nPeppy w przedszkolu?", answers: ["Pani Gazela", "Pani Królik", "Pani Zebra"], correctAnswerIndex: 0 },
+            { questionText: "Jakiego koloru jest samochód\nrodziny Świnek?", answers: ["Niebieski", "Czerwony", "Zielony"], correctAnswerIndex: 1 },
+            { questionText: "Co George (Jacek) często mówi,\ngdy jest smutny?", answers: ["\"Ojej!\"", "\"Łee!\" (płacz)", "\"Nie chcę!\""], correctAnswerIndex: 1 },
+            { questionText: "Kto jest listonoszem\nw świecie Świnki Peppy?", answers: ["Pan Zebra", "Pan Byk", "Pan Wilk"], correctAnswerIndex: 0 },
+            { questionText: "Jak nazywa się kuzynka\nŚwinki Peppy, która jest starsza?", answers: ["Chloe", "Candy", "Emily"], correctAnswerIndex: 0 },
+            { questionText: "Jaki jest ulubiony program TV\nPeppy i George'a o warzywach?", answers: ["Pan Ziemniak", "Pani Marchewka", "Wesołe Warzywa"], correctAnswerIndex: 0 },
+            { questionText: "Czym zajmuje się Dziadek Świnka,\ngdy nie jest w ogrodzie?", answers: ["W warsztacie", "Na swojej łódce", "W bibliotece"], correctAnswerIndex: 1 },
+            { questionText: "Kiedy Peppa i George się śmieją,\nco często robią?", answers: ["Klaszczą w ręce", "Skaczą w górę i w dół", "Padają na plecy i chichoczą"], correctAnswerIndex: 2 },
+            { questionText: "Jak nazywa się złota rybka\nŚwinki Peppy?", answers: ["Złotka", "Pływaczka", "Bubbles"], correctAnswerIndex: 0 },
+            { questionText: "Kto w świecie Peppy pracuje\njako weterynarz?", answers: ["Doktor Chomik", "Doktor Niedźwiedź", "Doktor Słoń"], correctAnswerIndex: 0 },
+            { questionText: "Jak nazywa się pluszowy miś\nPeppy?", answers: ["Teddy", "Misiu", "Przytulak"], correctAnswerIndex: 0 },
+            { questionText: "Co często gubi Tata Świnka?", answers: ["Kluczyki do samochodu", "Okulary", "Telefon"], correctAnswerIndex: 1 },
+            { questionText: "Kto jest bardzo mądry i wie\ndużo o gwiazdach i planetach?", answers: ["Słonik Edmond", "Lisek Freddy", "Kucyk Pedro"], correctAnswerIndex: 0 },
+            { questionText: "Jaką grę Peppa i przyjaciele\nczęsto grają na dworze?", answers: ["W chowanego", "W \"Kto pierwszy...?\"", "W \"Ryczące zwierzęta\""], correctAnswerIndex: 2 },
+            { questionText: "Jaki pojazd ma Pani Królik,\nktórym często pomaga innym?", answers: ["Helikopter ratunkowy", "Ciężarówka pomocy", "Łódź podwodna"], correctAnswerIndex: 0 },
+            { questionText: "Gdzie Peppa i George często\nbawią się ze swoimi przyjaciółmi?", answers: ["W kuchni", "W sypialni Peppy i George'a", "W garażu"], correctAnswerIndex: 1 },
+            { questionText: "Jaki dźwięk wydaje ulubiony\ndinozaur George'a?", answers: ["\"Miau!\"", "\"Grrr! Dinozaur!\"", "\"Piiip!\""], correctAnswerIndex: 1 },
+            { questionText: "Jakiego koloru jest domek,\nw którym mieszka rodzina Świnek?", answers: ["Żółty z czerwonym dachem", "Niebieski z zielonym dachem", "Czerwony z żółtym dachem"], correctAnswerIndex: 0 },
+            { questionText: "Kto bardzo lubi marchewki?", answers: ["Rebecca Królik", "Danny Pies", "Suzy Owca"], correctAnswerIndex: 0 },
+            { questionText: "Kto jest dentystą\nw świecie Świnki Peppy?", answers: ["Doktor Słoń", "Doktor Krokodyl", "Doktor Niedźwiedź Bruno"], correctAnswerIndex: 0 }
         ];
 
-
-        let currentQuestionIndex;
+        let currentQuestionIndexGlobal; // Zmieniona nazwa, aby uniknąć konfliktu z lokalną zmienną
         let shuffledQuestions = [];
         let questionAnsweredCorrectly = false;
         let score = 0;
@@ -194,9 +189,14 @@
                 const randomIndex = Math.floor(Math.random() * tempQuestions.length);
                 shuffledQuestions.push(tempQuestions.splice(randomIndex, 1)[0]);
             }
-            currentQuestionIndex = 0;
+            currentQuestionIndexGlobal = 0;
             score = 0;
-            answerButtonElements.forEach(btn => btn.style.display = 'block');
+            answerButtonElements.forEach(btn => {
+                btn.style.display = 'block';
+                btn.onclick = function() { // Przypisanie event listenera tutaj
+                    checkAnswer(parseInt(this.dataset.index));
+                };
+            });
             loadNextQuestion();
         }
 
@@ -206,8 +206,8 @@
             messageElement.textContent = '';
             messageElement.className = '';
 
-            if (currentQuestionIndex < shuffledQuestions.length) {
-                const question = shuffledQuestions[currentQuestionIndex];
+            if (currentQuestionIndexGlobal < shuffledQuestions.length) {
+                const question = shuffledQuestions[currentQuestionIndexGlobal];
                 questionTextElement.textContent = question.questionText;
                 question.answers.forEach((answer, index) => {
                     answerButtonElements[index].textContent = answer;
@@ -215,7 +215,10 @@
                 });
             } else {
                 questionTextElement.textContent = `Super! Koniec Gry!\nZdobyłeś ${score} pkt!`;
-                answerButtonElements.forEach(btn => btn.style.display = 'none');
+                answerButtonElements.forEach(btn => {
+                    btn.style.display = 'none';
+                    btn.onclick = null; // Usuń event listener po zakończeniu gry
+                });
                 messageElement.textContent = 'Zagraj znów? Odśwież stronę!';
             }
         }
@@ -228,17 +231,28 @@
         }
 
         function checkAnswer(selectedIndex) {
-            if (answerButtonElements[selectedIndex].disabled && !questionAnsweredCorrectly) return;
-            if (questionAnsweredCorrectly) return;
+            // Sprawdź, czy przycisk jest już wyłączony (po błędnej odpowiedzi) i czy pytanie nie zostało już poprawnie odpowiedziane
+            if (answerButtonElements[selectedIndex].disabled && !questionAnsweredCorrectly) {
+                 return;
+            }
+            if (questionAnsweredCorrectly) {
+                return;
+            }
 
-            const question = shuffledQuestions[currentQuestionIndex];
+            const question = shuffledQuestions[currentQuestionIndexGlobal];
             const selectedButton = answerButtonElements[selectedIndex];
 
-            answerButtonElements.forEach(btn => {
-                if (btn !== selectedButton) {
-                    btn.classList.remove('incorrect');
-                }
-            });
+            // Usuń klasę 'incorrect' z innych przycisków, jeśli użytkownik zmienia zdanie
+            // ale tylko jeśli pytanie nie zostało jeszcze poprawnie odpowiedziane
+            if (!questionAnsweredCorrectly) {
+                answerButtonElements.forEach(btn => {
+                    if (btn !== selectedButton) {
+                        btn.classList.remove('incorrect');
+                        // Nie włączaj ponownie przycisków, które były już błędne, chyba że to nowa próba
+                    }
+                });
+            }
+
 
             if (selectedIndex === question.correctAnswerIndex) {
                 selectedButton.classList.add('correct');
@@ -246,18 +260,18 @@
                 messageElement.className = 'message-correct';
                 questionAnsweredCorrectly = true;
                 score++;
-                answerButtonElements.forEach(btn => btn.disabled = true);
-                selectedButton.disabled = false;
+                answerButtonElements.forEach(btn => btn.disabled = true); // Zablokuj wszystkie
+                // selectedButton.disabled = false; // Niepotrzebne, bo i tak wszystkie są blokowane
 
                 setTimeout(() => {
-                    currentQuestionIndex++;
+                    currentQuestionIndexGlobal++;
                     loadNextQuestion();
-                }, 1800); // Trochę dłużej, żeby dziecko zdążyło przeczytać
+                }, 1800);
             } else {
                 selectedButton.classList.add('incorrect');
                 messageElement.textContent = 'Oj, spróbuj\njeszcze raz!';
                 messageElement.className = 'message-incorrect';
-                selectedButton.disabled = true;
+                selectedButton.disabled = true; // Zablokuj tylko ten błędny przycisk
             }
         }
 
