@@ -15,7 +15,8 @@
         {{ site.author }}
         &nbsp;&bull;&nbsp;
       {% endif %}
-      {{ site.time | date: '%Y' }}
+      <span id="copyright-year">{{ site.time | date: '%Y' }}</span>
+      <script>document.getElementById('copyright-year').textContent=new Date().getFullYear();</script>
 
       {% if site.url-pretty %}
         &nbsp;&bull;&nbsp;
