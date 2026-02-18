@@ -4,8 +4,24 @@ title: "404"
 permalink: /404.html
 ---
 
-<div class="text-center">
+<div id="e404-pl" class="text-center">
   <h1>Strona nie została znaleziona</h1>
   <p>Przepraszamy, ta strona nie istnieje. (błąd 404)</p>
   <a href="/">Wróć na stronę główną</a>
 </div>
+
+<div id="e404-en" class="text-center" style="display:none">
+  <h1>Page not found</h1>
+  <p>Sorry, this page doesn't exist. (404 error)</p>
+  <a href="/">Go to homepage</a>
+</div>
+
+<script>
+(function() {
+  var lang = (navigator.language || navigator.userLanguage || '').toLowerCase();
+  if (!lang.startsWith('pl')) {
+    document.getElementById('e404-pl').style.display = 'none';
+    document.getElementById('e404-en').style.display = '';
+  }
+})();
+</script>

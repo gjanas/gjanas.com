@@ -4,10 +4,11 @@ title: Grzegorz Janas
 subtitle: O mnie
 ---
 
+<div id="content-pl">
 <p>
-  Entuzjasta technologii – fan Apple, automatyki domowej, inteligentnych gadżetów i druku 3D.  
-  Na co dzień pracuję jako SysAdmin i DevOps, a po godzinach jestem tatą, majsterkowiczem i eksperymentatorem.  
-  Interesuję się uprawą roślin w systemie hydroponicznym, sztuczną inteligencją i nowoczesnymi rozwiązaniami smart home.  
+  Entuzjasta technologii – fan Apple, automatyki domowej, inteligentnych gadżetów i druku 3D.
+  Na co dzień pracuję jako SysAdmin i DevOps, a po godzinach jestem tatą, majsterkowiczem i eksperymentatorem.
+  Interesuję się uprawą roślin w systemie hydroponicznym, sztuczną inteligencją i nowoczesnymi rozwiązaniami smart home.
   Szukam sposobów, by łączyć technologię z codziennym życiem – praktycznie i kreatywnie.
 </p>
 
@@ -20,6 +21,39 @@ subtitle: O mnie
   <li>Drukiem 3D do celów praktycznych i hobbystycznych</li>
   <li>Wykorzystaniem AI w automatyzacji zadań i narzędzi</li>
 </ul>
+</div>
+
+<div id="content-en" style="display:none">
+<p>
+  Technology enthusiast – Apple fan, home automation geek, smart gadget lover and 3D printing hobbyist.
+  By day I work as a SysAdmin and DevOps engineer, and after hours I'm a dad, tinkerer and experimenter.
+  I'm interested in hydroponic plant growing, artificial intelligence and modern smart home solutions.
+  I look for ways to combine technology with everyday life – practically and creatively.
+</p>
+
+<hr>
+
+<p><strong>Currently experimenting with:</strong></p>
+<ul>
+  <li>Hydroponics and home plant growing automation</li>
+  <li>Home Assistant and IoT device integration</li>
+  <li>3D printing for practical and hobby purposes</li>
+  <li>Using AI to automate tasks and tools</li>
+</ul>
+</div>
+
+<script>
+(function() {
+  var lang = (navigator.language || navigator.userLanguage || '').toLowerCase();
+  if (!lang.startsWith('pl')) {
+    document.getElementById('content-pl').style.display = 'none';
+    document.getElementById('content-en').style.display = '';
+    document.title = document.title.replace('O mnie', 'About me');
+    var sub = document.querySelector('.page-subheading');
+    if (sub) sub.textContent = 'About me';
+  }
+})();
+</script>
 
 <style>
   .home {
