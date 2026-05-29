@@ -2,6 +2,7 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
+    <meta name="color-scheme" content="light dark">
     <title>Bird Detection - Statystyki</title>
     
     <!-- Czcionka Google Fonts -->
@@ -113,10 +114,83 @@
             transform: scale(1.05);
         }
 
+        /* Zakładki */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            justify-content: center;
+            animation: fadeIn 1s ease-in;
+        }
+        .tab-button {
+            padding: 10px 24px;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            background: transparent;
+            color: #333;
+            font-family: 'Roboto', sans-serif;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .tab-button:hover {
+            background: rgba(76, 175, 80, 0.1);
+        }
+        .tab-button.active {
+            background: #4CAF50;
+            color: white;
+        }
+        #top-species-table td.empty-message {
+            text-align: center;
+            padding: 30px;
+            color: #888;
+            font-style: italic;
+        }
+
         /* Animacja fade-in dla nagłówków i tabeli */
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #1a1a2e, #16213e);
+                color: #e0e0e0;
+            }
+            #last-detection-info {
+                background-color: #1e2a1e;
+                box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+            }
+            #top-species-header {
+                color: #e0e0e0;
+            }
+            #top-species-table th {
+                background-color: #1b5e20;
+            }
+            #top-species-table td {
+                background-color: #2d2d2d;
+                border-bottom: 1px solid #404040;
+            }
+            #top-species-table tr:hover {
+                background-color: #3d3d3d;
+            }
+            #top-species-table {
+                box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+            }
+            .tab-button {
+                border-color: #66BB6A;
+                color: #e0e0e0;
+            }
+            .tab-button:hover {
+                background: rgba(102, 187, 106, 0.15);
+            }
+            .tab-button.active {
+                background: #1b5e20;
+                border-color: #1b5e20;
+                color: #e0e0e0;
+            }
         }
 
         /* Responsywność dla urządzeń mobilnych */
@@ -138,7 +212,12 @@
         <p id="bird-detection-time">Wykrycie: <span></span></p>
     </div>
     
-    <h2 id="top-species-header">Top 10 gatunków wykrytych w ciągu ostatnich 24 godzin</h2>
+    <h2 id="top-species-header">Top 10 gatunków</h2>
+    <div class="tabs">
+        <button class="tab-button active" data-range="24h">24h</button>
+        <button class="tab-button" data-range="week">Tydzień</button>
+        <button class="tab-button" data-range="month">Miesiąc</button>
+    </div>
     <table id="top-species-table">
         <thead>
             <tr>
