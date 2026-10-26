@@ -207,16 +207,16 @@
 <body>
     <div id="last-detection-info">
         <h2>Ostatni wykryty ptak</h2>
-        <img id="bird-image" src="" alt="Zdjęcie ptaka">
+        <a id="bird-link" href="#" target="_blank" rel="noopener"><img id="bird-image" src="placeholder.jpg" alt="Zdjęcie ptaka"></a>
         <p id="bird-name">Nazwa: <span></span></p>
         <p id="bird-detection-time">Wykrycie: <span></span></p>
     </div>
     
     <h2 id="top-species-header">Top 10 gatunków</h2>
-    <div class="tabs">
-        <button class="tab-button active" data-range="24h">24h</button>
-        <button class="tab-button" data-range="week">Tydzień</button>
-        <button class="tab-button" data-range="month">Miesiąc</button>
+    <div class="tabs" role="tablist">
+        <button class="tab-button active" role="tab" aria-selected="true" data-range="24h">24h</button>
+        <button class="tab-button" role="tab" aria-selected="false" data-range="week">Tydzień</button>
+        <button class="tab-button" role="tab" aria-selected="false" data-range="month">Miesiąc</button>
     </div>
     <table id="top-species-table">
         <thead>
@@ -228,7 +228,7 @@
             </tr>
         </thead>
         <tbody id="species-table-body">
-            <!-- Wiersze z danymi zostaną dodane dynamicznie przez JavaScript -->
+            <tr><td colspan="4" class="empty-message">Ładowanie…</td></tr>
         </tbody>
     </table>
 
