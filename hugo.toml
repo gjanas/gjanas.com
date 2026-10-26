@@ -83,7 +83,6 @@ defaultContentLanguageInSubdir = false
     locale = "en"
     weight = 1
     [languages.en.params]
-      subtitle = "About me"
       description = "Grzegorz Janas – technology enthusiast, Apple fan, home automation, 3D printing and hydroponics. SysAdmin and DevOps."
       keywords = "Grzegorz Janas, gjanas, SysAdmin, DevOps, smart home, Home Assistant, hydroponics, 3D printing, Apple"
     [[languages.en.menus.main]]
@@ -95,8 +94,8 @@ defaultContentLanguageInSubdir = false
       pageRef = "/links"
       weight = 2
     [[languages.en.menus.main]]
-      name = "Ptaki"
-      url = "/ptaki/"
+      name = "About me"
+      pageRef = "/about"
       weight = 3
 
   [languages.pl]
@@ -104,7 +103,6 @@ defaultContentLanguageInSubdir = false
     locale = "pl"
     weight = 2
     [languages.pl.params]
-      subtitle = "O mnie"
       description = "Grzegorz Janas - entuzjasta technologii, fan Apple, automatyki domowej, druku 3D i hydroponiki. SysAdmin i DevOps."
       keywords = "Grzegorz Janas, gjanas, SysAdmin, DevOps, smart home, Home Assistant, hydroponika, druk 3D, Apple"
     [[languages.pl.menus.main]]
@@ -116,6 +114,6 @@ defaultContentLanguageInSubdir = false
       pageRef = "/links"
       weight = 2
     [[languages.pl.menus.main]]
-      name = "Ptaki"
-      url = "/ptaki/"
+      name = "O mnie"
+      pageRef = "/about"
       weight = 3

@@ -1,5 +1,5 @@
 ---
-title: "Grzegorz Janas"
+title: "O mnie"
 ---
 
 Entuzjasta technologii – fan Apple, automatyki domowej, inteligentnych gadżetów i druku 3D.

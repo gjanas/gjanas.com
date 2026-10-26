@@ -1,5 +1,5 @@
 ---
-title: "Grzegorz Janas"
+title: "About me"
 ---
 
 Technology enthusiast – Apple fan, home automation geek, smart gadget lover and 3D printing hobbyist.
