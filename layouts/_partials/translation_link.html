@@ -1,0 +1,3 @@
+{{- /* Nadpisanie: kopia z motywu z .Language.Label zamiast LanguageName (deprecated od Hugo 0.158). */ -}}
+<a href="{{ .Permalink }}" lang="{{ .Lang }}">{{ default .Lang .Site.Language.Label }}</a>
+

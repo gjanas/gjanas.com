@@ -1,0 +1,26 @@
+{{ define "header" }}<!-- No header on 404 pages -->{{ end }}
+{{ define "main" }}
+  <div class="intro-header"></div>
+  <div role="main" class="container main-content">
+    {{- /* GitHub Pages serwuje tylko /404.html, więc oba języki są w jednym pliku */}}
+    <div id="e404-en" class="text-center">
+      <h1>Page not found</h1>
+      <p>Sorry, this page doesn't exist. (404 error)</p>
+      <a href="{{ "" | relURL }}">Go to homepage</a>
+    </div>
+    <div id="e404-pl" class="text-center" hidden>
+      <h1>Strona nie została znaleziona</h1>
+      <p>Przepraszamy, ta strona nie istnieje. (błąd 404)</p>
+      <a href="{{ "pl/" | relURL }}">Wróć na stronę główną</a>
+    </div>
+  </div>
+<script>
+(function () {
+  var lang = (navigator.language || navigator.userLanguage || '').toLowerCase();
+  if (lang.indexOf('pl') === 0) {
+    document.getElementById('e404-en').hidden = true;
+    document.getElementById('e404-pl').hidden = false;
+  }
+})();
+</script>
+{{ end }}

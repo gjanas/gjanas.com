@@ -1,0 +1,23 @@
+{{- /*
+  Nadpisanie helpera motywu: te same szerokości co w oryginale, ale każdy
+  wariant (łącznie z pełnym rozmiarem) jest kodowany do WebP.
+  Takes: an image resource.
+  Returns: dict with "srcset" (string) and "src" (the candidate nearest
+  800px wide, for browsers without srcset support).
+*/ -}}
+{{- $img := . -}}
+{{- $widths := site.Params.imageWidths | default (slice 480 800 1200 1600) -}}
+{{- $candidates := slice -}}
+{{- range $widths -}}
+  {{- if lt . $img.Width -}}
+    {{- $candidates = $candidates | append ($img.Resize (printf "%dx webp" .)) -}}
+  {{- end -}}
+{{- end -}}
+{{- $candidates = $candidates | append ($img.Process "webp") -}}
+{{- $srcset := slice -}}
+{{- $src := index $candidates 0 -}}
+{{- range $candidates -}}
+  {{- $srcset = $srcset | append (printf "%s %dw" .RelPermalink .Width) -}}
+  {{- if le .Width 800 -}}{{- $src = . -}}{{- end -}}
+{{- end -}}
+{{- return (dict "srcset" (delimit $srcset ", ") "src" $src) -}}

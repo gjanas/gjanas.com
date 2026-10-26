@@ -1,0 +1,27 @@
+{{- /* Nadpisanie: kopia z motywu z .Language.Label zamiast LanguageName (deprecated od Hugo 0.158). */ -}}
+{{- /*
+  Resolves the display name of a language for the language switcher.
+
+  A `languageName` in the site configuration always wins. Hugo defaults
+  that key to the language code, so when the two are equal the theme
+  looks the code up in `data/beautifulhugo/languages.toml`, first as a
+  whole and then by its base subtag (`de-ch` gives `de`). The code
+  itself is the last resort.
+
+  Takes: a page (usually a translation of the current page).
+  Returns: the display name string.
+*/ -}}
+{{- $lang := .Lang -}}
+{{- $name := default $lang .Site.Language.Label -}}
+{{- if eq $name $lang -}}
+  {{- $key := lower $lang -}}
+  {{- $names := (partial "func/data.html" .).beautifulhugo.languages -}}
+  {{- with index $names $key -}}
+    {{- $name = . -}}
+  {{- else -}}
+    {{- with index $names (index (split $key "-") 0) -}}
+      {{- $name = . -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $name -}}

@@ -1,0 +1,25 @@
+{{ define "main" }}
+  {{- $lang := .Lang }}
+  <div class="container" role="main">
+    <div class="row">
+      <div class="col-md-10 offset-md-1">
+        {{ with .Content }}
+          <div class="content-section">{{ . }}</div>
+        {{ end }}
+        {{ range hugo.Data.links }}
+          <h2>{{ (index . (printf "group_%s" $lang)) | default .group_en }}</h2>
+          <ul>
+            {{ range .items }}
+              {{- $external := strings.HasPrefix .url "http" }}
+              <li>
+                <a href="{{ .url }}"{{ if $external }} target="_blank" rel="noopener"{{ end }}>
+                  {{- (index . (printf "title_%s" $lang)) | default .title_en -}}
+                </a>
+              </li>
+            {{ end }}
+          </ul>
+        {{ end }}
+      </div>
+    </div>
+  </div>
+{{ end }}

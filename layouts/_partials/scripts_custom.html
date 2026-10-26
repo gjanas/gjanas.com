@@ -1,0 +1,10 @@
+<script>
+  // Ręczny wybór języka w navbarze wyłącza auto-przekierowanie (head_custom.html)
+  document.querySelectorAll('#main-navbar a .fa-globe').forEach(function (icon) {
+    var link = icon.closest('a');
+    link.addEventListener('click', function () {
+      var lang = new URL(link.href).pathname.indexOf('/pl/') === 0 ? 'pl' : 'en';
+      try { localStorage.setItem('site-lang', lang); } catch (e) {}
+    });
+  });
+</script>

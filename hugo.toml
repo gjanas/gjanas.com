@@ -1,0 +1,121 @@
+baseURL = "https://gjanas.com/"
+theme = "beautifulhugo"
+title = "gjanas"
+enableRobotsTXT = true
+enableGitInfo = true
+
+defaultContentLanguage = "en"
+defaultContentLanguageInSubdir = false
+
+# ptaki/CLAUDE.md to notatka developerska aplikacji — zostaje w repo, nie trafia na stronę.
+# Własny mount zastępuje domyślny mount static/, więc musi go odtworzyć w całości.
+[[module.mounts]]
+  source = "static"
+  target = "static"
+  files = ["! ptaki/CLAUDE.md"]
+
+# Nazwa katalogu wpisu (page bundle) = URL, wspólny dla EN i PL
+[permalinks]
+  [permalinks.page]
+    blog = "/blog/:contentbasename/"
+
+[pagination]
+  pagerSize = 10
+
+[taxonomies]
+  tag = "tags"
+
+[outputs]
+  home = ["html", "rss", "json"]
+
+# RSS pod /feed.xml (adres zwyczajowy z Jekylla) zamiast /index.xml
+[outputFormats.rss]
+  baseName = "feed"
+
+[imaging]
+  resampleFilter = "Lanczos"
+  [imaging.jpeg]
+    quality = 80
+  [imaging.webp]
+    quality = 80
+
+# selfHosted pobiera Bootstrap/Font Awesome/fonty raz przy buildzie i trzyma je w cache
+[caches.getresource]
+  dir = ":cacheDir/:project"
+  maxAge = -1
+
+[markup.goldmark.renderer]
+  unsafe = true
+
+[markup.tableOfContents]
+  startLevel = 2
+  endLevel = 3
+
+[markup.highlight]
+  codeFences = true
+  noClasses = false
+
+[Params]
+  logo = "/assets/img/avatar-icon.png"
+  favicon = "/favicon.ico"
+  colorScheme = "auto"
+  selfHosted = true
+  rss = true
+  readingTime = true
+  showRelatedPosts = true
+  mainSections = ["blog"]
+  homeTitle = "Grzegorz Janas"
+
+  [Params.author]
+    name = "Grzegorz Janas"
+    email = "grzegorz.janas@outlook.com"
+    facebook = "grzesiek.tzw"
+    github = "gjanas"
+    twitter = "g_janas"
+    youtube = "@gjanas"
+    reddit = "gjanas"
+    linkedin = "janasgrzegorz"
+    steam = "gjanas"
+
+[languages]
+  [languages.en]
+    label = "English"
+    locale = "en"
+    weight = 1
+    [languages.en.params]
+      subtitle = "About me"
+      description = "Grzegorz Janas – technology enthusiast, Apple fan, home automation, 3D printing and hydroponics. SysAdmin and DevOps."
+      keywords = "Grzegorz Janas, gjanas, SysAdmin, DevOps, smart home, Home Assistant, hydroponics, 3D printing, Apple"
+    [[languages.en.menus.main]]
+      name = "Blog"
+      pageRef = "/blog"
+      weight = 1
+    [[languages.en.menus.main]]
+      name = "Links"
+      pageRef = "/links"
+      weight = 2
+    [[languages.en.menus.main]]
+      name = "Ptaki"
+      url = "/ptaki/"
+      weight = 3
+
+  [languages.pl]
+    label = "Polski"
+    locale = "pl"
+    weight = 2
+    [languages.pl.params]
+      subtitle = "O mnie"
+      description = "Grzegorz Janas - entuzjasta technologii, fan Apple, automatyki domowej, druku 3D i hydroponiki. SysAdmin i DevOps."
+      keywords = "Grzegorz Janas, gjanas, SysAdmin, DevOps, smart home, Home Assistant, hydroponika, druk 3D, Apple"
+    [[languages.pl.menus.main]]
+      name = "Blog"
+      pageRef = "/blog"
+      weight = 1
+    [[languages.pl.menus.main]]
+      name = "Linki"
+      pageRef = "/links"
+      weight = 2
+    [[languages.pl.menus.main]]
+      name = "Ptaki"
+      url = "/ptaki/"
+      weight = 3

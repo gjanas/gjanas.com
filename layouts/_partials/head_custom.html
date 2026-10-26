@@ -1,0 +1,74 @@
+{{- with site.Params.keywords }}
+<meta name="keywords" content="{{ . }}">
+{{- end }}
+
+{{- /* hreflang dla stron z tłumaczeniem; x-default = wersja EN (domyślna) */}}
+{{- if .IsTranslated }}
+  {{- range .AllTranslations }}
+<link rel="alternate" hreflang="{{ .Language.Locale }}" href="{{ .Permalink }}">
+  {{- end }}
+  {{- range first 1 (where .AllTranslations "Lang" "en") }}
+<link rel="alternate" hreflang="x-default" href="{{ .Permalink }}">
+  {{- end }}
+{{- end }}
+
+{{- /*
+  Przeglądarka po polsku trafia na wersję PL — tylko ze strony EN, która ma
+  tłumaczenie, i tylko dopóki użytkownik nie wybrał języka przełącznikiem
+  (localStorage 'site-lang', zapisywany w scripts_custom.html).
+  Nie dotyczy 404: GitHub Pages serwuje /404.html pod błędnym adresem,
+  a język przełącza tam własny skrypt (layouts/404.html).
+*/}}
+{{- if and (eq .Lang "en") (ne .Kind "404") }}
+  {{- range first 1 (where .Translations "Lang" "pl") }}
+<script>
+(function () {
+  try {
+    if (localStorage.getItem('site-lang')) return;
+  } catch (e) {
+    return;
+  }
+  var lang = ((navigator.languages && navigator.languages[0]) || navigator.language || '').toLowerCase();
+  if (lang.indexOf('pl') === 0) location.replace({{ .RelPermalink }});
+})();
+</script>
+  {{- end }}
+{{- end }}
+
+<style>
+  /* Kolory z poprzedniej wersji strony (beautiful-jekyll + własny dark mode) */
+  a, p a { color: #008AFF; }
+  a:hover, a:focus { color: #0085A1; }
+  .navbar-custom { background: #EAEAEA; border-bottom: 1px solid #DDDDDD; }
+  .navbar-custom .navbar-brand, .navbar-custom .nav-link { color: #404040; }
+  .navbar-custom .navbar-brand:hover, .navbar-custom .navbar-brand:focus,
+  .navbar-custom .nav-link:hover, .navbar-custom .nav-link:focus { color: #0085A1; }
+  footer { background: #EAEAEA; border-top: 1px solid #DDDDDD; }
+  footer .copyright, footer .theme-by { color: #777777; }
+  footer a { color: #404040; }
+  footer a:hover, footer a:focus { color: #0085A1; }
+  /* Treść strony głównej/list bez szarego boksu — jak na starej stronie */
+  .content-section, [data-theme="dark"] .content-section {
+    background: none;
+    padding: 0;
+    font-family: inherit;
+  }
+
+  [data-theme="dark"] {
+    --dark-bg: #1a1a2e;
+    --dark-fg: #d4d4d4;
+    --dark-link: #5ba8ff;
+    --dark-navbar-bg: #16213e;
+    --dark-navbar-border: #2a2a4a;
+    --dark-navbar-text: #d4d4d4;
+    --dark-navbar-hover: #82c4ff;
+    --dark-surface: #16213e;
+    --dark-surface-hover: #2a2a4a;
+    --dark-surface-active: #2a2a4a;
+    --dark-muted: #999999;
+  }
+  [data-theme="dark"] a:hover, [data-theme="dark"] a:focus { color: #82c4ff; }
+  [data-theme="dark"] footer { border-top-color: #2a2a4a; }
+  [data-theme="dark"] footer a { color: #d4d4d4; }
+  [data-theme="dark"] img { opacity: 0.9; }
+</style>

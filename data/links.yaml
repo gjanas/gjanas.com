@@ -1,0 +1,16 @@
+# Strona /links/ i /pl/links/. Pola *_pl są opcjonalne — brak = użyj wersji EN.
+- group_en: Apps
+  group_pl: Aplikacje
+  items:
+    - title_en: Ptaki – birds detected in my garden (BirdNET)
+      title_pl: Ptaki – ptaki wykryte na moim podwórku (BirdNET)
+      url: /ptaki/
+- group_en: Find me
+  group_pl: Gdzie mnie znaleźć
+  items:
+    - title_en: GitHub
+      url: https://github.com/gjanas
+    - title_en: YouTube
+      url: https://www.youtube.com/@gjanas
+    - title_en: LinkedIn
+      url: https://linkedin.com/in/janasgrzegorz
