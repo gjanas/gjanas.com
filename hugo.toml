@@ -74,6 +74,8 @@ defaultContentLanguageInSubdir = false
   selfHosted = true
   rss = true
   readingTime = true
+  # Jedyny autor — bez imienia przy każdym wpisie
+  hideAuthor = true
   showRelatedPosts = true
   mainSections = ["blog"]
 

@@ -1,0 +1,38 @@
+{{- /* Nadpisanie z motywu: bez author.name w stopce — tytuł strony to już "Grzegorz Janas", więc imię było dwa razy. */ -}}
+{{ if eq .Type "page" }}
+  {{ partial "page_meta.html" . }}
+{{ end }}
+<footer>
+  <div class="container">
+    {{ if .Site.Params.disclaimerText }}
+    <div class="row">
+      <div class="disclaimer">
+        <b>Disclaimer:</b> {{ .Site.Params.disclaimerText }}
+      </div>
+    </div>
+    {{ end }}
+    <div class="row">
+      <div class="col-md-10 offset-md-1">
+        {{ partialCached "footer-social.html" . .Language.Lang }}
+        <p class="credits copyright text-muted">
+          &copy;
+          {{ if .Site.Params.since }}
+            {{ .Site.Params.since }} - {{ .Site.Lastmod.Format "2006" }}
+          {{ else }}
+            {{ .Site.Lastmod.Format "2006" }}
+          {{ end }}
+
+          &nbsp;&bull;&nbsp;
+          {{ if or .Site.Params.homeTitle .Site.Title }}
+            <a href="{{ "" | relLangURL }}">{{ .Site.Params.homeTitle | default .Site.Title }}</a>
+          {{ end }}
+        </p>
+        <!-- Please don't remove this, keep my open source work credited :) -->
+        <p class="credits theme-by text-muted">
+          {{ i18n "poweredBy" (dict "Version" hugo.Version) | safeHTML }}
+          {{ if and $.GitInfo .Site.Params.commit }}&nbsp;&bull;&nbsp;[<a href="{{ .Site.Params.commit }}{{ .GitInfo.Hash }}">{{ substr .GitInfo.Hash 0 8 }}</a>]{{ end }}
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
