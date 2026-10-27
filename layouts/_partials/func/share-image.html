@@ -1,0 +1,21 @@
+{{- /*
+  Obrazek podglądu linku (og:image, twitter:image).
+  Wpis z `cover: plik.jpg` w front matter dostaje przyciętą kopię 1200x630
+  z page bundle — przetworzoną, więc bez EXIF; oryginał nie jest publikowany
+  (build.publishResources = false w hugo.toml). Pozostałe strony:
+  site.Params.share_img.
+  Takes: a page.
+  Returns: absolute URL string.
+*/ -}}
+{{- $url := "" -}}
+{{- with .Params.cover -}}
+  {{- with $.Resources.GetMatch . -}}
+    {{- $url = (.Fill "1200x630 Center jpg q85").Permalink -}}
+  {{- end -}}
+{{- end -}}
+{{- if not $url -}}
+  {{- with site.Params.share_img -}}
+    {{- $url = strings.TrimPrefix "/" . | absURL -}}
+  {{- end -}}
+{{- end -}}
+{{- return $url -}}

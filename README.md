@@ -52,6 +52,8 @@ docker run --rm -v "$PWD":/project -w /project ghcr.io/gohugoio/hugo:v0.168.0@sh
 
 Nowy wpis ma `draft: true` — usuń tę linię przed publikacją. Zdjęcie wstawiasz Markdownem (`![opis](zdjecie.jpg)`); przy buildzie powstają warianty WebP 480/800/1200/1600 px z `srcset`, `width`/`height` i `loading="lazy"`. Wpis tylko w jednym języku pojawia się tylko na liście tego języka.
 
+Oryginały zdjęć z wpisów **nie są publikowane** (`build.publishResources = false` dla `/blog/**`), więc EXIF/GPS z telefonu nie trafia na stronę — publikowane są tylko wersje WebP z render hooka. Pole `cover:` we front matter wskazuje zdjęcie z katalogu wpisu, z którego powstaje obrazek podglądu linku 1200×630 (og:image); bez niego używany jest `static/img/og-default.jpg`.
+
 ## Linki
 
 Strona `/links/` (`/pl/links/`) renderuje `data/links.yaml` (pola `*_pl` opcjonalne).

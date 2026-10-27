@@ -1,0 +1,15 @@
+{{- /* Nadpisanie z motywu: twitter:image z func/share-image.html, opis z site.Params.description jako fallback (strona główna). */ -}}
+{{- with .Title | default .Site.Title }}
+  <meta name="twitter:title" content="{{ . | truncate 70 }}" />
+{{- end }}
+{{- with .Description | default .Params.subtitle | default .Summary | default site.Params.description }}
+  <meta name="twitter:description" content="{{ . | truncate 200 }}">
+{{- end }}
+{{- with partial "func/share-image.html" . }}
+  <meta name="twitter:image" content="{{ . }}" />
+{{- end }}
+  <meta name="twitter:card" content="summary_large_image" />
+{{- with .Site.Params.author.twitter }}
+  <meta name="twitter:site" content="@{{ . }}" />
+  <meta name="twitter:creator" content="@{{ . }}" />
+{{- end }}

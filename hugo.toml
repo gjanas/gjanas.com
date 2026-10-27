@@ -1,6 +1,6 @@
 baseURL = "https://gjanas.com/"
 theme = "beautifulhugo"
-title = "gjanas"
+title = "Grzegorz Janas"
 enableRobotsTXT = true
 enableGitInfo = true
 
@@ -18,6 +18,14 @@ defaultContentLanguageInSubdir = false
 [permalinks]
   [permalinks.page]
     blog = "/blog/:contentbasename/"
+
+# Oryginały zdjęć z wpisów (z EXIF/GPS) nie są publikowane — tylko wersje
+# przetworzone przez render hook (WebP) i obrazek podglądu (func/share-image.html)
+[[cascade]]
+  [cascade.build]
+    publishResources = false
+  [cascade.target]
+    path = "{/blog/**}"
 
 [pagination]
   pagerSize = 10
@@ -56,15 +64,18 @@ defaultContentLanguageInSubdir = false
   noClasses = false
 
 [Params]
-  logo = "/assets/img/avatar-icon.png"
+  # 200 px WebP; stary /assets/img/avatar-icon.png (1 MB) zostaje tylko dla starych linków
+  logo = "/img/gjanas-avatar.webp"
+  # Domyślny obrazek podglądu linku (1200x630); wpis może ustawić własny przez `cover:`
+  share_img = "/img/og-default.jpg"
   favicon = "/favicon.ico"
   colorScheme = "auto"
+  mathEngine = "none"
   selfHosted = true
   rss = true
   readingTime = true
   showRelatedPosts = true
   mainSections = ["blog"]
-  homeTitle = "Grzegorz Janas"
 
   [Params.author]
     name = "Grzegorz Janas"
